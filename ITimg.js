@@ -1,9 +1,9 @@
 
-var use = {}
-use.tool = require("./utlis/app_tool.js");
+const tool = require('./utlis/app_tool.js');
+
 
 //辅助脚本
-var helper = use.tool.readJSON("helper");
+var helper = tool.readJSON("helper");
 
 var path_ = context.getExternalFilesDir(null).getAbsolutePath();
 var ITimg_state = false,

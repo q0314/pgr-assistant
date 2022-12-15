@@ -1,11 +1,11 @@
 
 importClass(android.content.ComponentName);
 
-var use = {}
-use.tool = require("./utlis/app_tool.js");
+const tool = require('./utlis/app_tool.js');
+
 
 //辅助脚本
-var helper = use.tool.readJSON("helper", {
+var helper = tool.readJSON("helper", {
     "注射血清": 0,
     "已注射血清": 0,
     "挑战次数": 0,
@@ -989,7 +989,7 @@ function 领取手册经验() {
 
 function 便笺(sleep_) {
     sleep_ = sleep_ || 1000
-    let notes = use.tool.readJSON("notes");
+    let notes = tool.readJSON("notes");
     console.info(notes)
     if (notes == undefined) {
         return
@@ -1013,9 +1013,9 @@ function 便笺(sleep_) {
                 return text
             } else {
                 console.info("剩余血清数：" + serum)
-                use.tool.writeJSON("已有血清", serum + "/160", "notes")
-                use.tool.writeJSON("血清数", serum, "notes")
-                use.tool.writeJSON("血清时间", new Date(), "notes")
+                tool.writeJSON("已有血清", serum + "/160", "notes")
+                tool.writeJSON("血清数", serum, "notes")
+                tool.writeJSON("血清时间", new Date(), "notes")
             }
             return true
         }

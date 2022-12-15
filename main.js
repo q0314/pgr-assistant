@@ -1,6 +1,5 @@
 "ui";
 
-const tool = require('./utlis/app_tool.js');
 
 if (device.sdkInt < 24) {
     engines.execScriptFile("./activity/devices.js")
@@ -37,13 +36,12 @@ require('./utlis/ButtonLayout');
 require('./utlis/widget-switch-se7en');
 require("./utlis/NonSwipeableViewPager");
 
-
+const tool = require('./utlis/app_tool.js');
 const use = {}
-use.tool = require("./utlis/app_tool.js");
 use.prompt = require("./utlis/Dialog_Tips")
 use.gallery = require("./utlis/gallery.js");
 use.theme = require("./theme.js");
-use.Floaty = use.tool.script_locate("Floaty"),
+use.Floaty = tool.script_locate("Floaty"),
 use.server = "http://43.138.239.186/qiao0314/";
 
 
@@ -57,7 +55,7 @@ $settings.setEnabled('stop_all_on_volume_up', false);
 //storages.create("warbler").clear();
 
 //辅助脚本
-var helper = use.tool.readJSON("helper", {
+var helper = tool.readJSON("helper", {
     "注射血清": 0,
     "已注射血清": 0,
     "挑战次数": 0,
@@ -75,14 +73,14 @@ var helper = use.tool.readJSON("helper", {
     "最低电量": 30
 });
 
-var interface = use.tool.readJSON("interface", {
+var interface = tool.readJSON("interface", {
     "公告": false,
     "无障碍提醒": false,
     "语言": "zh-CN",
     "运行次数":0,
 });
 
-var notes = use.tool.readJSON("notes", {
+var notes = tool.readJSON("notes", {
     "当前血清": false,
     "血清数": false,
     "血清时间": new Date(),
@@ -102,12 +100,12 @@ try {
     helper.血清数.length
 } catch (err) {
     console.error(err)
-    use.tool.writeJSON("血清管理", {
+    tool.writeJSON("血清管理", {
         "血清数": false,
         "自动识别": false,
         "通知": true
     })
-    setting = use.tool.readJSON("configure");
+    setting = tool.readJSON("configure");
 }
 */
 
@@ -346,16 +344,16 @@ if (notes != undefined && notes.血清数 != false) {
                     return;
                 }
             }
-            use.tool.writeJSON("血清数", "0/160", "notes")
-            use.tool.writeJSON("血清时间", new Date(), "notes")
-            use.tool.writeJSON("自动识别", dialog.checkBoxPrompt.checked, "notes")
+            tool.writeJSON("血清数", "0/160", "notes")
+            tool.writeJSON("血清时间", new Date(), "notes")
+            tool.writeJSON("自动识别", dialog.checkBoxPrompt.checked, "notes")
 
-            notes = use.tool.readJSON("notes");
+            notes = tool.readJSON("notes");
             initPop()
             ui.lizhishu.setText(notes.血清数);
             ui.selectTime.performClick();
         })
-        use.tool.setBackgroundRoundRounded(memo.getWindow(),{bg:use.theme.bar})
+        tool.setBackgroundRoundRounded(memo.getWindow(),{bg:use.theme.bar})
         memo.show()
     })
 }
@@ -419,14 +417,14 @@ function initPop(modify) {
             if (text2 == "get") {
                 switch (text) {
                     case "上限":
-                        notes = use.tool.readJSON("notes");
+                        notes = tool.readJSON("notes");
                         return notes.血清数.split("/")[1];
                 }
             }
-            use.tool.writeJSON(text, text2, "notes");
+            tool.writeJSON(text, text2, "notes");
             if (text == "血清数") {
                 let c = new Date();
-                use.tool.writeJSON("血清时间", c, "notes")
+                tool.writeJSON("血清时间", c, "notes")
                 sense_tips();
                 ui.lizhishu.setText(notes.血清数)
                 popView.lizhishu.setText("血清     " + notes.血清数)
@@ -438,7 +436,7 @@ function initPop(modify) {
     popView.shezhi.click(() => {
         require("./utlis/reason.js").ssbjview(function (text, text2) {
             if (text2 == "get") {
-                notes = use.tool.readJSON("notes");
+                notes = tool.readJSON("notes");
 
                 switch (text) {
                     case "自动识别":
@@ -458,7 +456,7 @@ function initPop(modify) {
                     break
                case "通知":
                     if (text2) {
-                        let rational_notice = use.tool.script_locate("rational_notice.js")
+                        let rational_notice = tool.script_locate("rational_notice.js")
 
                         if (rational_notice) {
                             console.verbose("已停止运行同名脚本")
@@ -468,19 +466,19 @@ function initPop(modify) {
                     } else {
                         var manager = context.getSystemService(android.app.Service.NOTIFICATION_SERVICE);
                         manager.cancel(0);
-                        if (manager = use.tool.script_locate("rational_notice.js")) {
+                        if (manager = tool.script_locate("rational_notice.js")) {
                             manager.forceStop()
                         }
                     }
                     break
             }
-            use.tool.writeJSON(text, text2, "notes")
+            tool.writeJSON(text, text2, "notes")
         })
     })
 
 
     function sense_tips() {
-        notes = use.tool.readJSON("notes");
+        notes = tool.readJSON("notes");
         let lizhishu = notes.血清数.split("/");
         lizhishu[0] = Number(lizhishu[0]);
         lizhishu[1] = Number(lizhishu[1]);
@@ -504,7 +502,7 @@ function initPop(modify) {
   
 
     if (notes.通知) {
-        let rational_notice = use.tool.script_locate("rational_notice.js");
+        let rational_notice = tool.script_locate("rational_notice.js");
         if (rational_notice) {
             console.verbose("已停止运行同名脚本")
             rational_notice.forceStop();
@@ -815,7 +813,7 @@ ui.autoService.on("click", (checked) => {
     }
 
     if (checked == true) {
-        if (use.tool.autoService(true) == false) {
+        if (tool.autoService(true) == false) {
             ui.autoService.checked = false;
             if (!helper.ADB提醒) {
                 dialogs.build({
@@ -832,7 +830,7 @@ ui.autoService.on("click", (checked) => {
                     });
                 }).on("check", (checked) => {
                     //监听勾选框
-                    use.tool.writeJSON("ADB提醒", checked)
+                    tool.writeJSON("ADB提醒", checked)
                 }).show();
             } else {
                 use.startActivity({
@@ -841,7 +839,7 @@ ui.autoService.on("click", (checked) => {
             }
         }
     } else {
-        use.tool.autoService(false)
+        tool.autoService(false)
 
     }
 
@@ -863,7 +861,7 @@ ui.emitter.on("resume", function () {
         use.theme.bar = themes.bar;
     }
     // 此时根据无障碍服务的开启情况，同步开关的状
-    if (use.tool.autoService() == true) {
+    if (tool.autoService() == true) {
 
         ui.autoService.checked = true;
     } else {
@@ -874,7 +872,7 @@ ui.emitter.on("resume", function () {
         ui.floatyCheckPermission.checked = false;
     }
 
-    if (use.tool.script_locate("Floaty.js")) {
+    if (tool.script_locate("Floaty.js")) {
         ui.start.setText("停止运行")
     } else {
         //        ui.start.setText("开始运行");
@@ -949,15 +947,15 @@ ui._bg.on("click", function () {
         snakebar("请先授予战双悬浮窗权限！");
         return;
     }
-    if (ui.start.getText() == "停止运行" && !use.tool.script_locate("Floaty.js") == false) {
-        Floaty = use.tool.script_locate("Floaty.js");
+    if (ui.start.getText() == "停止运行" && !tool.script_locate("Floaty.js") == false) {
+        Floaty = tool.script_locate("Floaty.js");
         Floaty.emit("暂停", "关闭程序");
         ui.start.setText("开始运行");
         return;
     }
 
     if (auto.service == null) {
-        if (use.tool.autoService() != true) {
+        if (tool.autoService() != true) {
             if (ui.autoService.checked == true) {
                 use.prompt.Dialog_Tips("温馨提示", "无障碍服务已启用但并未运行，您需要强行停止应用/重启无障碍服务/重启手机");
             }
@@ -972,9 +970,9 @@ ui._bg.on("click", function () {
         use.prompt.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
         return;
     }
-    helper = use.tool.readJSON("helper");
+    helper = tool.readJSON("helper");
     
-    if (!use.tool.script_locate("Floaty.js")) {
+    if (!tool.script_locate("Floaty.js")) {
         if (helper.最低电量 != false) {
             if (!device.isCharging() && device.getBattery() < helper.最低电量) {
                 use.prompt.Dialog_Tips("温馨提示", "电量低于设定值" + helper.最低电量 + "%且未充电");
@@ -988,7 +986,7 @@ ui._bg.on("click", function () {
     开始运行jk();
         
     } else {
-        Floaty = use.tool.script_locate("Floaty.js");
+        Floaty = tool.script_locate("Floaty.js");
         Floaty.emit("暂停", "关闭程序");
         ui.start.setText("开始运行");
         return;
@@ -1002,7 +1000,7 @@ ui._bgC.on("click", function () {
     setTimeout(function () {
         ui._bgC.setEnabled(true)
     }, 800);
-    setting = use.tool.readJSON("configure");
+    setting = tool.readJSON("configure");
         if (floaty.checkPermission() == false) {
             use.prompt.Dialog_Tips("温馨提示", "请先授予战双辅助悬浮窗权限！");
             return;
@@ -1011,8 +1009,8 @@ ui._bgC.on("click", function () {
             use.prompt.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
             return;
         }
-        if (!use.tool.script_locate("Floaty.js")) {
-            use.tool.writeJSON("初始暂停", true,"pane");
+        if (!tool.script_locate("Floaty.js")) {
+            tool.writeJSON("初始暂停", true,"pane");
             开始运行jk(true);
         } else {
             snakebar("悬浮窗程序已在运行中")
@@ -1091,21 +1089,21 @@ function 输入框(id, text) {
 
     switch (id) {
         case ui.inputxi:
-            use.tool.writeJSON("行动", arr[0]);
+            tool.writeJSON("行动", arr[0]);
             toast("行动上限次数成功设置为" + arr[0])
-            setting = use.tool.readJSON("configure");
+            setting = tool.readJSON("configure");
             ui.inputxi.setHint(helper.行动 + "次");
             break;
         case ui.inputjm:
-            use.tool.writeJSON("剿灭", arr[0]);
+            tool.writeJSON("剿灭", arr[0]);
             toast("剿灭上限次数成功设置为" + arr[0])
-            setting = use.tool.readJSON("configure");
+            setting = tool.readJSON("configure");
             ui.inputjm.setHint(helper.剿灭 + "次");
             break;
         case ui.inputiz:
-            use.tool.writeJSON("血清", arr[0]);
+            tool.writeJSON("血清", arr[0]);
             toast("血清兑换次数成功设置为" + arr[0])
-            setting = use.tool.readJSON("configure");
+            setting = tool.readJSON("configure");
             ui.inputiz.setHint(helper.血清 + "个");
             break;
     }
@@ -1171,7 +1169,7 @@ function 开始运行jk(jk, tips_) {
                     negative: "取消",
                     canceledOnTouchOutside: false
                 }).on("positive", () => {
-                    use.tool.writeJSON("模拟器", true);
+                    tool.writeJSON("模拟器", true);
                 }).show()
 
                 return
@@ -1268,7 +1266,7 @@ function 开始运行jk(jk, tips_) {
    toastLog("ksagk")
     ui.start.setText("停止运行");
     interface.运行次数 = interface.运行次数 + 1;
-    use.tool.writeJSON("运行次数", interface.运行次数, "interface");
+    tool.writeJSON("运行次数", interface.运行次数, "interface");
     $settings.setEnabled('foreground_service', true);
     new_ui("悬浮窗");
     //engines.execScriptFile("./Floaty.js");
@@ -1306,16 +1304,16 @@ threads.start(function () {
 
 
                 case ui.card:
-                    if (use.tool.script_locate("Floaty.js")) {
+                    if (tool.script_locate("Floaty.js")) {
                         ui.start.setText("停止运行")
                     } else {
                         ui.start.setText("开始运行");
                     }
 
-                    ui.autoService.checked = use.tool.autoService() ? true : false;
+                    ui.autoService.checked = tool.autoService() ? true : false;
 
                     if (notes != undefined && notes.血清数 != false) {
-                        notes = use.tool.readJSON("notes")
+                        notes = tool.readJSON("notes")
 
                         var ms = new Date(new Date()).getTime() - new Date(notes.血清时间).getTime()
                         let hflz = Math.floor(ms / 60 / 1000);
@@ -1329,7 +1327,7 @@ threads.start(function () {
                              jlsj = jlsj - 6;
                              log(jlsj)
                              if (jlsj <= 6 && jlsj >= 0) {
-                                 use.tool.writeJSON("距离时间", jlsj, "notes");
+                                 tool.writeJSON("距离时间", jlsj, "notes");
                                  break
                              }
                          }*/
@@ -1340,18 +1338,18 @@ threads.start(function () {
                             hflz = notes.血清数.split("/")[1] + "/" + notes.血清数.split("/")[1]
                             ui.lizhishu.setText(hflz)
                             popView.lizhishu.setText("血清     " + hflz)
-                            use.tool.writeJSON("血清数", hflz, "notes");
+                            tool.writeJSON("血清数", hflz, "notes");
                             return
                         }
                         hflz = hflz + "/" + notes.血清数.split("/")[1]
                         if (hflz != ui.lizhishu.getText()) {
-                            if (notes.血清时间 != use.tool.readJSON("notes").血清时间) {
+                            if (notes.血清时间 != tool.readJSON("notes").血清时间) {
                                 return
                             }
 
                             ui.lizhishu.setText(hflz)
                             popView.lizhishu.setText("血清     " + hflz)
-                            use.tool.writeJSON("血清数", hflz, "notes");
+                            tool.writeJSON("血清数", hflz, "notes");
                         }
                     }
                     break
@@ -1392,12 +1390,12 @@ threads.start(function () {
     sleep(50);
 
     ui.run(() => {
-        if (use.tool.autoService(true)) {
+        if (tool.autoService(true)) {
             ui.autoService.checked = true;
         }
     })
     if (interface.运行次数 != true && interface.公告 == true) threads.start(tishi);
-    interface = use.tool.readJSON("interface");
+    interface = tool.readJSON("interface");
 
 
 })
@@ -1483,7 +1481,7 @@ function Update_UI(i) {
                 floaty.checkPermission() ? ui.floatyCheckPermission.setVisibility(8) : ui.floatyCheckPermission.setVisibility(0);
 
                 try {
-                    if (use.tool.script_locate("Floaty.js")) {
+                    if (tool.script_locate("Floaty.js")) {
                         ui.start.setText("停止运行")
                     } else {
                         ui.start.setText("开始运行");
