@@ -1,0 +1,1 @@
+screencap -p /storage/emulated/0/脚本/明日计划/library/screencap.png
