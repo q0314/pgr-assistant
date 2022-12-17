@@ -15,21 +15,21 @@ var blockHandle = threads.start(function () {
     setInterval(() => { }, 1000);
 });
 
-var use = {}
-use.tool = require("./utlis/app_tool.js");
+var use = {};
+var tool = require("./utlis/app_tool.js");
 
-var helper = use.tool.readJSON("helper");
+var helper = tool.readJSON("helper");
 
 //图标运行状态,是否手动暂停
 var eliminate = false;
 
-var pane = use.tool.readJSON("pane",{
-    "悬浮窗大小":0.75,
-    "背景颜色": "#a6ccf3",
-    "图标颜色": "#747984",
-    "文字颜色": "#6b5891",
-    "初始暂停":false,
-})
+var pane = tool.readJSON("pane",{
+        "悬浮窗大小":0.75,
+        "背景颜色": "#a6ccf3",
+        "图标颜色": "#747984",
+        "文字颜色": "#6b5891",
+        "初始暂停":false,
+ })
 let size = pane.悬浮窗大小;
 size = Number(size);
 
@@ -324,11 +324,11 @@ function 悬浮窗监听(window) {
                     Combat_report.view_show();
                     return
                 }
-                if (use.tool.script_locate("莺尾花")) {
+                if (tool.script_locate("莺尾花")) {
                     toast("请先点击" + window.name.text() + "右侧的图标暂停");
                     return;
                 };
-                use.tool.writeJSON("侧边", "宿舍");
+                tool.writeJSON("侧边", "宿舍");
                 继续();
                 break;
 
@@ -343,7 +343,7 @@ function 悬浮窗监听(window) {
 
 
 function 执行次数() {
-    helper = use.tool.readJSON("helper");
+    helper = tool.readJSON("helper");
     let rewriteView = ui.inflate(
         <vertical padding="10 0">
             <View bg="#ffffff" h="1" w="auto" />
@@ -370,7 +370,7 @@ function 执行次数() {
     })
 
     rewriteView.ysrh.on("check", (checked) => {
-        use.tool.writeJSON("黑卡", checked);
+        tool.writeJSON("黑卡", checked);
     });
     rewriteView.buiok.on("click", () => {
         输入框事件()
@@ -408,14 +408,14 @@ function 执行次数() {
             return
         };
         if (rwt2.length > 0) {
-            use.tool.writeJSON("注射血清", rwt2)
+            tool.writeJSON("注射血清", rwt2)
             record("设置了磕药/黑卡：" + rwt2 + "个");
         } else {
             rewriteView.wordname2.setError("请输入数字");
         };
 
         if (rwt.length > 0) {
-            use.tool.writeJSON("挑战次数", rwt);
+            tool.writeJSON("挑战次数", rwt);
             record("设置了挑战次数上限：" + rwt + "次");
         } else {
             rewriteView.wordname.setError("请输入数字");
@@ -429,10 +429,10 @@ function 执行次数() {
          rwt = null;
         rwt2 = null;
         ui.run(function () {
-            helper = use.tool.readJSON("helper");
-            window.tod.setText("挑战：上限" + helper.挑战次数 + "次");
-           
-            window.tof.setText("血清：已注射" + helper.已注射血清 + "次&上限" + helper.注射血清 + "个");
+            helper = tool.readJSON("helper");
+            window.tod.setText("挑战：可挑战次数:"+helper.挑战次数);
+            window.tof.setText("血清：可使用:"+helper.注射血清+"&已使用:"+helper.已注射血清);
+            
             rewriteView.wordname.setHint(" " + helper.挑战次数);
          
             rewriteView.wordname2.setHint(" " + helper.注射血清);
@@ -458,28 +458,27 @@ function 暂停(form) {
     });
 
     //判断不是手动暂停的
-    /*
+    
     if (eliminate == false) {
         try {
-            if (helper.音量 == true && helper.当前音量 != false) {
+            if (helper.静音 == true && helper.当前音量 != false) {
                 device.setMusicVolume(helper.当前音量)
-                use.tool.writeJSON("当前音量", false);
+                tool.writeJSON("当前音量", false);
             }
         } catch (err) {
             console.error("恢复音量失败" + err)
         }
      
     }
-    */
+    
     $settings.setEnabled('foreground_service', false);
 
-    use.progra = use.tool.script_locate("莺尾花");
-    console.error(use.progra)
-    if (use.progra) {
+    use.progra = tool.script_locate("莺尾花");
+   if (use.progra) {
         use.progra.emit("暂停", "结束程序");
         eliminate = false;
         setTimeout(function () {
-            use.progra = use.tool.script_locate("莺尾花");
+            use.progra = tool.script_locate("莺尾花");
             if (use.progra) {
                 console.verbose("强行终止莺尾花")
                 use.progra.forceStop();
@@ -513,7 +512,7 @@ function 继续() {
                 window.tos.setText("警告：电量低且未充电");
             };
         };
-        helper = use.tool.readJSON("helper"); 
+        helper = tool.readJSON("helper"); 
         程序();
     });
 
@@ -646,13 +645,18 @@ function 获取屏幕方向() {
 程序(helper.执行);
 
 function 程序(implem) {
+    helper = tool.readJSON("helper");
+    ui.post(() => {
+        window.tod.setText("挑战：可挑战次数:"+helper.挑战次数);
+        window.tof.setText("血清：可使用:"+helper.注射血清+"&已使用:"+helper.已注射血清);
+    })
     if (pane.初始暂停) {
         threads.start(暂停);
         ui.run(function () {
             window.tos.setText("状态：主程序暂停中");
         })
         pane = false;
-        use.tool.writeJSON("初始暂停",false,"pane");
+        tool.writeJSON("初始暂停",false,"pane");
     } else {
         eliminate = false;
         ui.post(() => {
@@ -661,7 +665,7 @@ function 程序(implem) {
         }, 200)
         setTimeout(function () {
             if (!eliminate) {
-                if (use.tool.script_locate("莺尾花") == false) {
+                if (tool.script_locate("莺尾花") == false) {
                     /*
                     if (files.read("./mrfz/Byte.txt") == "true") {
                         files.write("./mrfz/Byte.txt", "false");

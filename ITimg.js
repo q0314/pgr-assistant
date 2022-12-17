@@ -1,5 +1,5 @@
 
-const tool = require('./utlis/app_tool.js');
+var tool = require('./utlis/app_tool.js');
 
 
 //辅助脚本
@@ -245,7 +245,7 @@ function adbSgetScreen() {
     sleep(10);
     return images.read(path_ + "/library/screencap.png");
 }
-log("全分辨率兼容：" + helper.多分辨率兼容)
+log("多分辨率兼容：" + helper.多分辨率兼容)
 if (helper.多分辨率兼容) {
     log("参数:" + scaleSet(2, undefined, true))
 }
@@ -403,7 +403,7 @@ function 找图(picture, list) {
         imgList.recycle();
         !imgList.isRecycled() && imgList.recycle();
     } catch (e) { }
-
+    console.verbose("找图配置：" + JSON.stringify(list));
     if (ITimg_state) {
         let img_small_xy = {
             w: img_small.getWidth(),
@@ -560,7 +560,7 @@ function ocr文字识别(words, list) {
         return true;
     } else {
         sleep(list.nods)
-        console.warn("未匹配到" + words + "，识别结果：" + JSON.stringify(result));
+        console.warn("未匹配到" + words + "\n配置：" + JSON.stringify(list) + "\n识别结果：" + JSON.stringify(result));
         return false;
 
     }

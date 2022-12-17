@@ -6,7 +6,6 @@ try {
     importClass(android.provider.Settings);
 } catch (err) { }
 
-var packageName = context.getPackageName();
 var Disposition = storages.create("warbler");
 var Accessibility = false;
 
@@ -26,7 +25,10 @@ function readJSON(key, list) {
             Disposition.put(key, setting);
         }
     } else {
-        setting = Disposition.get(key)
+        setting = Disposition.get(key);
+        if(setting==undefined){
+            console.error("无法取得"+key+"的数据,请确认是否已保存")
+        }
     }
     return setting;
 
@@ -41,9 +43,9 @@ function readJSON(key, list) {
  */
 function writeJSON(sett, value, key) {
     key = key || "helper";
-    setting = readJSON(key);
+    setting = readJSON(key);  
     setting[sett] = value;
-    Disposition.put(key, setting);
+     Disposition.put(key, setting);
 }
 
 function autoService(force, mode) {

@@ -1,6 +1,5 @@
 "ui";
 
-
 if (device.sdkInt < 24) {
     engines.execScriptFile("./activity/devices.js")
     exit();
@@ -17,10 +16,14 @@ importClass(android.provider.Settings);
 importClass(com.google.android.material.bottomsheet.BottomSheetDialog);
 importClass(com.google.android.material.bottomsheet.BottomSheetBehavior);
 
-//包名
-var package_name = context.getPackageName();
-var package_path = context.getExternalFilesDir(null).getAbsolutePath();
-
+var tool = require('./utlis/app_tool.js');
+var use = {}
+use.prompt = require("./utlis/Dialog_Tips");
+use.gallery = require("./utlis/gallery.js");
+use.gallery_link = JSON.parse(files.read("./library/gallery_link.json"));
+use.theme = require("./theme.js");
+use.Floaty = tool.script_locate("Floaty");
+use.server = "http://43.138.239.186/qiao0314/";
 
 const resources = context.getResources();
 // 四舍五入 转化到px, 最小 1 像素
@@ -31,24 +34,17 @@ const statusBarHeight = resources.getDimensionPixelSize(
 var dp2px = (dp) => {
     return Math.floor(dp * resources.getDisplayMetrics().density + 0.5);
 };
-
 require('./utlis/ButtonLayout');
 require('./utlis/widget-switch-se7en');
 require("./utlis/NonSwipeableViewPager");
 
-const tool = require('./utlis/app_tool.js');
-const use = {}
-use.prompt = require("./utlis/Dialog_Tips")
-use.gallery = require("./utlis/gallery.js");
-use.theme = require("./theme.js");
-use.Floaty = tool.script_locate("Floaty"),
-use.server = "http://43.138.239.186/qiao0314/";
 
+//包名
+var package_name = context.getPackageName();
+//指向Android/data/包名/file 路径
+var package_path = context.getExternalFilesDir(null).getAbsolutePath();
 
-
-var jlink_mian,
-    tukuss;
-
+//禁用音量上键停止脚本
 $settings.setEnabled('stop_all_on_volume_up', false);
 
 //清除各项已存储数据
@@ -58,9 +54,9 @@ $settings.setEnabled('stop_all_on_volume_up', false);
 var helper = tool.readJSON("helper", {
     "注射血清": 0,
     "已注射血清": 0,
-    "挑战次数": 0,
-    "截图方式":"辅助",
-    "包名": "com.hypergryph.arknights",
+    "挑战次数": 99,
+    "截图方式": "辅助",
+    "包名": "com.kurogame.haru.hero",
     "模拟器": false,
     "监听键": "关闭",
     "静音": false,
@@ -73,42 +69,38 @@ var helper = tool.readJSON("helper", {
     "最低电量": 30
 });
 
+//图形界面
 var interface = tool.readJSON("interface", {
     "公告": false,
     "无障碍提醒": false,
     "语言": "zh-CN",
-    "运行次数":0,
+    "运行次数": 0,
 });
 
 var notes = tool.readJSON("notes", {
-    "当前血清": false,
+    "当前血清": 0,
     "血清数": false,
     "血清时间": new Date(),
     "自动识别": false,
     "通知": false
 });
 
-
+//悬浮窗操作面板
+var pane = tool.readJSON("pane", {
+    "悬浮窗大小": 0.75,
+    "背景颜色": "#a6ccf3",
+    "图标颜色": "#747984",
+    "文字颜色": "#6b5891",
+    "初始暂停": false,
+})
 
 if (helper.注射血清 == undefined) {
     storages.create("warbler").clear(); //删除这个本地存储的数据（用于调试）
     throw Error("初始化配置失败，已重置数据，请尝试重启应用")
 }
 
-/*
-try {
-    helper.血清数.length
-} catch (err) {
-    console.error(err)
-    tool.writeJSON("血清管理", {
-        "血清数": false,
-        "自动识别": false,
-        "通知": true
-    })
-    setting = tool.readJSON("configure");
-}
-*/
 
+/*
 threads.start(function () {
     try {
         let linkurl = http.get(use.server + "about_link.json");
@@ -137,7 +129,7 @@ threads.start(function () {
         engines.stopAll();
     };
 });
-
+*/
 
 var sto_mod = storages.create("modular");
 //sto_mod.clear()
@@ -329,7 +321,7 @@ if (notes != undefined && notes.血清数 != false) {
         if (ui.lizhishu.getText() != "未启用") {
             return
         }
-      let memo = dialogs.build({
+        let memo = dialogs.build({
             type: "app-or-overlay",
             title: "实时便笺",
             content: "是否启用实时便笺功能？\n实时显示当前剩余血清数量。\n建议启用(OCR)自动识别。每次脚本确认进入主页后，自动识别剩余血清数量",
@@ -353,7 +345,7 @@ if (notes != undefined && notes.血清数 != false) {
             ui.lizhishu.setText(notes.血清数);
             ui.selectTime.performClick();
         })
-        tool.setBackgroundRoundRounded(memo.getWindow(),{bg:use.theme.bar})
+        tool.setBackgroundRoundRounded(memo.getWindow(), { bg: use.theme.bg });
         memo.show()
     })
 }
@@ -381,7 +373,7 @@ function initPop(modify) {
                             </vertical>
                         </linear>
                     </card>
-                     <card id="shezhi" layout_gravity="right" w="auto" h="auto" margin="10 4"
+                    <card id="shezhi" layout_gravity="right" w="auto" h="auto" margin="10 4"
                         cardCornerRadius="5dp" cardElevation="0" foreground="?selectableItemBackground" cardBackgroundColor="#ff8c9099">
                         <img src="@drawable/ic_settings_applications_black_48dp" w="30" h="30" margin="1" tint="#ffffff" />
                     </card>
@@ -443,7 +435,7 @@ function initPop(modify) {
                         return notes.自动识别;
                     case "通知":
                         return notes.通知;
-                
+
                 }
                 return
             }
@@ -454,7 +446,7 @@ function initPop(modify) {
                         return false;
                     }
                     break
-               case "通知":
+                case "通知":
                     if (text2) {
                         let rational_notice = tool.script_locate("rational_notice.js")
 
@@ -499,7 +491,7 @@ function initPop(modify) {
 
         //    popView.tv_text.setSelected(true);
     }
-  
+
 
     if (notes.通知) {
         let rational_notice = tool.script_locate("rational_notice.js");
@@ -606,7 +598,7 @@ ui.viewpager.setOnPageChangeListener({
         ui.run(() => {
             switch (index) {
                 case 0:
-                    if (!files.exists("./mrfz/tuku/分辨率.txt")) {
+                    if (!files.exists("./library/gallery/gallery_message.json")) {
                         items[1].text = "检查图库";
                         items[1].drawable = "@drawable/ic_wallpaper_black_48dp";
                         ui.drawerList.setDataSource(items);
@@ -620,8 +612,8 @@ ui.viewpager.setOnPageChangeListener({
 
                     break
                 case 1:
-                    
-                
+
+
 
                     break
 
@@ -632,7 +624,7 @@ ui.viewpager.setOnPageChangeListener({
 
                     // activity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
                     // SystemUiVisibility(true)
-                    break
+                    brea
                 default:
                     // SystemUiVisibility(index ? false : true);
                     break
@@ -658,11 +650,11 @@ var items = [{
 {
     text: "问题帮助",
     drawable: "@drawable/ic_help_black_48dp",
-},
+},/*
 {
     text: "捐赠打赏",
     drawable: "ic_favorite_black_48dp",
-},
+},*/
 {
     text: "关于应用",
     drawable: "ic_account_circle_black_48dp",
@@ -688,28 +680,34 @@ ui.drawerList.on("item_click", (item) => {
             return
         case "检查图库":
         case "更换图库":
-            gallery.gallery_view(tukuss, function (tukutxt, value) {
-                switch (tukutxt) {
-                    case "全分辨率兼容":
-                        if (value == "get_") {
-                               return helper.全分辨率兼容;
-                        }
-
-                        break;
-                    case "检验":
-
-                        return use.server;
-                    case "检测":
-                   
-                        break
-                    // code
-                }
-
+            helper = tool.readJSON("helper");
+            threads.start(function () {
+                use.gallery.gallery_view(use.gallery_link)
+                /*, function (txt, value) {
+                    switch (txt) {
+                        case "全分辨率兼容":
+                            if (value == "get_") {
+                                return helper.全分辨率兼容;
+                            }
+    
+                            break;
+                        case "检验":
+    
+                            return use.server;
+                        case "检测":
+    
+                            break
+                        // code
+                    }
+    
+                })
+                */
             })
+
             break;
         case "加群交流":
             use.群号 = "481747236"
-            
+
             try {
                 $app.startActivity({
                     data: "mqqapi://card/show_pslcard?card_type=group&uin=" + use.群号,
@@ -721,13 +719,13 @@ ui.drawerList.on("item_click", (item) => {
         case "问题帮助":
             toast("还没有相关内容")
             // age.put("url", jlink_mian.疑惑解答);
-          //  new_ui("浏览器", jlink_mian.疑惑解答);
+            //  new_ui("浏览器", jlink_mian.疑惑解答);
             break
         case "运行日志":
             new_ui("日志");
             return
         case "捐赠打赏":
-            vengines.execScript("donation","require('./utlis/donation.js').donation('iVBORw0KGgoAAAANSUhEUgAA')")
+            engines.execScript("donation", "require('./utlis/donation.js').donation('iVBORw0KGgoAAAANSUhEUgAA')")
             break
         case "关于应用":
             toast("还没有相关内容")
@@ -756,7 +754,7 @@ ui.settingsBtn.on("click", () => {
 
 ui.logBtn.on("click", () => {
 
-    
+
 });
 
 
@@ -815,7 +813,7 @@ ui.autoService.on("click", (checked) => {
     if (checked == true) {
         if (tool.autoService(true) == false) {
             ui.autoService.checked = false;
-            if (!helper.ADB提醒) {
+            if (!interface.无障碍提醒) {
                 dialogs.build({
                     type: "app-or-overlay",
                     title: "自启动无障碍提醒",
@@ -830,7 +828,7 @@ ui.autoService.on("click", (checked) => {
                     });
                 }).on("check", (checked) => {
                     //监听勾选框
-                    tool.writeJSON("ADB提醒", checked)
+                    tool.writeJSON("无障碍提醒", checked,"interface")
                 }).show();
             } else {
                 use.startActivity({
@@ -898,24 +896,6 @@ var MaterialListC = JSON.parse(
 
 /*
 
-ui.inputxi.on("key", function (keyCode, event) {
-    if (event.getAction() == 0 && keyCode == 66) {
-        输入框(ui.inputxi, ui.inputxi.text())
-        event.consumed = true;
-    }
-});
-ui.inputjm.on("key", function (keyCode, event) {
-    if (event.getAction() == 0 && keyCode == 66) {
-        输入框(ui.inputjm, ui.inputjm.text())
-        event.consumed = true;
-    }
-});
-ui.searchiz.click(() => {
-    输入框(ui.inputxi, ui.inputxi.text());
-    输入框(ui.inputjm, ui.inputjm.text());
-    输入框(ui.inputiz, ui.inputiz.text());
-
-});
 ui.inputiz.on("key", function (keyCode, event) {
     if (event.getAction() == 0 && keyCode == 66) {
         输入框(ui.inputiz, ui.inputiz.text())
@@ -954,24 +934,18 @@ ui._bg.on("click", function () {
         return;
     }
 
-    if (auto.service == null) {
-        if (tool.autoService() != true) {
-            if (ui.autoService.checked == true) {
-                use.prompt.Dialog_Tips("温馨提示", "无障碍服务已启用但并未运行，您需要强行停止应用/重启无障碍服务/重启手机");
-            }
-            toast("无障碍服务异常！请长按无障碍服务按钮跳转设置检查是否正常开启！");
-            console.error("无障碍服务异常！请检查是否正常开启！");
-            return;
-        };
-    }
-   
-
-    if (!files.exists("./library/gallery/主页-展开.png")) {
-        use.prompt.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
+    if (tool.autoService() != true) {
+        if (ui.autoService.checked == true) {
+            use.prompt.Dialog_Tips("温馨提示", "无障碍服务已启用但并未运行，您需要强行停止应用/重启无障碍服务/重启手机");
+        }
+        toast("无障碍服务异常！请长按无障碍服务按钮跳转设置检查是否正常开启！");
+        console.error("无障碍服务异常！请检查是否正常开启！");
         return;
-    }
+    };
+
+
     helper = tool.readJSON("helper");
-    
+
     if (!tool.script_locate("Floaty.js")) {
         if (helper.最低电量 != false) {
             if (!device.isCharging() && device.getBattery() < helper.最低电量) {
@@ -983,8 +957,8 @@ ui._bg.on("click", function () {
                 return;
             };
         };
-    开始运行jk();
-        
+        开始运行jk();
+
     } else {
         Floaty = tool.script_locate("Floaty.js");
         Floaty.emit("暂停", "关闭程序");
@@ -1000,24 +974,205 @@ ui._bgC.on("click", function () {
     setTimeout(function () {
         ui._bgC.setEnabled(true)
     }, 800);
-    setting = tool.readJSON("configure");
-        if (floaty.checkPermission() == false) {
-            use.prompt.Dialog_Tips("温馨提示", "请先授予战双辅助悬浮窗权限！");
-            return;
-        }
-        if (!files.exists("./library/gallery/主页-展开.png")) {
-            use.prompt.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
-            return;
-        }
-        if (!tool.script_locate("Floaty.js")) {
-            tool.writeJSON("初始暂停", true,"pane");
-            开始运行jk(true);
-        } else {
-            snakebar("悬浮窗程序已在运行中")
-            return;
-        }
-    
+    if (floaty.checkPermission() == false) {
+        use.prompt.Dialog_Tips("温馨提示", "请先授予战双辅助悬浮窗权限！");
+        return;
+    }
+
+    if (!tool.script_locate("Floaty")) {
+        tool.writeJSON("初始暂停", true, "pane");
+        开始运行jk(true);
+    } else {
+        snakebar("悬浮窗程序已在运行中")
+        return;
+    }
+
 })
+
+//开始运行
+function 开始运行jk(jk, tips_) {
+    // 屏幕方向
+
+    /*  if (ui.card.getHeight() == device.width) {
+          console.error("请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常");
+          use.prompt.Dialog_Tips("温馨提示", "请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常")
+      }*/
+    if (!files.exists("./library/gallery/主页-展开.png")) {
+        use.prompt.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
+        return;
+    }
+    let tuku_de = JSON.parse(files.read("./library/gallery/gallery_message.json"));
+
+    if (tips_ != true && helper.全分辨率兼容 != true) {
+
+        if (device.model == "MuMu") {
+            let dialog = dialogs.build({
+                title: "警告⚠",
+                titleColor: "#F44336",
+                type: "app",
+                content: "加载中...",
+                contentColor: "#F44336",
+                positive: "我已知晓",
+                negative: "下载MuMu9",
+                positiveColor: "#000000",
+                canceledOnTouchOutside: false
+            }).on("negative", () => {
+                app.openUrl("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
+                setClip("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
+                console.info("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
+                toast("已粘贴到剪贴板并打印到运行日志")
+            })
+            tool.setBackgroundRoundRounded(dialog.getWindow(), { bg: use.theme.bg, })
+            if (device.release != 9 && device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
+                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本,\n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe\n当前分辨率：w:" + device.width + ",h:" + device.height + "，战双辅助图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
+                toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
+                dialog.show();
+                return
+            }
+            if (device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
+                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前分辨率：w:" + device.width + ",h:" + device.height + "，战双辅助图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
+                dialog.show();
+                return
+            }
+            switch (true) {
+                case device.release != 9:
+                    dialog.setContent("你的设备环境貌似是mumu模拟器，当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本, \n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe");
+                    toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
+                    dialog.show();
+                    return
+            }
+
+        }
+        if (tuku_de.分辨率.h == device.width && tuku_de.分辨率.w == device.height) {
+            if (!helper.模拟器) {
+                dialogs.build({
+                    type: "app-or-overlay",
+                    title: "兼容模拟器平板版",
+                    content: "检测到你的设备可能是模拟器平板版分辨率,是否启用设置-兼容模拟器平板版？\n如果不是，请不要启用，这将导致悬浮窗过大。\n可在侧边栏-设置中关闭",
+                    positive: "启用",
+                    positiveColor: "#FF8C00",
+                    negative: "取消",
+                    canceledOnTouchOutside: false
+                }).on("positive", () => {
+                    tool.writeJSON("模拟器", true);
+                }).show()
+
+                return
+            }
+        } else {
+
+            tuku_de.h = (tuku_de.分辨率.h - device.height).toString().replace(/[^\d]/g, "");
+            tuku_de.w = (tuku_de.分辨率.w - device.width).toString().replace(/[^\d]/g, "");
+            if (tuku_de.h > 220 || tuku_de.w > 170) {
+                console.error("设备分辨率与图库分辨率相差过大，可能无法正常使用")
+                let Tips_tuku_ui = ui.inflate(
+                    <vertical id="parent">
+
+                        <card gravity="center_vertical" cardElevation="0dp" margin="0">
+                            <img src="file://res/icon.png" w="50" h="30" margin="0" />
+                            <text text="无法使用战双辅助" padding="5" textSize="20" gravity="center|left" textColor="#f03752" marginLeft="50" />
+
+
+                        </card>
+
+                        <ScrollView>
+                            <vertical>
+                                <vertical padding="10 0" >
+                                    <View bg="#f5f5f5" w="*" h="2" />
+                                    <text id="Device_resolution" text="加载中" />
+                                    <text id="dwh" text="加载中" />
+                                    <text id="Tips" textStyle="italic" textColor="#f03752" />
+
+                                    <text id="wxts" text="温馨" typeface="sans" padding="5" textColor="#000000" textSize="15sp" layout_gravity="center" />
+                                </vertical>
+                                <horizontal w="*" padding="-3" gravity="center_vertical">
+                                    <button text="退出(5s)" id="exit" textColor="#dbdbdb" style="Widget.AppCompat.Button.Borderless.Colored" layout_weight="1" />
+                                    <button text="执意启动" id="ok" textColor="#dbdbdb" style="Widget.AppCompat.Button.Borderless.Colored" layout_weight="1" />
+                                </horizontal>
+                            </vertical>
+                        </ScrollView>
+
+                    </vertical>);
+
+                var Tips_tuku = dialogs.build({
+                    type: "app",
+                    customView: Tips_tuku_ui,
+                    wrapInScrollView: false,
+                    cancelable: false,
+                    canceledOnTouchOutside: false
+                })
+                tool.setBackgroundRoundRounded(Tips_tuku.getWindow(), { bg: use.theme.bg, })
+                Tips_tuku.show();
+                Tips_tuku_ui.exit.on("click", function () {
+                    Tips_tuku.dismiss();
+                })
+                Tips_tuku_ui.ok.on("click", function () {
+                    Tips_tuku.dismiss()
+                    开始运行jk(false, true)
+
+                })
+
+                Tips_tuku_ui.wxts.setText("1. 没有适合你的图库？\n加入群聊获取教程动手制作，或使用虚拟机、模拟器等自调适合的分辨率，左边高度×右边宽度，DPI随意" +
+                    "\n2. 分辨率反的？ \n请在竖屏下启动悬浮窗。华为：更改屏幕分辨率-为对应图库。模拟器：说明设置的是平板版分辨率(更换与设备分辨率相反的图库分辨率即可)。 注：更换设备分辨率后都需要到应用内更换相符合的图库")
+                Tips_tuku_ui.Device_resolution.setText("当前设备分辨率:宽" + device.widget + ",高:" + device.height)
+                Tips_tuku_ui.dwh.setText("当前使用图库：" + tuku_de.name);
+
+                Tips_tuku_ui.Tips.setText("请在软件主页面-左上角头像-更换图库\n更换设备分辨率相近的图库，否则将无法正常使用本应用-辅助。\n目前，图库与设备分辨率宽度一致，而高度误差不超过230左右，或高度一致，而宽度误差不超过170左右，基本上是可以使用的，但不排除某些小图片在你的设备上无法匹配，导致某功能失效")
+                Tips_tuku_ui.exit.setEnabled(false);
+                var i_tnter = 5;
+                var id_tnter = setInterval(function () {
+                    if (i_tnter >= 0) {
+                        i_tnter--;
+                    }
+                    ui.run(() => {
+                        if (i_tnter == 0) {
+                            Tips_tuku_ui.exit.setEnabled(true);
+                            Tips_tuku_ui.exit.setText("退出")
+                            Tips_tuku_ui.exit.setTextColor(colors.parseColor("#F4A460"))
+                            clearInterval(id_tnter);
+                        } else {
+                            Tips_tuku_ui.exit.setText("退出(" + i_tnter + "s)")
+                        }
+
+                    })
+                }, 1000)
+
+                return
+            }
+        }
+    }
+
+    if (interface.运行次数 <= 2) {
+        jk = true;
+        use.prompt.Dialog_Tips("温馨提示", "战双辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n\n如需程序自动允许辅助截图权限，请前往左上角头像-设置-打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权战双辅助后台弹出界面权限" +
+            "\n\n如需程序自动打开明日方舟，请前往左上角头像-设置-打开自动启动方舟" +
+            "\n\n不懂如何使用本程序？ 左上角头像-疑惑解答，或加群交流", "@drawable/ic_report_problem_black_48dp");
+    }
+    ui.start.setText("停止运行");
+    interface.运行次数 = interface.运行次数 + 1;
+    tool.writeJSON("运行次数", interface.运行次数, "interface");
+    $settings.setEnabled('foreground_service', true);
+    new_ui("悬浮窗");
+    //engines.execScriptFile("./Floaty.js");
+    // console.info('版本信息：' + toupdate.version(packageName) + (app.autojs.versionCode > 8081300 ? "(64位)" : "(32位)"))
+    console.info('device info: ' + device.brand + " " + device.product + " " + device.release);
+    console.info('设备分辨率：' + device.height + "×" + device.width);
+    console.info('图库分辨率: ' + tuku_de);
+    console.info('截图方式: ' + helper.截图方式);
+    ui.start.setHint(null)
+    if (!jk) {
+        setTimeout(function () {
+            setting = null;
+            tukuss = null;
+            toastLog("开始运行20秒后主动关闭战双辅助-界面\n如无需此功能请从悬浮窗启动战双辅助");
+            let runtime = java.lang.Runtime.getRuntime();
+            runtime.gc();
+            threads.shutDownAll();
+            ui.finish()
+            exit();
+        }, 20000);
+    }
+};
 
 //当离开本界面时保存data
 ui.emitter.on("pause", () => {
@@ -1109,191 +1264,12 @@ function 输入框(id, text) {
     }
 }
 
-//开始运行
-function 开始运行jk(jk, tips_) {
-    // 屏幕方向
 
-    /*  if (ui.card.getHeight() == device.width) {
-          console.error("请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常");
-          use.prompt.Dialog_Tips("温馨提示", "请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常")
-      }*/
-    if (tips_ != true && helper.全分辨率兼容 != true) {
-
-        if (device.model == "MuMu") {
-            let dialog = dialogs.build({
-                title: "警告⚠",
-                titleColor: "#F44336",
-                type: "app",
-                content: "加载中...",
-                contentColor: "#F44336",
-                positive: "我已知晓",
-                negative: "下载MuMu9",
-                positiveColor: "#000000",
-                canceledOnTouchOutside: false
-            }).on("negative", () => {
-                app.openUrl("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                setClip("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                console.info("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                toast("已粘贴到剪贴板并打印到运行日志")
-            })
-            tool.setBackgroundRoundRounded(dialog.getWindow(),{bg:use.theme.bar,})
-            if (device.release != 9 && device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
-                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本,\n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe\n当前分辨率：w:" + device.width + ",h:" + device.height + "，战双辅助图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
-                toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                dialog.show();
-                return
-            }
-            if (device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
-                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前分辨率：w:" + device.width + ",h:" + device.height + "，战双辅助图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
-                dialog.show();
-                return
-            }
-            switch (true) {
-                case device.release != 9:
-                    dialog.setContent("你的设备环境貌似是mumu模拟器，当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本, \n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe");
-                    toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                    dialog.show();
-                    return
-            }
-
-        }
-        let tuku_de = JSON.parse(files.read("./library/gallery/gallery_message.json"));
-       if (tuku_de.分辨率.h == device.width && tuku_de.分辨率.w == device.height) {
-            if (!helper.模拟器) {
-                dialogs.build({
-                    type: "app-or-overlay",
-                    title: "兼容模拟器平板版",
-                    content: "检测到你的设备可能是模拟器平板版分辨率,是否启用设置-兼容模拟器平板版？\n如果不是，请不要启用，这将导致悬浮窗过大。\n可在侧边栏-设置中关闭",
-                    positive: "启用",
-                    positiveColor: "#FF8C00",
-                    negative: "取消",
-                    canceledOnTouchOutside: false
-                }).on("positive", () => {
-                    tool.writeJSON("模拟器", true);
-                }).show()
-
-                return
-            }
-        } else {
-
-            tuku_de.h = (tuku_de.分辨率.h - device.height).toString().replace(/[^\d]/g, "");
-            tuku_de.w = (tuku_de.分辨率.w - device.width).toString().replace(/[^\d]/g, "");
-            if (tuku_de.h > 220 || tuku_de.w > 170) {
-                console.error("设备分辨率与图库分辨率相差过大，可能无法正常使用")
-                let Tips_tuku_ui = ui.inflate(
-                    <vertical id="parent">
-
-                        <card gravity="center_vertical" cardElevation="0dp" margin="0">
-                            <img src="file://res/icon.png" w="50" h="30" margin="0" />
-                            <text text="无法使用战双辅助" padding="5" textSize="20" gravity="center|left" textColor="#f03752" marginLeft="50" />
-
-
-                        </card>
-
-                        <ScrollView>
-                            <vertical>
-                                <vertical padding="10 0" >
-                                    <View bg="#f5f5f5" w="*" h="2" />
-                                    <text id="Device_resolution" text="加载中" />
-                                    <text id="dwh" text="加载中" />
-                                    <text id="Tips" textStyle="italic" textColor="#f03752" />
-
-                                    <text id="wxts" text="温馨" typeface="sans" padding="5" textColor="#000000" textSize="15sp" layout_gravity="center" />
-                                </vertical>
-                                <horizontal w="*" padding="-3" gravity="center_vertical">
-                                    <button text="退出(5s)" id="exit" textColor="#dbdbdb" style="Widget.AppCompat.Button.Borderless.Colored" layout_weight="1" />
-                                    <button text="执意启动" id="ok" textColor="#dbdbdb" style="Widget.AppCompat.Button.Borderless.Colored" layout_weight="1" />
-                                </horizontal>
-                            </vertical>
-                        </ScrollView>
-
-                    </vertical>);
-
-                var Tips_tuku = dialogs.build({
-                    type: "app",
-                    customView: Tips_tuku_ui,
-                    wrapInScrollView: false,
-                    cancelable: false,
-                    canceledOnTouchOutside: false
-                })
-                tool.setBackgroundRoundRounded(Tips_tuku.getWindow(),{bg:use.theme.bar,})
-                Tips_tuku.show();
-                Tips_tuku_ui.exit.on("click", function () {
-                    Tips_tuku.dismiss();
-                })
-                Tips_tuku_ui.ok.on("click", function () {
-                    Tips_tuku.dismiss()
-                    开始运行jk(false, true)
-
-                })
-
-                Tips_tuku_ui.wxts.setText("1. 没有适合你的图库？\n加入群聊获取教程动手制作，或使用虚拟机、模拟器等自调适合的分辨率，左边高度×右边宽度，DPI随意" +
-                    "\n2. 分辨率反的？ \n请在竖屏下启动悬浮窗。华为：更改屏幕分辨率-为对应图库。模拟器：说明设置的是平板版分辨率(更换与设备分辨率相反的图库分辨率即可)。 注：更换设备分辨率后都需要到应用内更换相符合的图库")
-                Tips_tuku_ui.Device_resolution.setText("当前设备分辨率:宽" + device.widget + ",高:" + device.height )
-                Tips_tuku_ui.dwh.setText("当前使用图库：" + tuku_de.name);
-
-                Tips_tuku_ui.Tips.setText("请在软件主页面-左上角头像-更换图库\n更换设备分辨率相近的图库，否则将无法正常使用本应用-辅助。\n目前，图库与设备分辨率宽度一致，而高度误差不超过230左右，或高度一致，而宽度误差不超过170左右，基本上是可以使用的，但不排除某些小图片在你的设备上无法匹配，导致某功能失效")
-                Tips_tuku_ui.exit.setEnabled(false);
-                var i_tnter = 5;
-                var id_tnter = setInterval(function () {
-                    if (i_tnter >= 0) {
-                        i_tnter--;
-                    }
-                    ui.run(() => {
-                        if (i_tnter == 0) {
-                            Tips_tuku_ui.exit.setEnabled(true);
-                            Tips_tuku_ui.exit.setText("退出")
-                            Tips_tuku_ui.exit.setTextColor(colors.parseColor("#F4A460"))
-                            clearInterval(id_tnter);
-                        } else {
-                            Tips_tuku_ui.exit.setText("退出(" + i_tnter + "s)")
-                        }
-
-                    })
-                }, 1000)
-
-                return
-            }
-        }
-    }
-
-    if (interface.运行次数 <= 2) {
-        jk = true;
-        use.prompt.Dialog_Tips("温馨提示", "战双辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n\n如需程序自动允许辅助截图权限，请前往左上角头像-设置-打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权战双辅助后台弹出界面权限" +
-            "\n\n如需程序自动打开明日方舟，请前往左上角头像-设置-打开自动启动方舟" +
-            "\n\n不懂如何使用本程序？ 左上角头像-疑惑解答，或加群交流", "@drawable/ic_report_problem_black_48dp");
-    }
-   toastLog("ksagk")
-    ui.start.setText("停止运行");
-    interface.运行次数 = interface.运行次数 + 1;
-    tool.writeJSON("运行次数", interface.运行次数, "interface");
-    $settings.setEnabled('foreground_service', true);
-    new_ui("悬浮窗");
-    //engines.execScriptFile("./Floaty.js");
-   // console.info('版本信息：' + toupdate.version(packageName) + (app.autojs.versionCode > 8081300 ? "(64位)" : "(32位)"))
-    console.info('device info: ' + device.brand + " " + device.product + " " + device.release);
-    console.info('设备分辨率：' + device.height + "×" + device.width);
-    console.info('图库分辨率: ' + tuku_de);
-    console.info('截图方式: ' + helper.截图方式);
-    ui.start.setHint(null)
-    if (!jk) {
-        setTimeout(function () {
-            setting = null;
-            tukuss = null;
-            toastLog("开始运行20秒后主动关闭战双辅助-界面\n如无需此功能请从悬浮窗启动战双辅助");
-            let runtime = java.lang.Runtime.getRuntime();
-            runtime.gc();
-            threads.shutDownAll();
-            ui.finish()
-            exit();
-        }, 20000);
-    }
-};
 
 SystemUiVisibility(false)
 
 threads.start(function () {
-     Update_UI(1)
+    Update_UI(1)
 
 
     setInterval(function () {
@@ -1359,26 +1335,18 @@ threads.start(function () {
     }, 300)
 
 
-    var rtu = random(1, 3)
-    if (!files.copy("./res/Startpage/" + rtu + ".png", "./res/start-up.png")) {
-        toastLog("更换启动图失败");
-    }
-
 
     if (files.createWithDirs(files.path("./library/图片路径.txt"))) {
         files.write("./library/图片路径.txt", "./library/gallery/");
     }
     files.ensureDir(files.path("./library/gallery_list"))
     files.create(files.path("./library/Byte.txt"))
+
     while (true) {
         try {
             if (!files.exists("./library/gallery/gallery_message.json")) {
-                gallery.选择图库(tukuss, function (tukutxt) {
-                    //    popView.tukutxt.setText("当前图库：" + files.read("./mrfz/tuku/分辨率.txt"));
-                });
-                break;
-            } else {
-                //  popView.tukutxt.setText("当前图库：" + files.read("./mrfz/tuku/分辨率.txt"));
+                log(use.gallery)
+                use.gallery.选择图库(use.gallery_link);
                 break;
             }
         } catch (er) {
@@ -1426,7 +1394,7 @@ function 检测ocr(tips) {
         }
     }
     if (con_ != undefined) {
-       let ocr_tips =  dialogs.build({
+        let ocr_tips = dialogs.build({
             type: "app",
             title: "提醒",
             titleColor: "#000000",
@@ -1456,7 +1424,7 @@ function 检测ocr(tips) {
             }
             toastLog("密码:421")
         })
-        tool.setBackgroundRoundRounded(ocr_tips.getWindow(),{bg:use.theme.bar,})
+        tool.setBackgroundRoundRounded(ocr_tips.getWindow(), { bg: use.theme.bg, })
         ocr_tips.show();
         return false
     }
@@ -1487,13 +1455,13 @@ function Update_UI(i) {
                         ui.start.setText("开始运行");
                     }
                 } catch (err) { }
-                
+
                 if (mod_data[0] == undefined) {
                     ui._bgT.attr("visibility", "gone")
                 } else {
                     ui._bgT.attr("cardCornerRadius", "25dp");
                 }
-                
+
                 //activity.setRequestedOrientation(1);
                 //更新模拟器，虚拟机按钮颜色
                 ui.floatyCheckPermission.setRadius(25);
@@ -1518,11 +1486,11 @@ function new_ui(name, url) {
             use.theme.setTheme("night");
             break
         case '关于':
-             toastLog("还没有相关内容")
+            toastLog("还没有相关内容")
             break;
         case '设置':
-          
-        break;
+
+            break;
         case '日志':
             engines.execScript("journal_ui", variable + "require('./activity/journal.js')");
             //engines.execScript("journal_ui", java.lang.String.format("'ui';  var theme = storages.create('configure').get('theme_colors');require('./utlis/journal.js');"));
