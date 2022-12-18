@@ -29,6 +29,7 @@ ui.globalconsole.setColor("E", "#b71c1c");
 
 //创建选项菜单(右上角)
 ui.emitter.on("create_options_menu", menu => {
+    menu.add("代码测试");
     menu.add("清空日志");
     menu.add("其他应用打开");
     menu.add("保存至下载目录");
@@ -38,6 +39,9 @@ var packageName = context.getPackageName();
 //监听选项菜单点击
 ui.emitter.on("options_item_selected", (e, item) => {
     switch (item.getTitle()) {
+        case "代码测试":
+            engines.execScriptFile("./activity/debug.js");
+        break
         case "清空日志":
             console.clear();
             ui.globalconsole.clear();

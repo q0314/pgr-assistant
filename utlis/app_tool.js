@@ -80,7 +80,7 @@ function autoService(force, mode) {
                                         negative: "取消",
                                         canceledOnTouchOutside: false
                                     }).on("positive", () => {
-                                        openAppSetting(packageName);
+                                        openAppSetting(package_name);
                                     }).show()
 
                                 }
@@ -105,7 +105,7 @@ function autoService(force, mode) {
 
             if (mode) {
                 if ($shell.checkAccess("root")) {
-                    shell("pm grant " + packageName + " android.permission.WRITE_SECURE_SETTINGS", {
+                    shell("pm grant " + package_name + " android.permission.WRITE_SECURE_SETTINGS", {
                         root: true,
                     });
                     toastLog("root授权安全系统设置权限成功")
@@ -116,7 +116,7 @@ function autoService(force, mode) {
                 }
             } else {
                 if ($shell.checkAccess("adb")) {
-                    shell("pm grant " + packageName + " android.permission.WRITE_SECURE_SETTINGS", {
+                    shell("pm grant " + package_name + " android.permission.WRITE_SECURE_SETTINGS", {
                         adb: true,
                     });
                     toastLog("adb授权安全系统设置权限成功");
@@ -130,7 +130,7 @@ function autoService(force, mode) {
                     if (auto.rootInActiveWindow == null) {
                         let enabledServices = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
                         if (enabledServices) {
-                            if (enabledServices.toString().indexOf(packageName) != -1) {
+                            if (enabledServices.toString().indexOf(package_name) != -1) {
                                 let con_ = "检测到无障碍已开启但未运行。\n请尝试关闭再打开无障碍。如无效请跳转到应用设置停止战双辅助后，重启战双辅助。如仍无效请重启系统";
                                 dialogs.build({
                                     type: "app-or-overlay",
@@ -145,7 +145,7 @@ function autoService(force, mode) {
                                         action: "android.settings.ACCESSIBILITY_SETTINGS"
                                     });
                                 }).on("negative", () => {
-                                    openAppSetting(packageName);
+                                    openAppSetting(package_name);
                                 }).show()
                             }
                         }
@@ -165,7 +165,7 @@ function autoService(force, mode) {
 
     function openAccessibility(i) {
         try {
-            let mServices = packageName + "/com.stardust.autojs.core.accessibility.AccessibilityService";
+            let mServices = package_name + "/com.stardust.autojs.core.accessibility.AccessibilityService";
             let enabledServices = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
             if (enabledServices != null) {
                 if (enabledServices.length > 5) {
@@ -182,8 +182,8 @@ function autoService(force, mode) {
             if (enabledServices[0] == ":") {
                 enabledServices = enabledServices[0] = "";
             }
-            enabledServices = enabledServices.replace("::", ":")
-            Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "1");
+            enabledServices = enabledServices.replace("::", ":");
+           Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "1");
             Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, enabledServices + mServices);
             if (i != false) {
                 toastLog('安全系统设置权限成功开启无障碍');
@@ -201,7 +201,6 @@ function autoService(force, mode) {
     function closeAccesibility(i) {
 
         try {
-            let packageName = context.getPackageName();
             let enabledServices = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
             log("无障碍列表" + enabledServices);
             for (let i = 0; i < 10; i++) {
@@ -214,10 +213,10 @@ function autoService(force, mode) {
                 Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, '0')
 
             } else {
-                Service = enabledServices.replace(":" + packageName + "/com.stardust.autojs.core.accessibility.AccessibilityService");
+                Service = enabledServices.replace(":" + package_name + "/com.stardust.autojs.core.accessibility.AccessibilityService");
                 Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, Service)
                 Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, '0')
-                Service = enabledServices.replace(packageName + "/com.stardust.autojs.core.accessibility.AccessibilityService");
+                Service = enabledServices.replace(package_name + "/com.stardust.autojs.core.accessibility.AccessibilityService");
                 if (Service == "undefined") {
                     Service = "";
                 }

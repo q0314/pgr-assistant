@@ -17,13 +17,13 @@
     "stableMode": false
   },
   "main": "main.js",
-  "name": "明日计划（32）",
+  "name": "战双助手",
   "optimization": {
     "removeAccessibilityService": false,
     "removeOpenCv": false,
     "unusedResources": false
   },
-  "packageName": "mrfz.qiao.com",
+  "packageName": "com.pgr.assistant",
   "permissionConfig": {
     "manifestPermissions": [
       "android.permission.FOREGROUND_SERVICE",
@@ -78,5 +78,5 @@
     "uuid": "3c963c5d-b8e8-40e3-ab74-404fbab8bc9f"
   },
   "versionCode": 2022120642,
-  "versionName": "4.2.6_beta"
+  "versionName": "1.0.0_beta"
 }

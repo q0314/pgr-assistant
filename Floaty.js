@@ -483,11 +483,12 @@ function 暂停(form) {
                 console.verbose("强行终止莺尾花")
                 use.progra.forceStop();
             }
+           ui.run(function () {
             if(window.tos){
-            ui.run(function () {
                 window.tos.setText("状态：主程序暂停中");
+            }
             });
-        }
+        
         }, 500)
     }
     /*    files.write("./mrfz/图片路径.txt", "./mrfz/");
