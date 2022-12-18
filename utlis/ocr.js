@@ -87,7 +87,8 @@ var ocr_modular = {
                             break
                     }
 
-                    retext = retext.replace("峽想", "映想")
+                    retext = retext.replace("峽想", "映想");
+                    retext = retext.replace("来购", "采购")
                     retext = retext.replace(/(no0|noo|n00)/g, '/100')
                     retext = retext.replace('健', '键');
                     retext = retext.replace("(", "");

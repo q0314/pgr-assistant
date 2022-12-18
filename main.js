@@ -42,7 +42,8 @@ require("./utlis/NonSwipeableViewPager");
 //包名
 var package_name = context.getPackageName();
 //指向Android/data/包名/file 路径
-var package_path = context.getExternalFilesDir(null).getAbsolutePath();
+var package_path = context.getExternalFilesDir(null).getAbsolutePath() +"/";
+
 
 //禁用音量上键停止脚本
 $settings.setEnabled('stop_all_on_volume_up', false);
@@ -828,7 +829,7 @@ ui.autoService.on("click", (checked) => {
                     });
                 }).on("check", (checked) => {
                     //监听勾选框
-                    tool.writeJSON("无障碍提醒", checked,"interface")
+                    tool.writeJSON("无障碍提醒", checked, "interface")
                 }).show();
             } else {
                 use.startActivity({
@@ -1334,8 +1335,10 @@ threads.start(function () {
 
     }, 300)
 
-
-
+    files.create(package_path + "coordinate/");
+    if (!files.exists(package_path + "coordinate/coordinate.json")) {
+        files.copy("./library/coordinate.json", package_path + "coordinate/coordinate.json")
+    }
     if (files.createWithDirs(files.path("./library/图片路径.txt"))) {
         files.write("./library/图片路径.txt", "./library/gallery/");
     }
