@@ -63,8 +63,15 @@ function updateTheme() {
     setTheme("day");
 }
 
+function getLanguage() {
+    let interface = storages.create("warbler").get("interface");
+    let local_language = context.resources.configuration.locale.language + "-" + context.resources.configuration.locale.country;
+   
+    return JSON.parse(files.read("activity/languages/" + (interface["语言"].match(local_language) ? local_language : "zh-CN") + ".json"));
+}
+
 theme.setTheme = setTheme;
 theme.updateTheme = updateTheme;
 theme.setspecify = setspecify;
-
+theme.language = getLanguage();
 module.exports = theme;

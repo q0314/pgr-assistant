@@ -74,8 +74,7 @@ var helper = tool.readJSON("helper", {
 var interface = tool.readJSON("interface", {
     "公告": false,
     "无障碍提醒": false,
-    "语言": "zh-CN",
-    "运行次数": 0,
+   "运行次数": 0,
 });
 
 var notes = tool.readJSON("notes", {
@@ -217,7 +216,7 @@ ui.layout(
 
                     <View bg="#ffffff" w="2px" h="16" layout_gravity="center_vertical" />
 
-                    <button-layout id="logBtn" text="ocr调试" visibility="gone" drawablePadding="3" leftDrawable="ic_language_black_48dp" />
+                    <button-layout id="logBtn" text="坐标调试"  drawablePadding="3" leftDrawable="ic_language_black_48dp" />
                 </horizontal>
 
             </relative>
@@ -754,7 +753,8 @@ ui.settingsBtn.on("click", () => {
 });
 
 ui.logBtn.on("click", () => {
-
+    new_ui('坐标调试')
+   
 
 });
 
@@ -958,7 +958,62 @@ ui._bg.on("click", function () {
                 return;
             };
         };
-        开始运行jk();
+        let fg = app.getAppName("com.kurogame.haru.hero");
+        let fg1 = app.getAppName("com.kurogame.haru.bilibili");
+      
+        let appnameui = ui.inflate(
+            <vertical padding="25 0">
+                <View bg="#000000" h="1" w="auto" />
+                <horizontal w="*" >
+                    <button id="fg" text="官服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
+                    <button id="fg1" text="B服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
+                </horizontal>
+            </vertical>, null, false);
+        var appname = dialogs.build({
+            type: 'app',
+            customView: appnameui,
+            title: "你有多个战双！\n请选择启动其中一个",
+            wrapInScrollView: false,
+            autoDismiss: true
+        });
+        appnameui.fg.on("click", () => {
+            tool.writeJSON("包名", "com.kurogame.haru.hero");
+            ui.run(() => {
+                appname.dismiss();
+            })
+            开始运行jk();
+        });
+        appnameui.fg1.on("click", () => {
+            tool.writeJSON("包名", "com.kurogame.haru.bilibili");
+            ui.run(() => {
+                appname.dismiss();
+            })
+            开始运行jk()
+        });
+     
+
+        var pake = 2;
+        if (fg == null) {
+            pake = pake - 1;
+            appnameui.fg.attr("visibility", "gone");
+        }
+        if (fg1 == null) {
+            pake = pake - 1;
+            appnameui.fg1.attr("visibility", "gone");
+        }
+        if (fg == null) {
+            tool.writeJSON("包名", "com.kurogame.haru.bilibili");
+        } else if (fg1 == null) {
+           tool.writeJSON("包名", "com.kurogame.haru.hero");
+        }
+
+        if (pake > 1) {
+            appname.show();
+            return
+        } else {
+            开始运行jk();
+        }
+
 
     } else {
         Floaty = tool.script_locate("Floaty.js");
@@ -1143,6 +1198,9 @@ function 开始运行jk(jk, tips_) {
         }
     }
 
+
+   
+
     if (interface.运行次数 <= 2) {
         jk = true;
         use.prompt.Dialog_Tips("温馨提示", "战双辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n\n如需程序自动允许辅助截图权限，请前往左上角头像-设置-打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权战双辅助后台弹出界面权限" +
@@ -1266,7 +1324,10 @@ function 输入框(id, text) {
 }
 
 
-
+if (!files.exists("./library/coordinate.json")) {
+    new_ui('坐标调试')
+    //  files.copy("./library/coordinate.json", package_path + "coordinate/coordinate.json")
+  }
 SystemUiVisibility(false)
 
 threads.start(function () {
@@ -1276,12 +1337,11 @@ threads.start(function () {
     setInterval(function () {
 
         ui.post(() => {
-
+     
             switch (ui.viewpager.getChildAt(ui.viewpager.currentItem)) {
 
-
                 case ui.card:
-                    if (tool.script_locate("Floaty.js")) {
+                 if (tool.script_locate("Floaty")) {
                         ui.start.setText("停止运行")
                     } else {
                         ui.start.setText("开始运行");
@@ -1298,16 +1358,6 @@ threads.start(function () {
                             return
                         }
 
-                        //console.info("距离时间" + hflz)
-                        /* let jlsj = hflz;
-                         for (let i = 0; i < 999; i++) {
-                             jlsj = jlsj - 6;
-                             log(jlsj)
-                             if (jlsj <= 6 && jlsj >= 0) {
-                                 tool.writeJSON("距离时间", jlsj, "notes");
-                                 break
-                             }
-                         }*/
 
                         hflz = Math.floor(hflz / 6) + Number(notes.当前血清);
 
@@ -1335,10 +1385,9 @@ threads.start(function () {
 
     }, 300)
 
-    files.create(package_path + "coordinate/");
-    if (!files.exists(package_path + "coordinate/coordinate.json")) {
-        files.copy("./library/coordinate.json", package_path + "coordinate/coordinate.json")
-    }
+  //  files.create(package_path + "coordinate/");
+  
+
     if (files.createWithDirs(files.path("./library/图片路径.txt"))) {
         files.write("./library/图片路径.txt", "./library/gallery/");
     }
@@ -1351,6 +1400,8 @@ threads.start(function () {
                 log(use.gallery)
                 use.gallery.选择图库(use.gallery_link);
                 break;
+            }else{
+                break
             }
         } catch (er) {
             log("查询云端配置中" + er)
@@ -1360,11 +1411,6 @@ threads.start(function () {
 
     sleep(50);
 
-    ui.run(() => {
-        if (tool.autoService(true)) {
-            ui.autoService.checked = true;
-        }
-    })
     if (interface.运行次数 != true && interface.公告 == true) threads.start(tishi);
     interface = tool.readJSON("interface");
 
@@ -1480,7 +1526,7 @@ function Update_UI(i) {
 
 function new_ui(name, url) {
     // let JS_file;
-    let variable = "'ui';var theme = " + JSON.stringify(use.theme) + ";"; //require('./use.theme.js');";
+
     switch (name) {
         case "day":
             use.theme.setTheme("day");
@@ -1495,10 +1541,16 @@ function new_ui(name, url) {
 
             break;
         case '日志':
-            engines.execScript("journal_ui", variable + "require('./activity/journal.js')");
+            let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;" ; 
+   
+            engines.execScript("journal_ui", variabler + "require('./activity/journal.js')");
             //engines.execScript("journal_ui", java.lang.String.format("'ui';  var theme = storages.create('configure').get('theme_colors');require('./utlis/journal.js');"));
             break;
-
+        case '坐标调试':
+            let variablez = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;" ; 
+            engines.execScript("initialize_ui", variablez + "require('./activity/initialize.js')");
+            
+        break
         case '悬浮窗':
             // JS_file = "./Floaty.js";
             engines.execScriptFile("./Floaty.js");

@@ -26,8 +26,8 @@ function readJSON(key, list) {
         }
     } else {
         setting = Disposition.get(key);
-        if(setting==undefined){
-            console.error("无法取得"+key+"的数据,请确认是否已保存")
+        if (setting == undefined) {
+            console.error("无法取得" + key + "的数据,请确认是否已保存")
         }
     }
     return setting;
@@ -43,9 +43,9 @@ function readJSON(key, list) {
  */
 function writeJSON(sett, value, key) {
     key = key || "helper";
-    setting = readJSON(key);  
+    setting = readJSON(key);
     setting[sett] = value;
-     Disposition.put(key, setting);
+    Disposition.put(key, setting);
 }
 
 function autoService(force, mode) {
@@ -183,7 +183,7 @@ function autoService(force, mode) {
                 enabledServices = enabledServices[0] = "";
             }
             enabledServices = enabledServices.replace("::", ":");
-           Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "1");
+            Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "1");
             Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, enabledServices + mServices);
             if (i != false) {
                 toastLog('安全系统设置权限成功开启无障碍');
@@ -266,8 +266,8 @@ function checkPermission(permission) {
  */
 function setBackgroundRoundRounded(view, list) {
     list = {
-        radius:list.radius || 30,
-        bg:list.bg || "#eff0f4",
+        radius: list.radius || 30,
+        bg: list.bg || "#eff0f4",
     }
     let gradientDrawable = new GradientDrawable();
     gradientDrawable.setShape(GradientDrawable.RECTANGLE);
@@ -294,6 +294,8 @@ function script_locate(js) {
         return false
     }
 }
+
+
 
 let tool = {}
 tool.script_locate = script_locate;

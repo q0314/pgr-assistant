@@ -1,0 +1,31 @@
+{
+    "initialize":{
+    "toolbar": "初始化配置",
+    "preset": "使用预置坐标信息",
+    "hint1": "常规坐标信息",
+    "hint2": "宿舍坐标信息",
+    "hint3": "宿舍6房间位置",
+    "hint4": "房间内快捷头像坐标信息",
+    "hint5": "战斗坐标信息",
+    "return": "返回",
+    "mainpage": "主页面",
+    "manualicon": "手册图标",
+    "roominitialization":"自动获取(需宿舍名带有'宿舍')",
+    "attackkey":"攻击键",
+    "signalball1":"信号球1",
+    "signalball2":"信号球2",
+
+    "coord_ui_preset_list":"预置坐标信息列表",
+    "coord_ui_Device_resolution":"当前设备分辨率: ",
+    "coord_ui_Tips":"请在下方选择与设备分辨率一样的",
+    "coord_jsname":"预置坐标信息",
+
+    "leave_tips":"\n\n等坐标数据尚未配置, 将无法正常使用相关功能, 确认要离开?\n\n离开后还可在 侧边栏-左下角坐标调试 中进入",
+    "leave_title":"提醒",
+    "leave_positive":"取消",
+    "leave_negative":"确认离开",
+    "toast_save":"已保存坐标数据"
+
+
+}
+}

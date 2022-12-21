@@ -64,7 +64,8 @@ var package_path = context.getExternalFilesDir(null).getAbsolutePath() + "/"
 //作战控制器,不用管
 var fight_thread = false;
 
-var coordinate = JSON.parse(files.read(package_path + "coordinate/coordinate.json"));
+var coordinate = JSON.parse(files.read("./library/coordinate.json"));
+coordinate = coordinate.坐标信息;
 /**
  * 战斗相关配置
  * 资源.资源 - false时程序会去打活动
@@ -175,6 +176,8 @@ function 启动(package_) {
     sleep(800);
     switch (getpackage()) {
         case 'com.kurogame.haru.hero':
+            return
+        case helper.包名:
             return
         case null:
             toastLog("暂时无法获取前台应用，默认启动")
@@ -297,7 +300,7 @@ function 采购() {
         } else {
             helper.任务状态.日常补给 = true;
             tool.writeJSON("任务状态", helper.任务状态);
-            toastLog("今日补给包已领取")
+            toastLog("今日补给包可能已领取")
         }
 
         Floaty.emit("面板", "展开");
@@ -461,7 +464,7 @@ function 宿舍_委托() {
                 //点击委托
                 click(entrusted.x, entrusted.y);
                 sleep(1500);
-                if (!ITimg.ocr("接取委托", { action: 1, timing: 1500, area: "右下半屏", part: true, })) {
+                if (!ITimg.ocr("接取委托", { action: 1, timing: 1500, area: [parseInt(height/1.5),parseInt(width/2),parseInt(height-(height/1.5)),parseInt(width/2)], part: true, })) {
                     continue;
                 }
                 let multiple;
@@ -489,7 +492,7 @@ function 宿舍_委托() {
 }
 
 function 宿舍_执勤() {
-    if (!helper.任务状态.宿舍执勤) {
+    if (helper.任务状态.宿舍执勤) {
         toastLog("今日宿舍执勤已完成");
         return
     }
@@ -550,16 +553,13 @@ function 宿舍_执勤() {
         if (duty.chosen >= 8) {
             break
         }
-        //下滑显示新的小伙伴
-        //  swipe(height / 2, frcy(850), height / 2, 150, 300);
+        //上滑显示新的小伙伴
+      swipe(parseInt(height / 2), parseInt(width/1.4), parseInt(height / 2), parseInt(width/2.3), 500);
 
-        for (let i = 0; i < coordinate.宿舍.执勤伙伴下滑.length; i++) {
-            gestures.apply(null, coordinate.宿舍.执勤伙伴下滑[i]);
-            sleep(400);
-        };
 
         sleep(2000);
     }
+
     toastLog("返回");
     Floaty.emit("面板", "展开");
     //对图片进行回收
@@ -618,11 +618,25 @@ function 宿舍_抚摸() {
                     name: "宿舍" + i,
                     x: dorm[i].right,
                     y: dorm[i].bottom + 30
-                })
+                });
+
             } else {
                 dorm.splice(i, 1);
                 i--;
             }
+            coordinate = {
+                "name": width + "x" + height,
+                "w": width,
+                "h": height,
+                "坐标信息":coordinate
+            }
+
+            files.write(
+                "./library/coordinate.json",
+                JSON.stringify(coordinate),
+                (encoding = "utf-8")
+            )
+            coordinate = coordinate.坐标信息;
         }
     }
     Floaty.emit("展示文本", "状态", "状态：开始宿舍事件...");
@@ -642,19 +656,19 @@ function 宿舍_抚摸() {
         }
         //触发事件
         toastLog("触发事件");
-        for (k in coordinate.宿舍.快捷头像) {
-            click(coordinate.宿舍.快捷头像[k].x, coordinate.宿舍.快捷头像[k].y);
+        for (k in coordinate.宿舍.快捷头像位置) {
+            click(coordinate.宿舍.快捷头像位置[k].x, coordinate.宿舍.快捷头像位置[k].y);
             sleep(150);
         }
         sleep(3000);
         //逐个抚摸
-        for (m in coordinate.宿舍.快捷头像) {
-            Floaty.emit("展示文本", "状态", "状态：准备抚摸" + coordinate.宿舍.快捷头像[m].name);
+        for (m in coordinate.宿舍.快捷头像位置) {
+            Floaty.emit("展示文本", "状态", "状态：准备抚摸" + coordinate.宿舍.快捷头像位置[m].name);
             //点击小人
-            click(coordinate.宿舍.快捷头像[m].x, coordinate.宿舍.快捷头像[m].y);
+            click(coordinate.宿舍.快捷头像位置[m].x, coordinate.宿舍.快捷头像位置[m].y);
             sleep(150);
             //点击小人旁的抚摸
-            click(coordinate.宿舍.快捷头像[m].x - frcx(160), coordinate.宿舍.快捷头像[m].y);
+            click(coordinate.宿舍.快捷头像位置[m].x - frcx(160), coordinate.宿舍.快捷头像位置[m].y);
             sleep(3200);
             //多点找色,检查心情条;
             let mood = images.findMultiColors(ITimg.captureScreen_(), "#47ca4f", [[0, 30, "#47ca4f"]], {
@@ -679,8 +693,11 @@ function 宿舍_抚摸() {
                     toastLog("无法确认可抚摸次数: " + petting);
                     petting = 3;
                 } else {
+                    if(petting > 3){
+                        petting = 3;
+                      }
                     toastLog("可抚摸次数:" + petting)
-
+                  
                 }
                 //有时候点进宿舍,没有小人在里面是什么鬼?没有任务在执行
                 //就算有个,点小人头像也是没反应,BUG?
@@ -703,10 +720,42 @@ function 宿舍_抚摸() {
             //默认分辨率w1080,h2160
             for (let n = 0; n < petting; n++) {
 
-                for (let i = 0; i < coordinate.宿舍.抚摸小人动作.length; i++) {
-                    gestures.apply(null, coordinate.宿舍.抚摸小人动作[i]);
-                    sleep(400);
-                };
+                var points = [1000];
+
+                var x_p = 0.1;
+                var y_p = 0.55;
+                
+                
+                for (let i = 0; i < 6; i++) {
+                    points.push([parseInt(height / (2.4 - x_p)) + random(-20, 20), parseInt(width / (1.05 + y_p)) + random(-10, 40)]);
+                    x_p = x_p + 0.1;
+                    y_p = y_p + 0.55
+                }
+                
+                x_p = 0.1;
+                y_p = 0.55;
+                
+                for (let i = 0; i < 6; i++) {
+                    points.push([parseInt(height / (1.8 + x_p)) + random(-20, 20), parseInt(width / (4.9 - y_p)) + random(-20, 20)]);
+                    x_p = x_p + 0.1;
+                    y_p = y_p + 0.55
+                
+                }
+                
+                
+                x_p = 0.1;
+                y_p = 0.55;
+                
+                for (let i = 0; i < 6; i++) {
+                    points.push([parseInt(height / (2.4 - x_p)) + random(-30, 10), parseInt(width / (1.05 + y_p)) + random(-30, 10)]);
+                    x_p = x_p + 0.1;
+                    y_p = y_p + 0.55
+                
+                }
+                
+                gesture.apply(null, points);
+                
+
 
                 if (n != 3) {
                     sleep(3000);

@@ -216,9 +216,6 @@ function gallery_view(gallery_link) {
     gallery_dialogs.show();
 
 
-    //tukuds.getWindow.setAttributes(params);
- 
-
    
  tukuui.Exit.on("click", function() {
         if (tukuui.parent_.getVisibility() == 0) {
