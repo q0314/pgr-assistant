@@ -58,6 +58,7 @@ var helper = tool.readJSON("helper", {
     "挑战次数": 99,
     "战斗": {
         "活动": false,
+        "作战":false,
         "资源名称": "螺母作战"
     },
     "截图方式": "辅助",
@@ -542,13 +543,32 @@ ui.depletion_way2.on("check", function (checked) {
 
 let updater;
 ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-    onItemSelected: function (parent, view, Executionsettings, id) {
+    onItemSelected: function (parent, view, resource_name, id) {
         if (!updater) {
             updater = true;
             return
         }
-        let r = parent.getSelectedItem();
-        helper.战斗.资源名称 = r;
+       switch (resource_name) {
+            case 0:
+                resource_name="作战补给"
+                break
+            case 1:
+                resource_name="后勤保养"
+                break;
+            case 2:
+                resource_name="军备突破"
+                break;
+            case 3:
+                resource_name="成员特训"
+                break;
+            case 4:
+                resource_name="螺母大作战"
+                break;
+            case 5:
+                resource_name="战技演习"
+                break;
+        };
+        helper.战斗.资源名称 = resource_name;
         tool.writeJSON("战斗", helper.战斗);
     }
 }));
@@ -1243,6 +1263,9 @@ function 开始运行jk(jk, tips_) {
                 return
             }
         }
+        if (!files.exists("./library/coordinate.json")) {
+            use.prompt.Dialog_Tips("确认坐标信息", "当前坐标信息不完整,请在左上角头像-坐标调试中配置");
+        }
     }
 
 
@@ -1570,24 +1593,24 @@ function Update_UI(i) {
                 if (!helper.战斗.活动) {
                     ui.depletion_way1.checked = true;
                     ui.resources_type.setVisibility(0);
-                    let 资源类型 = language.resources_type.split("|");
+                   // let 资源类型 = language.resources_type.split("|");
                     switch (helper.战斗.资源名称) {
-                        case 资源类型[0]:
+                        case "作战补给":
                             ui.resources_type.setSelection(0);
                             break
-                        case 资源类型[1]:
+                        case "后勤保养":
                             ui.resources_type.setSelection(1);
                             break;
-                        case 资源类型[2]:
+                        case "军备突破":
                             ui.resources_type.setSelection(2);
                             break;
-                        case 资源类型[3]:
+                        case "成员特训":
                             ui.resources_type.setSelection(3);
                             break;
-                        case 资源类型[4]:
+                        case "螺母大作战":
                             ui.resources_type.setSelection(4);
                             break;
-                        case 资源类型[5]:
+                        case "战技演习":
                             ui.resources_type.setSelection(5);
                             break;
                     };

@@ -554,7 +554,7 @@ function 宿舍_执勤() {
             break
         }
         //上滑显示新的小伙伴
-        swipe(parseInt(height / 2), parseInt(width / 1.4), parseInt(height / 2), parseInt(width / 2.3), 500);
+        swipe(parseInt(height / 2), parseInt(width / 1.4), parseInt(height / 2), parseInt(width / 2.3), 550);
 
 
         sleep(2000);
@@ -624,12 +624,14 @@ function 宿舍_抚摸() {
                 dorm.splice(i, 1);
                 i--;
             }
-            coordinate = {
+           coordinate = {
                 "name": width + "x" + height,
                 "w": width,
                 "h": height,
-                coordinate
-            }
+                "coordinate":coordinate.coordinate,
+                "宿舍":coordinate.宿舍,
+                "combat":coordinate.combat
+            };
 
             files.write(
                 "./library/coordinate.json",
@@ -850,17 +852,21 @@ function 战斗() {
     }
 
     if (!helper.战斗.活动) {
-        if (!ITimg.ocr("战斗", { action: 2, timing: 3000, area: "右半屏", })) {
+        if (!ITimg.ocr("战斗", { action: 2, timing: 3000, area: "右半屏",part:true, })) {
             //都识别不到，改用固定坐标进入活动
-            click(frcx(1950), frcy(360))
+            click(frcx(1950), frcy(500))
             sleep(3000)
         }
         ITimg.ocr("资源", { action: 1, timing: 1000, area: "右下半屏", })
-        ITimg.ocr(helper.战斗.资源名称, { action: 1, timing: 1000, })
+        while(true){
+        if(ITimg.ocr(helper.战斗.资源名称, { action: 1, timing: 1000, nods:2500,})){
+            break
+        };
+        }
         let checkpoint = ITimg.ocr("已完成", { action: 6, area: "下半屏", })
         if (checkpoint) {
             let point = [0, 0];
-            for (i in checkpoin) {
+            for (i in checkpoint) {
                 if (checkpoint[i].text == "已完成") {
                     if (checkpoint[i].left > point[0]) {
                         point[0] = checkpoint[i].left;
@@ -872,9 +878,15 @@ function 战斗() {
                 toastLog("无法确认 " + helper.战斗.资源名称 + " 中可自动作战关卡，请确认ocr是否识别正确")
             }
             click(point[0], point[1]);
-            sleep(500);
+            sleep(2000);
+    
             //为什么不用文字识别?活动关已解锁自动作战,开放新关卡时,没打过的没法自动作战,
-            ITimg.picture("战斗-自动作战", { action: 0, timing: 1000, area: "右下半屏" })
+            if(!ITimg.picture("战斗-自动作战", { action: 0, timing: 1000, area: "下半屏",threshold:0.75, })){
+                if(!ITimg.ocr("自动作战", { action: 1, timing: 1000, area: "下半屏",part:true, })){
+                    toastLog("没有匹配到自动作战")
+
+                }
+            }
         }
 
     } else {
@@ -919,7 +931,7 @@ function 战斗() {
             console.info(text)
         }
         if (!ITimg.picture("战斗-自动作战", { action: 0, timing: 1000, area: "右下半屏" })) {
-            coordinate.战斗.作战 = ITimg.ocr("多重挑战", { action: 4, timing: 1000, area: "右下半屏", })
+            helper.战斗.作战 = ITimg.ocr("多重挑战", { action: 4, timing: 1000, area: "右下半屏", })
         }
     }
 
@@ -947,7 +959,7 @@ function 战斗() {
     // ITimg.ocr("MAX", { action: 4, timing: 500, area: "下半屏", part: true })
     ITimg.ocr("确认出战", { action: 4, timing: 2000 });
     //   if(ITimg.ocr("确认出战", { action: 4, timing: 2000, refresh: false })
-    if (coordinate.战斗.作战) {
+    if (helper.战斗.作战) {
         ITimg.ocr("作战开始", { action: 4, timing: 10000, area: "右下半屏" })
         while (true) {
             if (ITimg.ocr("当前进度", { area: "左半屏", nods: 2000, part: true, })) {

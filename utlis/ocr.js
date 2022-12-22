@@ -86,7 +86,7 @@ var ocr_modular = {
                             retext = "已售罄";
                             break
                     }
-
+                    retext = retext.replace("以员", "成员");
                     retext = retext.replace("峽想", "映想");
                     retext = retext.replace("来购", "采购")
                     retext = retext.replace(/(no0|noo|n00)/g, '/100')
