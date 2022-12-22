@@ -18,7 +18,10 @@ ui.layout(
         <ScrollView>
 
             <vertical >
+            <text text="{{language['tips']}}" margin="10 0"  />
+                
                 <text id="preset" textColor="#03a9f4" text="{{language['preset']}}" padding="10" w="auto" h="auto" foreground="?attr/selectableItemBackground" clickable="true" />
+
 
                 <linear gravity="center" margin="0 -2">
                     <text text="{{language['hint1']}}" textSize="15" marginLeft="5" />
@@ -198,7 +201,21 @@ function update(coord) {
         ui.信号球2.getChildAt(4).setText(coord.combat.信号球2.y.toString());
     })
 }
-var package_name = context.getPackageName();
+
+//创建选项菜单(右上角)
+ui.emitter.on("create_options_menu", menu => {
+    menu.add(language.create_options_menu1);
+});
+//监听选项菜单点击
+ui.emitter.on("options_item_selected", (e, item) => {
+    switch (item.getTitle()) {
+        case language.create_options_menu1:
+            engines.execScriptFile("./工具/图色助手/main.js");
+        break
+    }
+    e.consumed = true;
+});
+
 
 activity.setSupportActionBar(ui.toolbar);
 activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);

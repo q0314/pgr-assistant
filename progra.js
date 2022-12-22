@@ -258,6 +258,7 @@ function 进入主页() {
             if (getpackage() != helper.包名) {
                 启动();
             }
+            ITimg.ocr("更新", { action: 0, timing: 10000, area: "右下半屏" });
             click(height / 2, width - 50);
 
         }
@@ -464,7 +465,7 @@ function 宿舍_委托() {
                 //点击委托
                 click(entrusted.x, entrusted.y);
                 sleep(1500);
-                if (!ITimg.ocr("接取委托", { action: 1, timing: 1500, area: [parseInt(height/1.5),parseInt(width/2),parseInt(height-(height/1.5)),parseInt(width/2)], part: true, })) {
+                if (!ITimg.ocr("接取委托", { action: 1, timing: 1500, area: [parseInt(height / 1.5), parseInt(width / 2), parseInt(height - (height / 1.5)), parseInt(width / 2)], part: true, })) {
                     continue;
                 }
                 let multiple;
@@ -554,7 +555,7 @@ function 宿舍_执勤() {
             break
         }
         //上滑显示新的小伙伴
-      swipe(parseInt(height / 2), parseInt(width/1.4), parseInt(height / 2), parseInt(width/2.3), 500);
+        swipe(parseInt(height / 2), parseInt(width / 1.4), parseInt(height / 2), parseInt(width / 2.3), 500);
 
 
         sleep(2000);
@@ -628,7 +629,7 @@ function 宿舍_抚摸() {
                 "name": width + "x" + height,
                 "w": width,
                 "h": height,
-                "坐标信息":coordinate
+                "坐标信息": coordinate
             }
 
             files.write(
@@ -693,11 +694,11 @@ function 宿舍_抚摸() {
                     toastLog("无法确认可抚摸次数: " + petting);
                     petting = 3;
                 } else {
-                    if(petting > 3){
+                    if (petting > 3) {
                         petting = 3;
-                      }
+                    }
                     toastLog("可抚摸次数:" + petting)
-                  
+
                 }
                 //有时候点进宿舍,没有小人在里面是什么鬼?没有任务在执行
                 //就算有个,点小人头像也是没反应,BUG?
@@ -724,37 +725,37 @@ function 宿舍_抚摸() {
 
                 var x_p = 0.1;
                 var y_p = 0.55;
-                
-                
+
+
                 for (let i = 0; i < 6; i++) {
                     points.push([parseInt(height / (2.4 - x_p)) + random(-20, 20), parseInt(width / (1.05 + y_p)) + random(-10, 40)]);
                     x_p = x_p + 0.1;
                     y_p = y_p + 0.55
                 }
-                
+
                 x_p = 0.1;
                 y_p = 0.55;
-                
+
                 for (let i = 0; i < 6; i++) {
                     points.push([parseInt(height / (1.8 + x_p)) + random(-20, 20), parseInt(width / (4.9 - y_p)) + random(-20, 20)]);
                     x_p = x_p + 0.1;
                     y_p = y_p + 0.55
-                
+
                 }
-                
-                
+
+
                 x_p = 0.1;
                 y_p = 0.55;
-                
+
                 for (let i = 0; i < 6; i++) {
                     points.push([parseInt(height / (2.4 - x_p)) + random(-30, 10), parseInt(width / (1.05 + y_p)) + random(-30, 10)]);
                     x_p = x_p + 0.1;
                     y_p = y_p + 0.55
-                
+
                 }
-                
+
                 gesture.apply(null, points);
-                
+
 
 
                 if (n != 3) {
@@ -827,7 +828,10 @@ function 宿舍_家具制造() {
 
 
 function 战斗() {
-
+    if (!helper.血清) {
+        console.info("消耗血清任务:", helper.血清)
+        return
+    }
     Floaty.emit("展示文本", "状态", "状态：准备作战中")
     if (ITimg.ocr("任务", { area: "右半屏", }) == false && ITimg.ocr("战斗", { area: "右半屏", refresh: false, }) == false) {
         //返回主页
@@ -847,14 +851,14 @@ function 战斗() {
         }
     }
 
-    if (coordinate.战斗.资源.资源) {
+    if (!helper.战斗.活动) {
         if (!ITimg.ocr("战斗", { action: 2, timing: 3000, area: "右半屏", })) {
             //都识别不到，改用固定坐标进入活动
             click(frcx(1950), frcy(360))
             sleep(3000)
         }
         ITimg.ocr("资源", { action: 1, timing: 1000, area: "右下半屏", })
-        ITimg.ocr(coordinate.战斗.资源.资源名称, { action: 1, timing: 1000, })
+        ITimg.ocr(helper.战斗.资源名称, { action: 1, timing: 1000, })
         let checkpoint = ITimg.ocr("已完成", { action: 6, area: "下半屏", })
         if (checkpoint) {
             let point = [0, 0];
@@ -867,7 +871,7 @@ function 战斗() {
                 }
             }
             if (point[0] == 0) {
-                toastLog("无法确认 " + coordinate.战斗.资源.资源名称 + " 中可自动作战关卡，请确认ocr是否识别正确")
+                toastLog("无法确认 " + helper.战斗.资源名称 + " 中可自动作战关卡，请确认ocr是否识别正确")
             }
             click(point[0], point[1]);
             sleep(500);

@@ -31,7 +31,7 @@ var themes = {
 try {
     themes.day.bar = settingStorage.get("theme").bar
     // settingStorage.clear()
-} catch (e) {}
+} catch (e) { }
 
 var theme = {};
 if (theme.bar == undefined) {
@@ -66,7 +66,9 @@ function updateTheme() {
 function getLanguage() {
     let interface = storages.create("warbler").get("interface");
     let local_language = context.resources.configuration.locale.language + "-" + context.resources.configuration.locale.country;
-   
+    if (!interface.语言) {
+        interface.语言 = "zh-CN";
+    }
     return JSON.parse(files.read("activity/languages/" + (interface["语言"].match(local_language) ? local_language : "zh-CN") + ".json"));
 }
 

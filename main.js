@@ -24,7 +24,7 @@ use.gallery_link = JSON.parse(files.read("./library/gallery_link.json"));
 use.theme = require("./theme.js");
 use.Floaty = tool.script_locate("Floaty");
 use.server = "http://43.138.239.186/qiao0314/";
-
+var language = use.theme.language.main;
 const resources = context.getResources();
 // 四舍五入 转化到px, 最小 1 像素
 const statusBarHeight = resources.getDimensionPixelSize(
@@ -42,7 +42,7 @@ require("./utlis/NonSwipeableViewPager");
 //包名
 var package_name = context.getPackageName();
 //指向Android/data/包名/file 路径
-var package_path = context.getExternalFilesDir(null).getAbsolutePath() +"/";
+var package_path = context.getExternalFilesDir(null).getAbsolutePath() + "/";
 
 
 //禁用音量上键停止脚本
@@ -56,6 +56,10 @@ var helper = tool.readJSON("helper", {
     "注射血清": 0,
     "已注射血清": 0,
     "挑战次数": 99,
+    "战斗": {
+        "活动": false,
+        "资源名称": "螺母作战"
+    },
     "截图方式": "辅助",
     "包名": "com.kurogame.haru.hero",
     "模拟器": false,
@@ -74,7 +78,7 @@ var helper = tool.readJSON("helper", {
 var interface = tool.readJSON("interface", {
     "公告": false,
     "无障碍提醒": false,
-   "运行次数": 0,
+    "运行次数": 0,
 });
 
 var notes = tool.readJSON("notes", {
@@ -167,7 +171,7 @@ ui.layout(
                         layout_toRightOf="icon"
                         layout_alignParentTop="true"
                         w="auto" h="auto"
-                        text="战双辅助"
+                        text="{{language['title']}}"
                         textSize="16sp"
                         textStyle="bold"
                         textColor="#ffffff"
@@ -175,11 +179,11 @@ ui.layout(
                     />
 
                     <text
-                        id="subtitle"
+                        id="briefly"
                         layout_toRightOf="icon"
                         layout_below="title"
                         w="auto" h="auto"
-                        text="空中花园协作应用工具"
+                        text="{{language['briefly']}}"
                         textSize="12sp"
                         textStyle="bold"
                         textColor="#7fffffff"
@@ -216,7 +220,7 @@ ui.layout(
 
                     <View bg="#ffffff" w="2px" h="16" layout_gravity="center_vertical" />
 
-                    <button-layout id="logBtn" text="坐标调试"  drawablePadding="3" leftDrawable="ic_language_black_48dp" />
+                    <button-layout id="logBtn" text="坐标调试" drawablePadding="3" leftDrawable="ic_language_black_48dp" />
                 </horizontal>
 
             </relative>
@@ -269,7 +273,19 @@ ui.layout(
                                 trackColor="{{use.theme.track}}" />
                             <View w="*" h="2" bg="#000000" />
 
-
+                            <widget-switch-se7en
+                                id="depletion_serum"
+                                checked="{{helper.血清}}"
+                                text="{{language['depletion_serum']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
+                            <radiogroup id="depletion_way" orientation="horizontal" h="auto">
+                                <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto" textColor="{{use.theme.text}}" />
+                                <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
+                                    layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
+                                <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto" textColor="{{use.theme.text}}" />
+                            </radiogroup>
 
                             <card
                                 w="*"
@@ -281,6 +297,8 @@ ui.layout(
                                 cardCornerRadius="30dp"
                             >
                             </card>
+
+
                         </vertical>
                     </ScrollView>
 
@@ -294,8 +312,8 @@ ui.layout(
 
                 <card w="50dp" h="50dp" id="_bgA" cardBackgroundColor="#87CEFA" layout_gravity="bottom|right"
                     marginRight="10" marginBottom="40" cardCornerRadius="25dp" scaleType="fitXY">
-                    <text w="*" h="*" id="_bgC" textColor="#ffffff"
-                        gravity="center" text="悬浮窗" textSize="13sp"
+                    <text w="*" h="*" id="onlyhover" textColor="#ffffff"
+                        gravity="center" text="{{language['onlyhover']}}" textSize="13sp"
                         foreground="?selectableItemBackground" />
                 </card>
                 <frame w="*" h="auto" layout_gravity="bottom|center" >
@@ -505,6 +523,35 @@ function initPop(modify) {
 
 
 }
+
+
+ui.depletion_serum.on("click", function (view) {
+    checked = view.checked;
+    ui.depletion_way.setVisibility(checked ? 0 : 8);
+    tool.writeJSON("血清", checked)
+})
+ui.depletion_way1.on("check", function (checked) {
+    ui.resources_type.setVisibility(checked ? 0 : 8);
+    helper.战斗.活动 = !checked;
+    tool.writeJSON("战斗", helper.战斗);
+});
+ui.depletion_way2.on("check", function (checked) {
+    if(checked) toastLog("暂时还未有活动材料开放");
+});
+
+
+let updater;
+ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
+    onItemSelected: function (parent, view, Executionsettings, id) {
+        if (!updater) {
+            updater = true;
+            return
+        }
+        let r = parent.getSelectedItem();
+        helper.战斗.资源名称 = r;
+        tool.writeJSON("战斗", helper.战斗);
+    }
+}));
 
 
 ui.viewpager.setCurrentItem(1)
@@ -754,7 +801,7 @@ ui.settingsBtn.on("click", () => {
 
 ui.logBtn.on("click", () => {
     new_ui('坐标调试')
-   
+
 
 });
 
@@ -960,7 +1007,7 @@ ui._bg.on("click", function () {
         };
         let fg = app.getAppName("com.kurogame.haru.hero");
         let fg1 = app.getAppName("com.kurogame.haru.bilibili");
-      
+
         let appnameui = ui.inflate(
             <vertical padding="25 0">
                 <View bg="#000000" h="1" w="auto" />
@@ -990,7 +1037,7 @@ ui._bg.on("click", function () {
             })
             开始运行jk()
         });
-     
+
 
         var pake = 2;
         if (fg == null) {
@@ -1004,7 +1051,7 @@ ui._bg.on("click", function () {
         if (fg == null) {
             tool.writeJSON("包名", "com.kurogame.haru.bilibili");
         } else if (fg1 == null) {
-           tool.writeJSON("包名", "com.kurogame.haru.hero");
+            tool.writeJSON("包名", "com.kurogame.haru.hero");
         }
 
         if (pake > 1) {
@@ -1025,10 +1072,10 @@ ui._bg.on("click", function () {
     return true;
 })
 
-ui._bgC.on("click", function () {
-    ui._bgC.setEnabled(false);
+ui.onlyhover.on("click", function () {
+    ui.onlyhover.setEnabled(false);
     setTimeout(function () {
-        ui._bgC.setEnabled(true)
+        ui.onlyhover.setEnabled(true)
     }, 800);
     if (floaty.checkPermission() == false) {
         use.prompt.Dialog_Tips("温馨提示", "请先授予战双辅助悬浮窗权限！");
@@ -1199,7 +1246,7 @@ function 开始运行jk(jk, tips_) {
     }
 
 
-   
+
 
     if (interface.运行次数 <= 2) {
         jk = true;
@@ -1327,7 +1374,7 @@ function 输入框(id, text) {
 if (!files.exists("./library/coordinate.json")) {
     new_ui('坐标调试')
     //  files.copy("./library/coordinate.json", package_path + "coordinate/coordinate.json")
-  }
+}
 SystemUiVisibility(false)
 
 threads.start(function () {
@@ -1337,11 +1384,11 @@ threads.start(function () {
     setInterval(function () {
 
         ui.post(() => {
-     
+
             switch (ui.viewpager.getChildAt(ui.viewpager.currentItem)) {
 
                 case ui.card:
-                 if (tool.script_locate("Floaty")) {
+                    if (tool.script_locate("Floaty")) {
                         ui.start.setText("停止运行")
                     } else {
                         ui.start.setText("开始运行");
@@ -1385,8 +1432,8 @@ threads.start(function () {
 
     }, 300)
 
-  //  files.create(package_path + "coordinate/");
-  
+    //  files.create(package_path + "coordinate/");
+
 
     if (files.createWithDirs(files.path("./library/图片路径.txt"))) {
         files.write("./library/图片路径.txt", "./library/gallery/");
@@ -1400,7 +1447,7 @@ threads.start(function () {
                 log(use.gallery)
                 use.gallery.选择图库(use.gallery_link);
                 break;
-            }else{
+            } else {
                 break
             }
         } catch (er) {
@@ -1516,6 +1563,36 @@ function Update_UI(i) {
                 ui.floatyCheckPermission.setRadius(25);
                 ui.autoService.setRadius(25);
                 ui._bgA.attr("cardCornerRadius", "25dp");
+                log(helper.战斗.活动);
+                ui.depletion_serum.checked = helper.血清;
+                if (!helper.战斗.活动) {
+                    ui.depletion_way1.checked = true;
+                    ui.resources_type.setVisibility(0);
+                    let 资源类型 = language.resources_type.split("|");
+                    switch (helper.战斗.资源名称) {
+                        case 资源类型[0]:
+                            ui.resources_type.setSelection(0);
+                            break
+                        case 资源类型[1]:
+                            ui.resources_type.setSelection(1);
+                            break;
+                        case 资源类型[2]:
+                            ui.resources_type.setSelection(2);
+                            break;
+                        case 资源类型[3]:
+                            ui.resources_type.setSelection(3);
+                            break;
+                        case 资源类型[4]:
+                            ui.resources_type.setSelection(4);
+                            break;
+                        case 资源类型[5]:
+                            ui.resources_type.setSelection(5);
+                            break;
+                    };
+                }else{
+                    ui.depletion_way2.checked = true;
+                  
+                }
 
                 console.verbose("初始化辅助配置完成")
             })
@@ -1541,16 +1618,16 @@ function new_ui(name, url) {
 
             break;
         case '日志':
-            let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;" ; 
-   
+            let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
+
             engines.execScript("journal_ui", variabler + "require('./activity/journal.js')");
             //engines.execScript("journal_ui", java.lang.String.format("'ui';  var theme = storages.create('configure').get('theme_colors');require('./utlis/journal.js');"));
             break;
         case '坐标调试':
-            let variablez = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;" ; 
+            let variablez = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
             engines.execScript("initialize_ui", variablez + "require('./activity/initialize.js')");
-            
-        break
+
+            break
         case '悬浮窗':
             // JS_file = "./Floaty.js";
             engines.execScriptFile("./Floaty.js");
