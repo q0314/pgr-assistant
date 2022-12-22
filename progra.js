@@ -65,7 +65,6 @@ var package_path = context.getExternalFilesDir(null).getAbsolutePath() + "/"
 var fight_thread = false;
 
 var coordinate = JSON.parse(files.read("./library/coordinate.json"));
-coordinate = coordinate.坐标信息;
 /**
  * 战斗相关配置
  * 资源.资源 - false时程序会去打活动
@@ -629,7 +628,7 @@ function 宿舍_抚摸() {
                 "name": width + "x" + height,
                 "w": width,
                 "h": height,
-                "坐标信息": coordinate
+                coordinate
             }
 
             files.write(
@@ -637,8 +636,7 @@ function 宿舍_抚摸() {
                 JSON.stringify(coordinate),
                 (encoding = "utf-8")
             )
-            coordinate = coordinate.坐标信息;
-        }
+       }
     }
     Floaty.emit("展示文本", "状态", "状态：开始宿舍事件...");
     Floaty.emit("面板", "隐藏");

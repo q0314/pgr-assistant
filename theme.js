@@ -66,6 +66,9 @@ function updateTheme() {
 function getLanguage() {
     let interface = storages.create("warbler").get("interface");
     let local_language = context.resources.configuration.locale.language + "-" + context.resources.configuration.locale.country;
+    if(!interface){
+        return JSON.parse(files.read("activity/languages/zh-CN.json"));
+    }
     if (!interface.语言) {
         interface.语言 = "zh-CN";
     }

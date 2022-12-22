@@ -280,7 +280,7 @@ ui.layout(
                                 padding="6 6 6 6"
                                 textSize="16" textColor="{{use.theme.text}}"
                             />
-                            <radiogroup id="depletion_way" orientation="horizontal" h="auto">
+                            <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="gone">
                                 <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto" textColor="{{use.theme.text}}" />
                                 <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
                                     layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
@@ -1563,8 +1563,10 @@ function Update_UI(i) {
                 ui.floatyCheckPermission.setRadius(25);
                 ui.autoService.setRadius(25);
                 ui._bgA.attr("cardCornerRadius", "25dp");
-                log(helper.战斗.活动);
-                ui.depletion_serum.checked = helper.血清;
+                 if(helper.血清){
+                    ui.depletion_serum.checked = true;
+                    ui.depletion_way.setVisibility(0);
+                 };
                 if (!helper.战斗.活动) {
                     ui.depletion_way1.checked = true;
                     ui.resources_type.setVisibility(0);
