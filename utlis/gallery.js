@@ -205,7 +205,7 @@ function gallery_view(gallery_link) {
         }
         tukuui.Device_resolution.setVisibility(0);
         tukuui.dwh.setVisibility(0);
-        tukuui.Tips.setText(" 请更换与设备分辨率较为接近的图库\n 例：设备分辨率1080x2160可用1080x2340图库 ");
+        tukuui.Tips.setText(" 请更换与设备分辨率较为接近的图库\n 例：设备分辨率1080x2160可用1080x2340图库. 图库不匹配将无法正常使用辅助,详情查看右上角 使用帮助");
 
         tukuui.tukulb.setDataSource(gallery_link);
     } catch (e) {
@@ -513,7 +513,7 @@ function 选择图库(gallery_link, fun) {
                 title: "警告⚠",
                 titleColor: "#F44336",
                 type: "app",
-                content: "程序选择图库失败！当前没有适合你手机分辨率的图库！\n\n你的设备将无法正常使用\n\n请点击左上角头像加入QQ群获取教程制作图库，或使用虚拟机/模拟器改与图库相合适的手机版分辨率即可",
+                content: "程序选择图库失败！当前没有适合你手机分辨率的图库！\n\n你的设备将无法正常使用\n\n请点击左上角头像-检查图库-使用帮助-获取教程制作图库，或使用虚拟机/模拟器改与图库相合适的手机版分辨率即可",
                 contentColor: "#F44336",
                 positive: "我已知晓",
                 positiveColor: "#000000",

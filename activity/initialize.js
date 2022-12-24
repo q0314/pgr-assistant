@@ -20,8 +20,11 @@ try {
                 <vertical >
                     <text text="{{language['tips']}}" margin="10 0" />
 
-                    <text id="preset" textColor="#03a9f4" text="{{language['preset']}}" padding="10" w="auto" h="auto" foreground="?attr/selectableItemBackground" clickable="true" />
+                    <linear w="*" gravity="center">
 
+                        <text id="preset" textColor="#03a9f4" text="{{language['preset']}}"  padding="10 8" w="auto" h="auto" foreground="?attr/selectableItemBackground" clickable="true" />
+                        <text id="export" textColor="#03a9f4" text="{{language['export']}}"  padding="10 8" w="auto" h="auto" foreground="?attr/selectableItemBackground" clickable="true" />
+                    </linear>
 
                     <linear gravity="center" margin="0 -2">
                         <text text="{{language['hint1']}}" textSize="15" marginLeft="5" />
@@ -266,7 +269,9 @@ try {
                                 </card>
                             </list>
                         </vertical>
-
+                        <linear w="*" gravity="center">
+                            <text id="import" textColor="#03a9f4" text="{{language['import']}}" w="auto" padding="10 8"  foreground="?attr/selectableItemBackground" clickable="true" />
+                        </linear>
                     </vertical>
                 </ScrollView>
             </vertical>, null, true);
@@ -302,9 +307,26 @@ try {
                 let coord = JSON.parse(files.read(item.path));
                 update(coord)
             })
-        })
-    })
+        });
 
+        coord_ui.import.on("click", (view) => {
+            coord_dialog.dismiss();
+            File_selector(".json");
+        })
+
+    })
+    ui.export.on("click", (view) => {
+        if (stockpile(true) == false) {
+            let path = files.path("/sdcard/Download/"+width+"x"+height+".json");
+            log("文件是否存在：" + files.exists("./library/coordinate.json"))
+            if (files.copy("./library/coordinate.json", path)) {
+                toastLog("成功保存至下载目录,\n路径:" + path);
+            } else {
+                toastLog("保存" + path + "失败")
+
+            }
+        }
+    })
 
     ui.房间初始化.on("check", (checked) => {
         checked ? ui.宿舍6房间位置.setVisibility(8) : ui.宿舍6房间位置.setVisibility(0);
@@ -319,7 +341,7 @@ try {
         }
     });
 
-    function stockpile() {
+    function stockpile(value) {
         let message = [];
         var 返回 = [Number(ui.返回.getChildAt(2).getText()), Number(ui.返回.getChildAt(4).getText())];
         var 主页面 = [Number(ui.主页面.getChildAt(2).getText()), Number(ui.主页面.getChildAt(4).getText())];
@@ -342,7 +364,7 @@ try {
         } else {
             for (let i = 0; i < ui.宿舍6房间位置.getChildCount(); i++) {
                 if (ui.宿舍6房间位置.getChildAt(i).getChildAt(1).getText() != '') {
-                    快捷头像位置[i]['name'] = ui.宿舍6房间位置.getChildAt(i).getChildAt(1).getText().toString();
+                    宿舍6房间位置[i]['name'] = ui.宿舍6房间位置.getChildAt(i).getChildAt(1).getText().toString();
                 };
                 if ((宿舍6房间位置[i]['x'] = Number(ui.宿舍6房间位置.getChildAt(i).getChildAt(3).getText())) == '') {
                     message.push('宿舍' + [i + 1] + '位置');
@@ -386,7 +408,7 @@ try {
         }
 
         if (message.length != 0) {
-            let con_ = message + language['leave_tips']
+            let con_ = message + (value ? language['import_tips'] : language['leave_tips'])
             let view = dialogs.build({
                 type: "app",
                 title: language['leave_title'],
@@ -394,7 +416,7 @@ try {
                 contentColor: "#F44336",
                 content: con_,
                 positive: language['leave_positive'],
-                negative: language['leave_negative'],
+                negative: value ? null : language['leave_negative'],
                 cancelable: false,
                 canceledOnTouchOutside: false,
                 // view高度超过对话框时是否可滑动
@@ -454,14 +476,14 @@ try {
             (encoding = "utf-8")
         )
         toastLog(language['toast_save'])
-
+        return false;
     }
     function File_selector(mime_Type, fun) {
 
         toastLog("请选择后缀为.txt类型的文件");
 
         threads.start(function () {
-            let FileChooserDialog = require("./prototype/file_chooser_dialog");
+            let FileChooserDialog = require("../utlis/file_chooser_dialog.js");
             FileChooserDialog.build({
                 title: '请选择后缀为.txt的文件',
                 type: "app-or-overlay",
@@ -477,20 +499,14 @@ try {
                         toastLog("未选择路径");
                         return
                     }
-                    if (file.indexOf(".txt") == -1) {
-                        toast("不是后缀为.txt的文件");
-                        console.error("不是后缀为.txt的文件");
+                    if (file.indexOf(".json") == -1) {
+                        toast("不是后缀为.json的文件");
+                        console.error("不是后缀为.json的文件");
                         return
                     }
-                    console.clear();
-                    ui.globalconsole.clear();
-                    log("清空旧日志")
-                    console.info("选择的文件路径：" + file);
-                    if (!files.copy(file, "/data/data/" + packageName + "/files/logs/log.txt")) {
-                        //   if(!files.copy(file,"/storage/emulated/0/Android/data/org.autojs.autojspro/files/logs/log.txt")){
-                        toast("导入日志" + file + "失败")
-                        console.error("导入日志" + file + "失败" + random(0, 9999))
-                    }
+
+                    let coord = JSON.parse(files.read(file));
+                    update(coord);
                 }
 
             }).show()

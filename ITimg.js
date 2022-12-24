@@ -423,7 +423,7 @@ function 找图(picture, list) {
                 click(cx, cy);
                 break;
             case 1:
-                click(ITimg_state.x, ITimg_state.y);
+                click(ITimg_state.x+10, ITimg_state.y+10);
                 break
             case 2:
                 click(ITimg_state.x + img_small_xy.w, ITimg_state.y)
@@ -458,7 +458,8 @@ function 找图(picture, list) {
     } else {
         img_small.recycle();
         sleep(list.nods);
-        log("匹配失败 " + picture);
+       console.error("匹配失败 " + picture + "\n配置：" + JSON.stringify(list) );
+       
         return false;
 
     };
@@ -560,7 +561,7 @@ function ocr文字识别(words, list) {
         return true;
     } else {
         sleep(list.nods)
-        console.warn("未匹配到" + words + "\n配置：" + JSON.stringify(list) + "\n识别结果：" + JSON.stringify(result));
+        console.error("未匹配到" + words + "\n配置：" + JSON.stringify(list) + "\n识别结果：" + JSON.stringify(result));
         return false;
 
     }

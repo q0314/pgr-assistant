@@ -58,7 +58,7 @@ var helper = tool.readJSON("helper", {
     "挑战次数": 99,
     "战斗": {
         "活动": false,
-        "作战":false,
+        "作战": false,
         "资源名称": "螺母作战"
     },
     "截图方式": "辅助",
@@ -287,6 +287,51 @@ ui.layout(
                                     layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
                                 <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto" textColor="{{use.theme.text}}" />
                             </radiogroup>
+                            <widget-switch-se7en
+                                id="daily_serum"
+                                checked="{{helper.每日血清}}"
+                                text="{{language['daily_serum']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
+                            <widget-switch-se7en
+                                id="aide_ac"
+                                checked="{{helper.助理交流}}"
+                                text="{{language['aide_ac']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
+                            <widget-switch-se7en
+                                id="brilliant_calculations"
+                                checked="{{helper.妙算神机}}"
+                                text="{{language['brilliant_calculations']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
+
+                            <widget-switch-se7en
+                                id="dorm_series"
+                                checked="{{helper.宿舍系列}}"
+                                text="{{language['dorm_series']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
+
+                            <widget-switch-se7en
+                                id="task_award"
+                                checked="{{helper.任务奖励}}"
+                                text="{{language['task_award']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
+
+                            <widget-switch-se7en
+                                id="handbook"
+                                checked="{{helper.手册经验}}"
+                                text="{{language['handbook']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
 
                             <card
                                 w="*"
@@ -526,52 +571,6 @@ function initPop(modify) {
 }
 
 
-ui.depletion_serum.on("click", function (view) {
-    checked = view.checked;
-    ui.depletion_way.setVisibility(checked ? 0 : 8);
-    tool.writeJSON("血清", checked)
-})
-ui.depletion_way1.on("check", function (checked) {
-    ui.resources_type.setVisibility(checked ? 0 : 8);
-    helper.战斗.活动 = !checked;
-    tool.writeJSON("战斗", helper.战斗);
-});
-ui.depletion_way2.on("check", function (checked) {
-    if(checked) toastLog("暂时还未有活动材料开放");
-});
-
-
-let updater;
-ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-    onItemSelected: function (parent, view, resource_name, id) {
-        if (!updater) {
-            updater = true;
-            return
-        }
-       switch (resource_name) {
-            case 0:
-                resource_name="作战补给"
-                break
-            case 1:
-                resource_name="后勤保养"
-                break;
-            case 2:
-                resource_name="军备突破"
-                break;
-            case 3:
-                resource_name="成员特训"
-                break;
-            case 4:
-                resource_name="螺母大作战"
-                break;
-            case 5:
-                resource_name="战技演习"
-                break;
-        };
-        helper.战斗.资源名称 = resource_name;
-        tool.writeJSON("战斗", helper.战斗);
-    }
-}));
 
 
 ui.viewpager.setCurrentItem(1)
@@ -947,6 +946,83 @@ ui.emitter.on("resume", function () {
 });
 
 
+
+ui.depletion_serum.on("click", function (view) {
+    checked = view.checked;
+    ui.depletion_way.setVisibility(checked ? 0 : 8);
+    tool.writeJSON("血清", checked)
+})
+ui.depletion_way1.on("check", function (checked) {
+    ui.resources_type.setVisibility(checked ? 0 : 8);
+    helper.战斗.活动 = !checked;
+    tool.writeJSON("战斗", helper.战斗);
+});
+ui.depletion_way2.on("check", function (checked) {
+    if (checked) toastLog("暂时还未有活动材料开放");
+});
+
+
+let updater;
+ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
+    onItemSelected: function (parent, view, resource_name, id) {
+        if (!updater) {
+            updater = true;
+            return
+        }
+        switch (resource_name) {
+            case 0:
+                resource_name = "作战补给"
+                break
+            case 1:
+                resource_name = "后勤保养"
+                break;
+            case 2:
+                resource_name = "军备突破"
+                break;
+            case 3:
+                resource_name = "成员特训"
+                break;
+            case 4:
+                resource_name = "螺母大作战"
+                break;
+            case 5:
+                resource_name = "战技演习"
+                break;
+        };
+        helper.战斗.资源名称 = resource_name;
+        tool.writeJSON("战斗", helper.战斗);
+    }
+}));
+
+ui.daily_serum.on("click", function (view) {
+    checked = view.checked;
+    tool.writeJSON("每日血清", checked)
+});
+
+ui.aide_ac.on("click", function (view) {
+    checked = view.checked;
+    tool.writeJSON("助理交流", checked)
+});
+
+ui.brilliant_calculations.on("click", function (view) {
+    checked = view.checked;
+    tool.writeJSON("妙算神机", checked)
+});
+
+ui.dorm_series.on("click", function (view) {
+    checked = view.checked;
+    tool.writeJSON("宿舍系列", checked)
+})
+
+ui.task_award.on("click", function (view) {
+    checked = view.checked;
+    tool.writeJSON("任务奖励", checked)
+})
+ui.handbook.on("click", function (view) {
+    checked = view.checked;
+    tool.writeJSON("手册经验", checked)
+});
+
 /*
 var MaterialListC = JSON.parse(
     files.read("./utlis/materialName.json", (encoding = "utf-8"))
@@ -1027,6 +1103,7 @@ ui._bg.on("click", function () {
         };
         let fg = app.getAppName("com.kurogame.haru.hero");
         let fg1 = app.getAppName("com.kurogame.haru.bilibili");
+        let fg2 = app.getAppName("com.kurogame.haru.huawei");
 
         let appnameui = ui.inflate(
             <vertical padding="25 0">
@@ -1034,6 +1111,8 @@ ui._bg.on("click", function () {
                 <horizontal w="*" >
                     <button id="fg" text="官服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
                     <button id="fg1" text="B服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
+                    <button id="fg2" text="华为服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
+
                 </horizontal>
             </vertical>, null, false);
         var appname = dialogs.build({
@@ -1057,7 +1136,13 @@ ui._bg.on("click", function () {
             })
             开始运行jk()
         });
-
+        appnameui.fg2.on("click", () => {
+            tool.writeJSON("包名", "com.kurogame.haru.huawei");
+            ui.run(() => {
+                appname.dismiss();
+            })
+            开始运行jk()
+        });
 
         var pake = 2;
         if (fg == null) {
@@ -1068,10 +1153,17 @@ ui._bg.on("click", function () {
             pake = pake - 1;
             appnameui.fg1.attr("visibility", "gone");
         }
-        if (fg == null) {
+        if (fg2 == null) {
+            pake = pake - 1;
+            appnameui.fg2.attr("visibility", "gone");
+        }
+        if (fg == null && fg2 == null) {
             tool.writeJSON("包名", "com.kurogame.haru.bilibili");
-        } else if (fg1 == null) {
+        } else if (fg1 == null && fg == null) {
+            tool.writeJSON("包名", "com.kurogame.haru.huawei");
+        } else if (fg1 == null && fg2 == null) {
             tool.writeJSON("包名", "com.kurogame.haru.hero");
+
         }
 
         if (pake > 1) {
@@ -1429,8 +1521,8 @@ threads.start(function () {
                         }
 
 
-                        hflz = Math.floor(hflz / 6) + Number(notes.当前血清);
-
+                        hflz = Math.floor(hflz / 6) + Number(notes.已有血清);
+                        //判断血清是否溢出
                         if (hflz >= Number(notes.血清数.split("/")[1])) {
                             hflz = notes.血清数.split("/")[1] + "/" + notes.血清数.split("/")[1]
                             ui.lizhishu.setText(hflz)
@@ -1438,6 +1530,7 @@ threads.start(function () {
                             tool.writeJSON("血清数", hflz, "notes");
                             return
                         }
+
                         hflz = hflz + "/" + notes.血清数.split("/")[1]
                         if (hflz != ui.lizhishu.getText()) {
                             if (notes.血清时间 != tool.readJSON("notes").血清时间) {
@@ -1487,6 +1580,76 @@ threads.start(function () {
 
 })
 
+
+
+
+function Update_UI(i) {
+    switch (i) {
+        case 1:
+            ui.run(() => {
+
+                ui._bgtxt.setText("模块\n配置")
+
+                floaty.checkPermission() ? ui.floatyCheckPermission.setVisibility(8) : ui.floatyCheckPermission.setVisibility(0);
+
+                try {
+                    if (tool.script_locate("Floaty.js")) {
+                        ui.start.setText("停止运行")
+                    } else {
+                        ui.start.setText("开始运行");
+                    }
+                } catch (err) { }
+
+                if (mod_data[0] == undefined) {
+                    ui._bgT.attr("visibility", "gone")
+                } else {
+                    ui._bgT.attr("cardCornerRadius", "25dp");
+                }
+
+                //activity.setRequestedOrientation(1);
+                //更新模拟器，虚拟机按钮颜色
+                ui.floatyCheckPermission.setRadius(25);
+                ui.autoService.setRadius(25);
+                ui._bgA.attr("cardCornerRadius", "25dp");
+                if (helper.血清) {
+                    ui.depletion_serum.checked = true;
+                    ui.depletion_way.setVisibility(0);
+                };
+                if (!helper.战斗.活动) {
+                    ui.depletion_way1.checked = true;
+                    ui.resources_type.setVisibility(0);
+                    // let 资源类型 = language.resources_type.split("|");
+                    switch (helper.战斗.资源名称) {
+                        case "作战补给":
+                            ui.resources_type.setSelection(0);
+                            break
+                        case "后勤保养":
+                            ui.resources_type.setSelection(1);
+                            break;
+                        case "军备突破":
+                            ui.resources_type.setSelection(2);
+                            break;
+                        case "成员特训":
+                            ui.resources_type.setSelection(3);
+                            break;
+                        case "螺母大作战":
+                            ui.resources_type.setSelection(4);
+                            break;
+                        case "战技演习":
+                            ui.resources_type.setSelection(5);
+                            break;
+                    };
+                } else {
+                    ui.depletion_way2.checked = true;
+
+                }
+
+                console.verbose("初始化辅助配置完成")
+            })
+            break
+    }
+
+}
 function 检测ocr(tips) {
     let ocr = app.getAppName("com.tony.mlkit.ocr");
     let con_;
@@ -1556,76 +1719,6 @@ function snakebar(text, second) {
     second = second || 3000;
     com.google.android.material.snackbar.Snackbar.make(ui.drawerFrame, text, second).show();
 }
-
-
-function Update_UI(i) {
-    switch (i) {
-        case 1:
-            ui.run(() => {
-
-                ui._bgtxt.setText("模块\n配置")
-
-                floaty.checkPermission() ? ui.floatyCheckPermission.setVisibility(8) : ui.floatyCheckPermission.setVisibility(0);
-
-                try {
-                    if (tool.script_locate("Floaty.js")) {
-                        ui.start.setText("停止运行")
-                    } else {
-                        ui.start.setText("开始运行");
-                    }
-                } catch (err) { }
-
-                if (mod_data[0] == undefined) {
-                    ui._bgT.attr("visibility", "gone")
-                } else {
-                    ui._bgT.attr("cardCornerRadius", "25dp");
-                }
-
-                //activity.setRequestedOrientation(1);
-                //更新模拟器，虚拟机按钮颜色
-                ui.floatyCheckPermission.setRadius(25);
-                ui.autoService.setRadius(25);
-                ui._bgA.attr("cardCornerRadius", "25dp");
-                 if(helper.血清){
-                    ui.depletion_serum.checked = true;
-                    ui.depletion_way.setVisibility(0);
-                 };
-                if (!helper.战斗.活动) {
-                    ui.depletion_way1.checked = true;
-                    ui.resources_type.setVisibility(0);
-                   // let 资源类型 = language.resources_type.split("|");
-                    switch (helper.战斗.资源名称) {
-                        case "作战补给":
-                            ui.resources_type.setSelection(0);
-                            break
-                        case "后勤保养":
-                            ui.resources_type.setSelection(1);
-                            break;
-                        case "军备突破":
-                            ui.resources_type.setSelection(2);
-                            break;
-                        case "成员特训":
-                            ui.resources_type.setSelection(3);
-                            break;
-                        case "螺母大作战":
-                            ui.resources_type.setSelection(4);
-                            break;
-                        case "战技演习":
-                            ui.resources_type.setSelection(5);
-                            break;
-                    };
-                }else{
-                    ui.depletion_way2.checked = true;
-                  
-                }
-
-                console.verbose("初始化辅助配置完成")
-            })
-            break
-    }
-
-}
-
 function new_ui(name, url) {
     // let JS_file;
 
