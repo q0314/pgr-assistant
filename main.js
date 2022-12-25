@@ -1101,19 +1101,16 @@ ui._bg.on("click", function () {
                 return;
             };
         };
-        let fg = app.getAppName("com.kurogame.haru.hero");
-        let fg1 = app.getAppName("com.kurogame.haru.bilibili");
-        let fg2 = app.getAppName("com.kurogame.haru.huawei");
+
 
         let appnameui = ui.inflate(
             <vertical padding="25 0">
                 <View bg="#000000" h="1" w="auto" />
-                <horizontal w="*" >
-                    <button id="fg" text="官服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
-                    <button id="fg1" text="B服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
-                    <button id="fg2" text="华为服" visibility="visible" layout_weight="1" style="Widget.AppCompat.Button.Colored" h="auto" />
-
-                </horizontal>
+                <vertical w="*" >
+                    <list id="fg_">
+                        <button id="fg" text="{{this.name}}" hint="{{this.package_name}}" w="*" style="Widget.AppCompat.Button.Colored" h="auto" />
+                    </list>
+                </vertical>
             </vertical>, null, false);
         var appname = dialogs.build({
             type: 'app',
@@ -1122,55 +1119,49 @@ ui._bg.on("click", function () {
             wrapInScrollView: false,
             autoDismiss: true
         });
-        appnameui.fg.on("click", () => {
-            tool.writeJSON("包名", "com.kurogame.haru.hero");
-            ui.run(() => {
-                appname.dismiss();
-            })
+        var package = [{
+            package_name: "com.kurogame.haru.hero",
+            name: "官服"
+        }, {
+            name: "B服",
+            package_name: "com.kurogame.haru.bilibili"
+        }, {
+            name: "华为服",
+            package_name: "com.kurogame.haru.huawei"
+        }, {
+            name: "oppo服",
+            package_name: "com.kurogame.haru.nearme.gamecenter"
+        }, {
+            name: "小米服",
+            package_name: "com.kurogame.haru.mi"
+        }]
+        for (let i = package.length - 1; i > 0; i--) {
+            if (app.getAppName(package[i].package_name.toString()) == null) {
+                package.splice(i, 1);
+            }
+        }
+        if (package.length <= 1) {
+            log(package[0].package_name)
+            tool.writeJSON("包名", package[0].package_name);
             开始运行jk();
-        });
-        appnameui.fg1.on("click", () => {
-            tool.writeJSON("包名", "com.kurogame.haru.bilibili");
-            ui.run(() => {
-                appname.dismiss();
+        } else {
+            appnameui.fg_.setDataSource(package);
+
+            appnameui.fg_.on("item_bind", function (itemView, itemHolder) {
+                itemView.fg.on("click", function () {
+                    let item = itemHolder.item;
+                    log(item)
+                    tool.writeJSON("包名", item.package_name);
+                    ui.run(() => {
+                        appname.dismiss();
+                    })
+                    开始运行jk();
+                    return true;
+                });
             })
-            开始运行jk()
-        });
-        appnameui.fg2.on("click", () => {
-            tool.writeJSON("包名", "com.kurogame.haru.huawei");
-            ui.run(() => {
-                appname.dismiss();
-            })
-            开始运行jk()
-        });
 
-        var pake = 2;
-        if (fg == null) {
-            pake = pake - 1;
-            appnameui.fg.attr("visibility", "gone");
-        }
-        if (fg1 == null) {
-            pake = pake - 1;
-            appnameui.fg1.attr("visibility", "gone");
-        }
-        if (fg2 == null) {
-            pake = pake - 1;
-            appnameui.fg2.attr("visibility", "gone");
-        }
-        if (fg == null && fg2 == null) {
-            tool.writeJSON("包名", "com.kurogame.haru.bilibili");
-        } else if (fg1 == null && fg == null) {
-            tool.writeJSON("包名", "com.kurogame.haru.huawei");
-        } else if (fg1 == null && fg2 == null) {
-            tool.writeJSON("包名", "com.kurogame.haru.hero");
-
-        }
-
-        if (pake > 1) {
             appname.show();
             return
-        } else {
-            开始运行jk();
         }
 
 

@@ -86,6 +86,7 @@ var ocr_modular = {
                             retext = "已售罄";
                             break
                     }
+                    retext = retext.replace("エ", "工");
                     retext = retext.replace(/(指辉|指择)/g, '指挥')
                     retext = retext.replace("以员", "成员");
                     retext = retext.replace("峽想", "映想");

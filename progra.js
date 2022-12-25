@@ -147,15 +147,17 @@ function 启动(package_) {
 
     var gmvp = device.getMusicVolume()
     sleep(800);
-    switch (getpackage()) {
+    let getpackage_ = getpackage();
+    switch (getpackage_) {
         //com.kurogame.haru.huawei
-        case 'com.kurogame.haru.hero':
-            return
         case helper.包名:
             return
         case null:
             toastLog("暂时无法获取前台应用，默认启动")
             break;
+    }
+    if (getpackage_ != null && getpackage_.indexOf('com.kurogame.haru') != -1) {
+        return
     }
     toastLog("启动战双中，等待启动完成");
     console.verbose(package_)
@@ -225,7 +227,7 @@ function 进入主页() {
             ITimg.picture("主页-展开", { action: 0, timing: 1000, });
             sleep(1000)
             break
-        } else if(!ITimg.picture("返回", { action: 0, timing: 1500, area:"左上半屏" })){
+        } else if (!ITimg.picture("返回", { action: 0, timing: 1500, area: "左上半屏" })) {
             Floaty.emit("展示文本", "状态", "状态：等待进入战双主页");
             toastLog("等待加载登录");
             sleep(2000);
@@ -364,7 +366,7 @@ function 指挥局() {
 }
 
 function 宿舍() {
-    if(!helper.宿舍系列){
+    if (!helper.宿舍系列) {
         return
     }
     Floaty.emit("展示文本", "状态", "状态：准备执行宿舍系列任务")
@@ -427,10 +429,10 @@ function 宿舍_委托() {
     //本来是想用ocr的,试了效果不好,只用找图了
     if (ITimg.picture("宿舍-委托", { action: 0, timing: 2500, refresh: false, })) {
 
-        if (ITimg.ocr("领取奖励", { action: 1, timing: 1100, area: "下半屏" })) {
+        if (ITimg.ocr("领取奖励", { action: 1, timing: 1500, area: "下半屏" })) {
             for (let i = 0; i < 5; i++) {
                 click(height / 2, width - 100);
-                sleep(1000);
+                sleep(1200);
             }
         };
         //红,橙,紫,蓝,绿级别的委托
@@ -525,13 +527,17 @@ function 宿舍_执勤() {
         //在大图中找出所有心情绿色的小图
         duty.entrusted = images.matchTemplate(ITimg.captureScreen_(), duty.mood, {
             region: [Math.floor(height / 3.5), Math.floor(width / 6), height - Math.floor(height / 3.5), width - Math.floor(width / 6)],
-            max: 9,
+            max: 8,
             threads: 6.5
         });
         log(duty.entrusted);
         if (duty.entrusted) {
             //遍历点击绿色小图的坐标点
             for (z in duty.entrusted.points) {
+                //已选择8位小伙伴时退出遍历
+                if (duty.chosen >= 8) {
+                    break
+                }
                 click(duty.entrusted.points[z].x, duty.entrusted.points[z].y)
                 sleep(200);
                 duty.chosen++;
@@ -549,7 +555,7 @@ function 宿舍_执勤() {
         sleep(2000);
     }
 
-    toastLog("返回");
+    toastLog("选择完成");
     Floaty.emit("面板", "展开");
     //对图片进行回收
     !duty.mood.isRecycled() && duty.mood.recycle();
@@ -559,11 +565,13 @@ function 宿舍_执勤() {
     //点击开始执勤
     click(duty.duty.left, duty.duty.top);
 
-    sleep(2500);
+    sleep(3000);
     //有bug,执勤过了,没一会又可以选择,但是显示工位已被使用
     ITimg.ocr("取消", { action: 1, timing: 1000, area: "下半屏", part: true });
 
-    ITimg.ocr("一键代工", { action: 1, timing: 1000, area: "下半屏", part: true, refresh: false });
+    if(!ITimg.ocr("一键代工", { action: 1, timing: 1000, area: "下半屏", part: true, refresh: false })){
+        ITimg.ocr("一键代工", { action: 1, timing: 1000, area: "下半屏", part: true })
+    };
     if (ITimg.ocr("立即完成", { action: 1, timing: 1500, area: "右下半屏" }) != false && duty.chosen >= 8) {
         helper.任务状态.宿舍执勤 = true;
         tool.writeJSON("任务状态", helper.任务状态);
@@ -578,7 +586,8 @@ function 宿舍_执勤() {
 }
 
 
-function 宿舍_抚摸() {
+function 
+宿舍_抚摸() {
 
     sleep(1000);
     if (!ITimg.ocr("执勤", { part: true, area: "右下半屏" })) {
@@ -595,7 +604,7 @@ function 宿舍_抚摸() {
             //过滤不是实际宿舍位置的文本
             let dorm_re = (dorm[i].text.indexOf("宿舍") != -1 && dorm[i].text.indexOf("宿舍伙伴") == -1);
             if (dorm_re) {
-                dorm_re = (dorm[i].text.indexOf("宿舍事") == -1 && dorm[i].text.indexOf("宿舍币") == -1&&dorm[i].text.indexOf("宿舍执") == -1);
+                dorm_re = (dorm[i].text.indexOf("宿舍事") == -1 && dorm[i].text.indexOf("宿舍币") == -1 && dorm[i].text.indexOf("宿舍执") == -1);
             }
             log("文字: " + dorm[i].text + " ,结果:" + dorm_re);
             if (dorm_re) {
@@ -711,43 +720,52 @@ function 宿舍_抚摸() {
             //默认分辨率w1080,h2160
             for (let n = 0; n < petting; n++) {
 
-                var points = [1000];
-
-                var x_p = 0.1;
-                var y_p = 0.55;
-
-
-                for (let i = 0; i < 6; i++) {
-                    points.push([parseInt(height / (2.4 - x_p)) + random(-20, 20), parseInt(width / (1.05 + y_p)) + random(-30, 10)]);
-                    x_p = x_p + 0.1;
-                    y_p = y_p + 0.55
-                }
-
-                x_p = 0.1;
-                y_p = 0.55;
-
-                for (let i = 0; i < 6; i++) {
-                    points.push([parseInt(height / (1.8 + x_p)) + random(-20, 20), parseInt(width / (4.9 - y_p)) + random(-30, 10)]);
-                    x_p = x_p + 0.1;
-                    y_p = y_p + 0.55
-
-                }
-
-
-                x_p = 0.1;
-                y_p = 0.55;
-
-                for (let i = 0; i < 6; i++) {
-                    points.push([parseInt(height / (2.4 - x_p)) + random(-30, 10), parseInt(width / (1.05 + y_p)) + random(-30, 10)]);
-                    x_p = x_p + 0.1;
-                    y_p = y_p + 0.55
-
-                }
-
-                gesture.apply(null, points);
-
-
-
+                var height = device.height,
+                width = device.width;
+     
+     
+            var points = [random(999,1100)];
+     
+            var x_p = 0.15;
+            var y_p = 0.7;
+     
+     
+            for (let i = 0; i < 6; i++) {
+              console.info("数值:",2.6-x_p,",x:",parseInt(height/(2.6-x_p)))
+                console.info("数值:",0.80+y_p,"y:",parseInt(width/(0.80+y_p)))
+            
+                points.push([parseInt(height / (2.6 - x_p)) + random(-20, 20), parseInt(width / (0.80 + y_p)) + random(-30, 10)]);
+                x_p = x_p + 0.15;
+                y_p = y_p + 0.7
+            }
+     
+            x_p = 0.1;
+            y_p = 0.7;
+     
+            for (let i = 0; i < 6; i++) {
+                console.warn("数值:",1.7+x_p,",x:",parseInt(height/(1.7+x_p)))
+                console.warn("数值:",5.6-y_p,"y:",parseInt(width/(5.6-y_p)))
+            
+                points.push([parseInt(height / (1.7 + x_p)) + random(-20, 20), parseInt(width / (5.6 - y_p)) + random(-30, 10)]);
+                x_p = x_p + 0.15;
+                y_p = y_p + 0.7
+     
+            }
+     
+     
+            x_p = 0.1;
+            y_p = 0.7;
+     
+            for (let i = 0; i < 6; i++) {
+           points.push([parseInt(height / (2.6 - x_p)) + random(-20, 20), parseInt(width / (0.80 + y_p)) + random(-30, 10)]);
+                x_p = x_p + 0.15;
+                y_p = y_p + 0.7
+            }
+     
+            gesture.apply(null, points);
+     
+     
+          
                 if (n != 3) {
                     sleep(3000);
                 }
@@ -944,7 +962,7 @@ function 战斗() {
         }
     }
     // ITimg.ocr("MAX", { action: 4, timing: 500, area: "下半屏", part: true })
-    ITimg.ocr("确认出战", { action: 4, timing: 2000 ,part:true,});
+    ITimg.ocr("确认出战", { action: 4, timing: 2000, part: true, });
     //   if(ITimg.ocr("确认出战", { action: 4, timing: 2000, refresh: false })
     if (helper.战斗.作战) {
         ITimg.ocr("作战开始", { action: 4, timing: 10000, area: "右下半屏" })
@@ -1043,7 +1061,7 @@ function 作战() {
     }
 }
 function 领取任务奖励(value) {
-    if(!helper.任务奖励){
+    if (!helper.任务奖励) {
         return
     }
     Floaty.emit("展示文本", "状态", "状态：领取任务奖励")

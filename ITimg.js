@@ -403,8 +403,7 @@ function 找图(picture, list) {
         imgList.recycle();
         !imgList.isRecycled() && imgList.recycle();
     } catch (e) { }
-    console.verbose("找图配置：" + JSON.stringify(list));
-    if (ITimg_state) {
+   if (ITimg_state) {
         let img_small_xy = {
             w: img_small.getWidth(),
             h: img_small.getHeight()
@@ -451,14 +450,14 @@ function 找图(picture, list) {
                 return "找图没有这个action";
 
         };
-        console.verbose("匹配成功 " + picture + ITimg_state)
+        console.info(picture + " 匹配成功 " +  ITimg_state)
 
         sleep(list.timing)
         return true;
     } else {
         img_small.recycle();
         sleep(list.nods);
-       console.error("匹配失败 " + picture + "\n配置：" + JSON.stringify(list) );
+       console.error(picture  + " 匹配失败\n找图配置：" + JSON.stringify(list));
        
         return false;
 
@@ -529,8 +528,7 @@ function ocr文字识别(words, list) {
 
     if (query_ != undefined) {
         cc = threads.atomic(0);
-        console.info(words + " 匹配成功，配置：" + JSON.stringify(list))
-        console.info(query_)
+        console.info(words + " 匹配成功\n配置：" + JSON.stringify(list) + "内容：" + JSON.stringify(query_))
         switch (list.action) {
             case undefined:
                 break
@@ -561,7 +559,7 @@ function ocr文字识别(words, list) {
         return true;
     } else {
         sleep(list.nods)
-        console.error("未匹配到" + words + "\n配置：" + JSON.stringify(list) + "\n识别结果：" + JSON.stringify(result));
+        console.error( words + " 未匹配到\n配置：" + JSON.stringify(list) + "\n识别结果：" + JSON.stringify(result));
         return false;
 
     }
