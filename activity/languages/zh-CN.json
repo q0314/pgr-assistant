@@ -18,6 +18,7 @@
         "show_history_update_info": "查看历史更新",
         "update": "更新",
         "cancel":"取消",
+        "confirm":"确认",
         "update_fail": "更新失败",
         "update_success": "更新成功",
         "wait_get_update_info": "等待获取更新信息",
