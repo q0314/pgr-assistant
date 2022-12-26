@@ -2,6 +2,9 @@
      * 更新
      * @param {boolean} show_update_dialog
      */
+ var language = require("./theme.js").language.update;
+var base_url = "https://github.com/qiao34653/pgr-assistant/raw/master/"
+
     update(true)
     function update(show_update_dialog) {
         let cancel = false;

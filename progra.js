@@ -430,8 +430,9 @@ function 宿舍_委托() {
     if (ITimg.picture("宿舍-委托", { action: 0, timing: 2500, refresh: false, })) {
 
         if (ITimg.ocr("领取奖励", { action: 1, timing: 1500, area: "下半屏" })) {
-            for (let i = 0; i < 5; i++) {
-                click(height / 2, width - 100);
+                for (let i = 0; i < 5; i++) {
+                   
+                click(height / 2, width - 50);
                 sleep(1200);
             }
         };
@@ -440,6 +441,7 @@ function 宿舍_委托() {
         for (let i = 0; i < entrusted_color.length; i++) {
             //识别不到有空闲队伍时不接取委托任务
             if (!ITimg.ocr("空闲中", { timing: 1000, area: "下半屏" })) {
+                log(i)
                 if (i == 2) {
                     toastLog("没有可接取的委托位")
                 }
