@@ -1,24 +1,24 @@
 var width = device.width,
     height = device.height;
 let banben = false,
-    stop = false;
-
+    stop = false,
+    jsname = "ocr识别.js";
+var window;
 var setting = storages.create("ocr识别助手").get("setting", {
     "x": null,
     "y": null,
     "h": null,
     "w": null,
-})
+});
 
 if (app.autojs.versionCode > 8082200) {
     banben = true;
 }
 if (!banben) {
-    v9()
+    v99()
 } else {
     识别设置()
 }
-
 
 function 识别设置() {
     let uii = ui.inflate(
@@ -156,8 +156,7 @@ function 识别设置() {
         if (!banben) {
             if (!stop) {
                 stop = true;
-                window.runOrStop_src.attr("src", "@drawable/ic_fiber_manual_record_black_48dp")
-
+              v9(true)
 
                 threads.start(检测)
 
@@ -226,7 +225,7 @@ function 识别设置() {
 
 }
 
-function v9() {
+function v99(value) {
 
 
     //启动一个线程用于处理可能阻塞UI线程的操作
@@ -239,20 +238,19 @@ function v9() {
         path = "/sdcard/脚本/测试.js"
     }
 
-    var show = true,
-        jsname = "ocr识别.js";
-    var window = 创建悬浮窗();
+    var show = true;
+        
+   window = 创建悬浮窗();
     //延迟1000毫秒再监听悬浮窗，否则可能出现监听失败的情况
     悬浮窗监听(window);
 
-
     function 创建悬浮窗() {
-        var window = floaty.rawWindow(
+        let window = floaty.rawWindow(
             <card w="auto" h="auto" cardCornerRadius="5" cardBackgroundColor="#857FFFAA">
                 <linear  orientation="vertical" bg="#755c895f" >
                     <text id="name" margin="8 3 0 0" text="及时行乐" textColor="#2a3e2c" textSize="33px" gravity="center_vertical"/>
                     <linear w="*" h="*">
-                        <linear id="action" w="*" h="30" gravity="center">
+                        <linear id="action" w="45" h="30" gravity="center">
                             <img id="action_src" src="@drawable/ic_expand_more_black_48dp" w="40" h="28" tint="#2a3e2c"/>
                         </linear>
                         
@@ -360,6 +358,22 @@ function v9() {
         exit()
     })
 
+
+}
+function v9(value){
+        switch(value){
+        case true:
+            ui.run(()=>{
+              window.runOrStop_src.attr("src", "@drawable/ic_fiber_manual_record_black_48dp")
+})
+return
+        case false:
+            ui.run(() => {
+                    window.runOrStop_src.attr("src", "@drawable/ic_play_arrow_black_48dp")
+                })
+            return
+    }
+}
     function 检测() {
         while (stop) {
             sleep(500)
@@ -371,10 +385,7 @@ function v9() {
             }
             if (execution !== true) {
                 stop = false;
-                ui.run(() => {
-                    window.runOrStop_src.attr("src", "@drawable/ic_play_arrow_black_48dp")
-                })
+                v9(false)
             }
         }
     }
-}

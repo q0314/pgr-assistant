@@ -6,19 +6,150 @@
         "depletion_way1":"资源",
         "depletion_way2":"活动",
         "resources_type":"稀有意识|装备经验|装备突破|成员经验|螺母作战|技能点",
+        "input_tips1":"挑战次数/使用血清上限:",
         "daily_serum":"领取每日血清",
         "aide_ac":"自动助理交流",
         "brilliant_calculations":"自动妙算神机",
         "dorm_series":"宿舍系列任务",
+        "disputes":"自动纷争战区",
         "task_award":"领取任务奖励",
         "handbook":"领取手册经验",
-        "onlyhover":"悬浮窗"
+        "auto_use_serum":"每日自动使用2血清",
+        "onlyhover":"悬浮窗",
+        "warm_tips":"温馨提示",
+        "disputes_tips":"自动作战:\n第3区域会调用人工智障进行战斗\n不过还是建议在队伍预设,编队1放一个没养过的构造体送死,也可通关,\n自动领取纷争战区任务奖励:暂不支持",
+        "accessibility_permissions":"无障碍服务",
+        "levitating_permissions":"悬浮窗权限",
+        "timed_tasks":"定时任务",
+        "timed_tasks_add":"添加",
+        "delete_timed_tasks":"\n确定要删除此定时任务吗？",
+        "yes":"确定",
+        "no":"取消",
+        "delete_timed_tasks_tips":"删除定时任务，id=: ",
+        "server_name":[{
+            "package_name": "com.kurogame.haru.hero",
+            "name": "官服"
+        }, {
+            "name": "B服",
+            "package_name": "com.kurogame.haru.bilibili"
+        }, {
+            "name": "华为服",
+            "package_name": "com.kurogame.haru.huawei"
+        }, {
+            "name": "oppo服",
+            "package_name": "com.kurogame.haru.nearme.gamecenter"
+        }, {
+            "name": "小米服",
+            "package_name": "com.kurogame.haru.mi"
+        }],
+        "timed_tasks_help":"使用帮助",
+        "task_tips":" 1. 保持后台运行\n由于各系统的限制，定时任务不能一定保证准时运行，可能会延迟1~5分钟。请尽量将应用加入各种白名单和允许自启动权限，后台任务上锁，让应用持续在后台运行。\n 2. 自动解锁手机\n如需自动解锁屏幕，请打开自动解锁-录制解锁动作-保存并导入模块\n 3. 定时任务不运行？\n请检查相关权限，你也可以通过运行日志-开发人员代码测试-DIY属于自己的循环定时任务",
+        
+        "channel_text":"渠道服",
+        "run_configure_text":"运行配置",
+        "elapsed_time_text":"运行时间",
+        "elapsed_time":[
+            "仅运行一次",
+            "按星期运行",
+            "按每天运行"
+        ],
+        "elapsed_time_abbreviation":["单次","每周","每天"],
+        "week":["周日","周一","周二","周三","周四","周五","周六"],
+        "senior_function_text":"高级功能",
+        "auto_unlock":"自动解锁屏幕",
+        "mute_run":"此次任务静音运行",
+        "run_configure_serum":"血清上限:",
+        "run_configure_challenge":"挑战次数:",
+        "serum":"血清",
+        "challenge":" 挑战",
+        "task_tips2":"请先选择时间",
+        "task_tips3":"请先选择星期",
+        "task_tips4":"已保存密码",
+        "task_tips5":"已保存模块",
+        "password_management":"密码解锁管理",
+        "record_unlock_action":"录制解锁动作",
+        "password_input_tips":"请输入模块路径 或",
+        "task_add_tips":"成功创建定时任务，id=",
+        "task_add_tips2":"时间:",
+        "task_add_tips3":"日期:",
+        
+        "levitating_permissions_tips":"请先授予战双助手悬浮窗权限！",
+        
+        "inducts_gallery":"导入图库",
+        "inducts_gallery_no":"失败，缺少必要的gallery_message.json文件\n如确认gallery_message.json存在，请确认压缩包打开后是否有多余的文件夹, 或请检查zip编码, 尽量使用手机上的文件管理器进行压缩",
+        "inspection_gallery":"检查图库",
+        "inspection_tips":"显示X说明该功能所需的图片不全，点击展开详细图片内容。可查看缺少那些小图片。tips:小图片显示 √ 并不代表此小图片在你的设备上可用，因为分辨率不同可能导致小图片在截图上匹配失败",
+        "identify_way_tips1":"\n该图库为ocr+找图混合识别方式,小图可能较少,对设备性能要求较高",
+        "identify_way_tips2":"\n该图库为单找图识别方式,小图较多,适合低性能设备,非中文外服"
+
+    },
+    "floaty":{
+        "depletion_serum":"自动消耗血清",
+        "depletion_way1":"资源",
+        "depletion_way2":"活动",
+        "resources_type":"稀有意识|装备经验|装备突破|成员经验|螺母作战|技能点",
+     
+     "dorm_series":"宿舍系列任务",
+     "handbook":"领取手册经验"
+    },
+    "basics":{
+        "volume_suspended":"音量按键暂停辅助",
+        "volume_suspended_description":"按下相关音量键暂停战双辅助\n相关音量键在战双辅助运行时不能调节音量",
+        "volume_suspended_under":"音量下键",
+        "volume_suspended_above":"音量上键",
+        "auto_empower_screenshots":"自动授权辅助截图权限",
+        "auto_empower_screenshots_description":"战双辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n如需程序自动允许辅助截图权限，请打开该功能。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权后台弹出界面权限",
+        "unusual_interface_suspended":"异常界面超时暂停",
+        "unusual_interface_suspended_description":"程序在3分钟内无法判断页面则暂停程序并返回桌面，\n有效防止突发意外情况使程序无法判断页面，出错进入死循环,导致设备一直亮屏，温度过高",
+        "suspended_desktop":"暂停后返回桌面",
+        "suspended_desktop_description":"程序被程序主动暂停时，手动暂停不会返回桌面",
+        "auto_accessibility":"自启动无障碍服务",
+        "auto_accessibility_description":"授权安全系统设置权限后可在打开应用/点击主页-无障碍服务开关时,自动打开无障碍服务,无需跳转系统设置界面手动打开",
+        "cancel_authorization":"取消授权安全系统设置权限方式：\n1.卸载本应用，重新安装， \n2.执行下方ADB相关命令",
+        "authorization_accessibility":"自启动无障碍服务需要授权战双助手安全系统设置权限，请点击/使用以下方式授权，adb授权命令(点击复制)：",
+        "copy_tips":"授权命令已复制到剪贴板",
+        "authorization_tips_on":"请先确认是否已授权战双助手以下权限:\n",
+        "authorization_tips_yes":"授权安全系统设置权限成功",
+        "senior_screenshot":"使用高级权限截图",
+        "shizuku_screenshot":"shizuku授权",
+        "shizuku_screenshot_tips":"开启成功",
+        "shizuku_screenshot_no":"开启失败，请检查是否已在Shizuku中授权明日计划\n不知道什么是Shizuku？请百度，谢谢\n",
+        "root_screenshot":"root授权",
+        "root_screenshot_tips":"开启成功，建议关闭使用超级权限通知",
+        "screenshot_no":"开启失败",
+        "senior_screenshot_description":"使用相关高级权限来进行截图, 不需要请求录屏权限，可以免受其困扰, 相应的，截图速度也会低于辅助录屏权限. 电脑模拟器竖屏打开此功能可修复",
+        "coordinate_adaptation":"坐标自适应",
+        "coordinate_adaptation_description":"点击位置偏差时，可以打开试试,我认为并没有什么卵用\n小米华为手机请重启系统再来尝试",
+        "image_monitoring":"监测图片回收",
+        "image_monitoring_description": "32位:实时回收图片，如出错则重新请求辅助截图权限\n64位:间隔15分钟重新请求辅助截图权限\n·禁用后不再检测图片是否被回收，不会出现重复申请辅助截图权限的情况。\n·但是如果脚本长时间运行，系统回收辅助截图权限，导致脚本无法获取新的界面内容，会卡住，32位报错image has been recycled，64位不会,但都无法执行下一步。推荐配合异常界面超时暂停使用",
+        "image_broker":"图片代理",
+        "image_broker_description":"图片内存资源管理，防止图片内存泄露。有点用,但不多\n出现应用崩溃可禁用此功能尝试,也许有用...",
+        "simulator_tablet":"兼容模拟器平板版",
+        "simulator_tablet_description":"打开后可兼容模拟器平板版分辨率, 可修复模拟器竖屏, 需选择设备分辨率与图库分辨率相近的，例：720x1280用图库1280x720，1080x1920用图库1920x1080,（推荐雷电、逍遥、夜神）模拟器",
+        "self_starting":"允许应用自启动",
+        "self_starting_description":"有无障碍异常/杀应用/应用闪退的情况时，请打开尝试\n是否已开启请以系统设置实际显示为准",
+        "manageimage_run_script":"管理运行脚本"
+    },
+    "about":{
+         "name":"战双助手",
+         "apply_version":"应用版本:",
+         "engine_version":"引擎版本:Auto.js ",
+         "author":"作者:梦月时歌",
+         "open_source":"开源:",
+         "qq_tips":"请先安装QQ或升级QQ",
+         "classify_text1":"联系作者",
+         "classify_text2":"应用相关",
+         "donation":"捐赠打赏",
+         "update_log":"更新日志",
+         "examine_update":"检查更新"
+        
     },
     "update":{
         "show_history_update_info": "查看历史更新",
         "update": "更新",
         "cancel":"取消",
         "confirm":"确认",
+        "update_fail_internet":"资源访问失败,更新失败,请检查网络",
         "update_fail": "更新失败",
         "update_success": "更新成功",
         "wait_get_update_info": "等待获取更新信息",
@@ -30,8 +161,10 @@
     "initialize": {
         "toolbar": "初始化坐标配置",
         "create_options_menu1":"运行图色助手",
-        "tips":"请在下方输入相关坐标信息. 请正确输入坐标信息,否则程序容易出错. x,y获取方式:\n1.右上角运行 图色助手-打开一个图片,绿色框左上角圆点中心就是x,y值. \n2.使用预置坐标信息,前人栽树,后人乘凉.需要分辨率一致,并且战双设置-异形屏适配:无.\n3.打开系统设置-开发者模式-指针位置显示,点按屏幕,两线相交中心位置即是x,y值. 详情查看屏幕左上角",
+        "tips":"请在下方输入相关坐标信息. 请正确输入坐标信息,否则程序容易出错. x,y获取方式:\n1.右上角运行 图色助手-打开一个图片,绿色框左上角圆点中心就是x,y值. \n2.使用预置坐标信息,前人栽树,后人乘凉.需要分辨率一致,并且战双设置-异形屏适配:无,还会受异形/全面屏的影响,出现坐标偏差\n3.打开系统设置-开发者模式-指针位置显示,点按屏幕,两线相交中心位置即是x,y值. 详情查看屏幕左上角\n4.使用自适应坐标兼容填充,你应当明白此方法的作用, 原理是用1080x2160分辨率的坐标信息与你的设备分辨率进行换算, 得出可能适用的坐标信息. 受异形屏，战双-异形屏适配, 战双自身界面布局的影响, 大概率会出现坐标位置偏差,无法正常使用脚本,",
+        "adaption":"使用自适应坐标兼容填充",
         "preset": "使用预置坐标信息",
+        "fill_tips":"填充出错,坐标信息可能不完整:\n",
         "export":"导出坐标文件",
         "import":"导入坐标文件",
         "hint1": "常规坐标信息",
@@ -40,6 +173,7 @@
         "hint4": "房间内快捷头像坐标信息",
         "hint5": "战斗坐标信息",
         "return": "返回",
+        "unfold":"主页-展开",
         "mainpage": "主页面",
         "manualicon": "手册图标",
         "roominitialization": "自动获取(需宿舍名带有'宿舍')",
@@ -55,6 +189,9 @@
         "leave_title": "提醒",
         "leave_positive": "取消",
         "leave_negative": "确认离开",
-        "toast_save": "已保存坐标数据"
+        "toast_save": "已保存坐标数据",
+        "import_error":"不是后缀为.json的文件",
+        "import_prompt":"请选择后缀为.json类型的文件",
+        "null_file":"未选择路径"
     }
 }

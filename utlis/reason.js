@@ -41,6 +41,7 @@
           }
           callback("当前血清",serum);
           callback("血清数", serum + "/160");
+          
       }).on("negative", (dialog) => {
           d_add.dismiss()
       }).on("show", (dialog) => {

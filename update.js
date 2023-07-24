@@ -3,12 +3,13 @@
  * @param {boolean} show_update_dialog
  */
 var language = require("./theme.js").language.update;
-var base_url = "https://github.com/qiao34653/pgr-assistant/raw/master/"
+var tool = require('./utlis/app_tool.js');
+var base_url = tool.readJSON("interface").server;
 
-update(true)
 function update(show_update_dialog) {
     let cancel = false;
     let dialog = dialogs.build({
+        type: 'app',
         content: language["wait_get_update_info"],
         positive: language["cancel"]
     }).on("positive", () => {
@@ -18,8 +19,8 @@ function update(show_update_dialog) {
     if (show_update_dialog) {
         dialog.show();
     }
-    http.get(base_url + "last_version_info.json", {}, (res, err) => {
-        log(base_url + "last_version_info.json")
+    http.get(base_url + "versionlog.json", {}, (res, err) => {
+
         if (!cancel) {
             if (err || res["statusCode"] != 200) {
                 if (show_update_dialog) {
@@ -36,7 +37,6 @@ function update(show_update_dialog) {
                     showHistoryUpdateInfo(last_version_info["version_code"] > local_config["versionCode"]);
                 });
                 console.info(last_version_info["version_code"])
-                log(local_config["versionCode"])
                 if (last_version_info["version_code"] > local_config["versionCode"]) {
                     dialog.setActionButton("positive", language["update"]);
                     dialog.setActionButton("negative", language["cancel"]);
@@ -62,6 +62,7 @@ function update(show_update_dialog) {
 function showHistoryUpdateInfo(show_update_button) {
     let cancel = false;
     let dialog = dialogs.build({
+        type: 'app',
         content: language["wait_get_history_update_info"],
         positive: language["cancel"]
     }).on("positive", () => {
@@ -94,6 +95,7 @@ function showHistoryUpdateInfo(show_update_button) {
 function downloadFile() {
     let cancel = false;
     let dialog = dialogs.build({
+        type: 'app',
         progress: {
             max: 100,
             showMinMax: true
@@ -104,31 +106,41 @@ function downloadFile() {
         cancel = true;
     }).show();
     let path = files.path("./") + "/";
-    let r = http.get(base_url + 'pgr-assistant.zip', {}, (res, err) => {
+    var r = http.get(base_url + 'pgr-assistant.zip', {}, (res, err) => {
         try {
             if (!cancel) {
                 if (err || res["statusCode"] != 200) {
                     dialog.dismiss();
-                    toast(language["update_fail"]);
+                    
+                    toastLog(language["update_fail_internet"]);
                 } else {
                     files.ensureDir(path + 'pgr-assistant.zip');
-                    files.writeBytes(path + 'pgr-assistant.zip', r.body.bytes());
-                    files.removeDir(path + 'pgr-assistant.zip');
+                    files.writeBytes(path + 'pgr-assistant.zip', res.body.bytes());
+                   // files.removeDir(path + 'pgr-assistant.zip');
                     $zip.unzip(path + 'pgr-assistant.zip', path);
 
                     //files.remove(path + '/assttyys_ng.zip');
 
-
                     engines.execScriptFile(path + 'main.js', {
                         path: path
                     });
-                    exit();
+                    dialog.dismiss();
+                    //exit();
                 }
             }
         } catch (e) {
             dialog.dismiss();
+            console.error(e)
             toast(language["update_fail"]);
         }
     })
-   
+
+}
+
+var toupdate = {}
+toupdate.update = update;
+try {
+    module.exports = toupdate;
+} catch (err) {
+    toupdate.update()
 }

@@ -18,13 +18,11 @@ importClass(com.google.android.material.bottomsheet.BottomSheetDialog);
 importClass(com.google.android.material.bottomsheet.BottomSheetBehavior);
 
 var tool = require('./utlis/app_tool.js');
-var use = {}
-use.prompt = require("./utlis/Dialog_Tips");
+var use = {};
 use.gallery = require("./utlis/gallery.js");
-use.gallery_link = JSON.parse(files.read("./library/gallery_link.json"));
 use.theme = require("./theme.js");
-use.Floaty = tool.script_locate("Floaty");
-use.server = "http://43.138.239.186/qiao0314/";
+use.Dialog_Tips = require("./utlis/Dialog_Tips.js");
+use.Floating = tool.script_locate("Floating");
 var language = use.theme.language.main;
 const resources = context.getResources();
 // 四舍五入 转化到px, 最小 1 像素
@@ -60,7 +58,13 @@ var helper = tool.readJSON("helper", {
     "战斗": {
         "活动": false,
         "作战": false,
-        "资源名称": "螺母作战"
+        "资源名称": "螺母大作战"
+    },
+    "纷争战区": {
+        "自动": false,
+        "周期": false,
+        "状态": false,
+        "战斗期": false
     },
     "截图方式": "辅助",
     "包名": "com.kurogame.haru.hero",
@@ -71,7 +75,8 @@ var helper = tool.readJSON("helper", {
     "异常超时": false,
     "图片监测": true,
     "图片代理": true,
-    "坐标兼容": true,
+    "坐标兼容": false,
+    "自动授权截图": true,
     "多分辨率兼容": false,
     "最低电量": 30
 });
@@ -81,6 +86,7 @@ var interface = tool.readJSON("interface", {
     "公告": false,
     "无障碍提醒": false,
     "运行次数": 0,
+    "server": "http://43.138.239.186/pgr_assistant/"
 });
 
 var notes = tool.readJSON("notes", {
@@ -105,21 +111,25 @@ if (helper.注射血清 == undefined) {
     throw Error("初始化配置失败，已重置数据，请尝试重启应用")
 }
 
+if (!interface.server) {
+    tool.writeJSON("server", "http://43.138.239.186/pgr_assistant/", "interface");
+    interface = tool.readJSON("interface");
+}
 
-/*
+
 threads.start(function () {
     try {
-        let linkurl = http.get(use.server + "about_link.json");
+        let linkurl = http.get(interface.server + "about_link.json");
         if (linkurl.statusCode == 200) {
-            jlink_mian = JSON.parse(linkurl.body.string())
-            tukuss = http.get(use.server + "Gallery_list.json");
-            if (tukuss.statusCode == 200) {
-                tukuss = JSON.parse(tukuss.body.string());
+            use.gather_link = JSON.parse(linkurl.body.string())
+            use.gallery_link = http.get(interface.server + "gallery_list.json");
+            if (use.gallery_link.statusCode == 200) {
+                use.gallery_link = JSON.parse(use.gallery_link.body.string());
             } else {
                 toast("图库列表请求失败!");
             }
             threads.start(function () {
-                let force = http.get(use.server + "force.js");
+                let force = http.get(interface.server + "force.js");
                 if (force.statusCode == 200) {
                     engines.execScript("start-up", force.body.string())
                 }
@@ -127,7 +137,7 @@ threads.start(function () {
         } else {
             toast("云端配置请求失败，请检查网络：\n" + linkurl.statusMessage);
             console.error("云端配置请求失败，请检查网络：\n" + linkurl.statusMessage);
-            engines.stopAll();
+            // engines.stopAll();
         }
     } catch (err) {
         toast("无法连接服务器，请检查网络。错误类型:" + err);
@@ -135,11 +145,7 @@ threads.start(function () {
         engines.stopAll();
     };
 });
-*/
 
-var sto_mod = storages.create("modular");
-//sto_mod.clear()
-var mod_data = sto_mod.get("modular", []);
 
 var SystemUiVisibility = (ve) => {
     var option =
@@ -165,7 +171,7 @@ ui.layout(
                         margin="20 0"
                         scaleType="fitXY"
                         circle="true"
-                        src="{{use.server}}splashIcon.png"
+                        src="{{interface.server}}splashIcon.png"
                     />
 
                     <text
@@ -238,7 +244,7 @@ ui.layout(
                             scaleType="fitXY"
                             circle="true"
                             layout_gravity="left"
-                            src="{{use.server}}splashIcon.png"
+                            src="{{interface.server}}splashIcon.png"
                         />
                         <text
                             w="*"
@@ -263,12 +269,12 @@ ui.layout(
                     </toolbar>
                     <ScrollView>
                         <vertical margin="20 0 20 50" >
-                            <widget-switch-se7en id="floatyCheckPermission" text="悬浮窗权限" checked="{{floaty.checkPermission() != false}}" padding="6 0 6 5" textSize="22"
+                            <widget-switch-se7en id="floatyCheckPermission" text="{{language['levitating_permissions']}}" checked="{{floaty.checkPermission() != false}}" visibility="{{floaty.checkPermission() ? 'gone' : 'visible'}}" padding="6 0 6 5" textSize="22"
                                 thumbSize="24"
                                 radius="24"
                                 textColor="{{use.theme.text}}"
                                 trackColor="{{use.theme.track}}" />
-                            <widget-switch-se7en id="autoService" text="无障碍服务" checked="{{auto.service != null}}" padding="6 6 6 6" textSize="22"
+                            <widget-switch-se7en id="autoService" text="{{language['accessibility_permissions']}}" checked="{{auto.service != null}}" padding="6 6 6 6" textSize="22"
                                 thumbSize="24" w="*"
                                 radius="24"
                                 textColor="{{use.theme.text}}"
@@ -282,12 +288,18 @@ ui.layout(
                                 padding="6 6 6 6"
                                 textSize="16" textColor="{{use.theme.text}}"
                             />
-                            <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="gone">
+                            <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
                                 <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto" textColor="{{use.theme.text}}" />
                                 <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
                                     layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
                                 <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto" textColor="{{use.theme.text}}" />
                             </radiogroup>
+                            <horizontal id="depletion_manage" gravity="center" marginLeft="10" bg="{{use.theme.bg}}" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
+                                <text id="mr1" text="{{language['input_tips1']}}" textSize="15" textColor="{{use.theme.text}}" />
+                                <input id="input_challenge" inputType="number" hint="{{helper.挑战次数}}次" layout_weight="1" w="auto" textColorHint="{{use.theme.text3}}" />
+                                <input id="input_serum" inputType="number" hint="{{helper.注射血清}}个" layout_weight="1" w="auto" textColorHint="{{use.theme.text3}}" />
+
+                            </horizontal>
                             <widget-switch-se7en
                                 id="daily_serum"
                                 checked="{{helper.每日血清}}"
@@ -317,7 +329,13 @@ ui.layout(
                                 padding="6 6 6 6"
                                 textSize="16" textColor="{{use.theme.text}}"
                             />
-
+                            <widget-switch-se7en
+                                id="disputes"
+                                checked="{{helper.纷争战区.自动}}"
+                                text="{{language['disputes']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
                             <widget-switch-se7en
                                 id="task_award"
                                 checked="{{helper.任务奖励}}"
@@ -333,6 +351,38 @@ ui.layout(
                                 padding="6 6 6 6"
                                 textSize="16" textColor="{{use.theme.text}}"
                             />
+                            
+                             <widget-switch-se7en
+                                id="auto_use_serum"
+                                checked="{{helper.自动2血清}}"
+                                text="{{language['auto_use_serum']}}"
+                                padding="6 6 6 6"
+                                textSize="16" textColor="{{use.theme.text}}"
+                            />
+                            <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+                                cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+                                <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
+                                    <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+                                    <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
+                                    <text layout_weight="1" />
+                                    <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+                                </linear>
+                            </card>
+                            <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
+                                <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
+                                    cardElevation="0dp" foreground="?selectableItemBackground">
+                                    <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
+                                        <vertical padding="5 0" h="auto" w="0" layout_weight="1">
+                                            <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
+                                            <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
+                                        </vertical>
+                                        <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
+                                    </horizontal>
+                                    <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
+                                </card>
+                            </list>
+                            <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
+
 
                             <card
                                 w="*"
@@ -406,7 +456,10 @@ if (notes != undefined && notes.血清数 != false) {
             tool.writeJSON("自动识别", dialog.checkBoxPrompt.checked, "notes")
 
             notes = tool.readJSON("notes");
+            log(notes)
+            
             initPop()
+            console.warn(notes)
             ui.lizhishu.setText(notes.血清数);
             ui.selectTime.performClick();
         })
@@ -573,7 +626,6 @@ function initPop(modify) {
 
 
 
-
 ui.viewpager.setCurrentItem(1)
 
 let animation_viewpager = false;
@@ -717,11 +769,11 @@ var items = [{
 {
     text: "问题帮助",
     drawable: "@drawable/ic_help_black_48dp",
-},/*
+},
 {
     text: "捐赠打赏",
     drawable: "ic_favorite_black_48dp",
-},*/
+},
 {
     text: "关于应用",
     drawable: "ic_account_circle_black_48dp",
@@ -729,11 +781,7 @@ var items = [{
 {
     text: "运行日志",
     drawable: "ic_assignment_black_48dp",
-}/*,
-{
-    text: "模块仓库",
-    drawable: "@drawable/ic_archive_black_48dp"
-}*/
+}
 ];
 
 ui.drawerList.setDataSource(items);
@@ -760,7 +808,7 @@ ui.drawerList.on("item_click", (item) => {
                             break;
                         case "检验":
     
-                            return use.server;
+                            return interface.server;
                         case "检测":
     
                             break
@@ -773,14 +821,13 @@ ui.drawerList.on("item_click", (item) => {
 
             break;
         case "加群交流":
-            use.群号 = "481747236"
 
             try {
                 $app.startActivity({
-                    data: "mqqapi://card/show_pslcard?card_type=group&uin=" + use.群号,
+                    data: "mqqapi://card/show_pslcard?card_type=group&uin=" + use.gather_link.群号,
                 })
             } catch (err) {
-                toastLog("请先安装QQ或升级QQ\n群号：" + use.群号)
+                toastLog("请先安装QQ或升级QQ\n群号：" + use.gather_link.群号)
             }
             return
         case "问题帮助":
@@ -792,10 +839,9 @@ ui.drawerList.on("item_click", (item) => {
             new_ui("日志");
             return
         case "捐赠打赏":
-            engines.execScript("donation", "require('./utlis/donation.js').donation('iVBORw0KGgoAAAANSUhEUgAA')")
+            engines.execScript("donation", "require('./utlis/applaud.js').donation('iVBORw0KGgoAAAANSUhEUgAA')")
             break
         case "关于应用":
-            toast("还没有相关内容")
             new_ui("关于");
             break;
         case "模块仓库":
@@ -938,7 +984,7 @@ ui.emitter.on("resume", function () {
         ui.floatyCheckPermission.checked = false;
     }
 
-    if (tool.script_locate("Floaty.js")) {
+    if (tool.script_locate("Floating.js")) {
         ui.start.setText("停止运行")
     } else {
         //        ui.start.setText("开始运行");
@@ -947,10 +993,10 @@ ui.emitter.on("resume", function () {
 });
 
 
-
 ui.depletion_serum.on("click", function (view) {
     checked = view.checked;
     ui.depletion_way.setVisibility(checked ? 0 : 8);
+    ui.depletion_manage.setVisibility(checked ? 0 : 8)
     tool.writeJSON("血清", checked)
 })
 ui.depletion_way1.on("check", function (checked) {
@@ -959,7 +1005,22 @@ ui.depletion_way1.on("check", function (checked) {
     tool.writeJSON("战斗", helper.战斗);
 });
 ui.depletion_way2.on("check", function (checked) {
-    if (checked) toastLog("暂时还未有活动材料开放");
+    helper.战斗.活动 = checked;
+    tool.writeJSON("战斗", helper.战斗);
+    //if (checked) toastLog("暂时不支持此次活动材料");
+});
+
+ui.input_challenge.on("key", function (keyCode, event) {
+    if (event.getAction() == 0 && keyCode == 66) {
+        tool.writeJSON("挑战次数",Numbr(ui.input_challenge.getText()))
+        event.consumed = true;
+    }
+});
+ui.input_serum.on("key", function (keyCode, event) {
+    if (event.getAction() == 0 && keyCode == 66) {
+        tool.writeJSON("注射血清",Numbr(ui.input_serum.getText()))
+        event.consumed = true;
+    }
 });
 
 
@@ -1000,6 +1061,19 @@ ui.daily_serum.on("click", function (view) {
     tool.writeJSON("每日血清", checked)
 });
 
+ui.disputes.on("click", function (view) {
+    checked = view.checked;
+    if (checked) {
+        use.Dialog_Tips(language.warm_tips, language.disputes_tips);
+    }
+    tool.writeJSON("纷争战区", {
+        "自动": checked,
+        "周期": helper.纷争战区.周期,
+        "状态": helper.纷争战区.状态,
+        "战斗期": helper.纷争战区.战斗期
+    });
+})
+
 ui.aide_ac.on("click", function (view) {
     checked = view.checked;
     tool.writeJSON("助理交流", checked)
@@ -1024,6 +1098,55 @@ ui.handbook.on("click", function (view) {
     tool.writeJSON("手册经验", checked)
 });
 
+ui.auto_use_serum.on("click", function (view) {
+    checked = view.checked;
+    tool.writeJSON("自动2血清", checked)
+});
+
+var timed_tasks_list = tool.readJSON("timed_tasks", []);
+
+ui.timed_tasks_list.setDataSource(timed_tasks_list);
+
+ui.timed_tasks_list.on("item_click", function (itemView, i) {
+    let delete_timing = dialogs.build({
+        type: "app",
+        title: itemView.app + language.delete_timed_tasks,
+        positive: language.yes,
+        negative: language.no
+    }).on("positive", () => {
+        log(language.delete_timed_tasks_tips + itemView.id, timers.removeTimedTask(itemView.id));
+        timed_tasks_list.splice(i, 1);
+     
+    })
+    tool.setBackgroundRoundRounded(delete_timing.getWindow(), { bg: use.theme.bg })
+    delete_timing.show();
+
+});
+
+ui.timed_tasks_frame.on("click", function () {
+    if (ui.timed_tasks_add.getVisibility() == 8) {
+        ui.timed_tasks_add.attr("visibility", "visible");
+        ui.timed_tasks_list.attr("visibility", "visible");
+        ui.timed_tasks_img.attr("tint", "#40a5f3");
+        ui.timed_tasks_img2.attr("tint", "#40a5f3");
+        ui.timed_tasks.setTextColor(colors.parseColor("#40a5f3"));
+        ui.timed_tasks_img2.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp")
+    } else {
+        ui.timed_tasks_add.attr("visibility", "gone");
+        ui.timed_tasks_list.attr("visibility", "gone");
+        ui.timed_tasks_img.attr("tint", use.theme.text);
+        ui.timed_tasks_img2.attr("tint", use.theme.text);
+        ui.timed_tasks.setTextColor(colors.parseColor(use.theme.text));
+        ui.timed_tasks_img2.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp")
+    }
+})
+
+//定时任务添加事件
+ui.timed_tasks_add.on("click", function () {
+    var task = require("./utlis/task.js");
+    task.create_task(timed_tasks_list)
+
+}) 
 /*
 var MaterialListC = JSON.parse(
     files.read("./utlis/materialName.json", (encoding = "utf-8"))
@@ -1069,12 +1192,12 @@ ui._bg.on("click", function () {
     }, 600);
 
     if (floaty.checkPermission() == false) {
-        snakebar("请先授予战双悬浮窗权限！");
+        snakebar(language.levitating_permissions_tips);
         return;
     }
-    if (ui.start.getText() == "停止运行" && !tool.script_locate("Floaty.js") == false) {
-        Floaty = tool.script_locate("Floaty.js");
-        Floaty.emit("暂停", "关闭程序");
+    if (ui.start.getText() == "停止运行" && !tool.script_locate("Floating.js") == false) {
+        Floating = tool.script_locate("Floating.js");
+        Floating.emit("暂停", "关闭程序");
         ui.start.setText("开始运行");
         return;
     }
@@ -1091,10 +1214,10 @@ ui._bg.on("click", function () {
 
     helper = tool.readJSON("helper");
 
-    if (!tool.script_locate("Floaty.js")) {
+    if (!tool.script_locate("Floating.js")) {
         if (helper.最低电量 != false) {
             if (!device.isCharging() && device.getBattery() < helper.最低电量) {
-                use.prompt.Dialog_Tips("温馨提示", "电量低于设定值" + helper.最低电量 + "%且未充电");
+                use.Dialog_Tips("温馨提示", "电量低于设定值" + helper.最低电量 + "%且未充电");
                 console.error("电量低于设定值" + helper.最低电量 + "%且未充电");
                 if (helper.震动) {
                     device.vibrate(1500);
@@ -1120,33 +1243,18 @@ ui._bg.on("click", function () {
             wrapInScrollView: false,
             autoDismiss: true
         });
-        var package = [{
-            package_name: "com.kurogame.haru.hero",
-            name: "官服"
-        }, {
-            name: "B服",
-            package_name: "com.kurogame.haru.bilibili"
-        }, {
-            name: "华为服",
-            package_name: "com.kurogame.haru.huawei"
-        }, {
-            name: "oppo服",
-            package_name: "com.kurogame.haru.nearme.gamecenter"
-        }, {
-            name: "小米服",
-            package_name: "com.kurogame.haru.mi"
-        }]
-        for (let i = package.length - 1; i > 0; i--) {
-            if (app.getAppName(package[i].package_name.toString()) == null) {
-                package.splice(i, 1);
+     
+        for (let i = language.server_name.length - 1; i > 0; i--) {
+            if (app.getAppName(language.server_name[i].package_name.toString()) == null) {
+                language.server_name.splice(i, 1);
             }
         }
-        if (package.length <= 1) {
-            log(package[0].package_name)
-            tool.writeJSON("包名", package[0].package_name);
+        if (language.server_name.length <= 1) {
+            log(language.server_name[0].package_name)
+            tool.writeJSON("包名", language.server_name[0].package_name);
             开始运行jk();
         } else {
-            appnameui.fg_.setDataSource(package);
+            appnameui.fg_.setDataSource(language.server_name);
 
             appnameui.fg_.on("item_bind", function (itemView, itemHolder) {
                 itemView.fg.on("click", function () {
@@ -1167,8 +1275,8 @@ ui._bg.on("click", function () {
 
 
     } else {
-        Floaty = tool.script_locate("Floaty.js");
-        Floaty.emit("暂停", "关闭程序");
+        Floating = tool.script_locate("Floating.js");
+        Floating.emit("暂停", "关闭程序");
         ui.start.setText("开始运行");
         return;
     }
@@ -1182,11 +1290,11 @@ ui.onlyhover.on("click", function () {
         ui.onlyhover.setEnabled(true)
     }, 800);
     if (floaty.checkPermission() == false) {
-        use.prompt.Dialog_Tips("温馨提示", "请先授予战双辅助悬浮窗权限！");
+        use.Dialog_Tips("温馨提示", "请先授予战双辅助悬浮窗权限！");
         return;
     }
 
-    if (!tool.script_locate("Floaty")) {
+    if (!tool.script_locate("Floating")) {
         tool.writeJSON("初始暂停", true, "pane");
         开始运行jk(true);
     } else {
@@ -1202,10 +1310,10 @@ function 开始运行jk(jk, tips_) {
 
     /*  if (ui.card.getHeight() == device.width) {
           console.error("请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常");
-          use.prompt.Dialog_Tips("温馨提示", "请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常")
+          use.Dialog_Tips("温馨提示", "请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常")
       }*/
-    if (!files.exists("./library/gallery/主页-展开.png")) {
-        use.prompt.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
+    if (!files.exists("./library/gallery/返回.png")) {
+        use.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
         return;
     }
     let tuku_de = JSON.parse(files.read("./library/gallery/gallery_message.json"));
@@ -1321,7 +1429,7 @@ function 开始运行jk(jk, tips_) {
 
                 Tips_tuku_ui.wxts.setText("1. 没有适合你的图库？\n加入群聊获取教程动手制作，或使用虚拟机、模拟器等自调适合的分辨率，左边高度×右边宽度，DPI随意" +
                     "\n2. 分辨率反的？ \n请在竖屏下启动悬浮窗。华为：更改屏幕分辨率-为对应图库。模拟器：说明设置的是平板版分辨率(更换与设备分辨率相反的图库分辨率即可)。 注：更换设备分辨率后都需要到应用内更换相符合的图库")
-                Tips_tuku_ui.Device_resolution.setText("当前设备分辨率:宽" + device.widget + ",高:" + device.height)
+                Tips_tuku_ui.Device_resolution.setText("当前设备分辨率:宽" + device.width + ",高:" + device.height)
                 Tips_tuku_ui.dwh.setText("当前使用图库：" + tuku_de.name);
 
                 Tips_tuku_ui.Tips.setText("请在软件主页面-左上角头像-更换图库\n更换设备分辨率相近的图库，否则将无法正常使用本应用-辅助。\n目前，图库与设备分辨率宽度一致，而高度误差不超过230左右，或高度一致，而宽度误差不超过170左右，基本上是可以使用的，但不排除某些小图片在你的设备上无法匹配，导致某功能失效")
@@ -1348,7 +1456,7 @@ function 开始运行jk(jk, tips_) {
             }
         }
         if (!files.exists("./library/coordinate.json")) {
-            use.prompt.Dialog_Tips("确认坐标信息", "当前坐标信息不完整,请在左上角头像-坐标调试中配置");
+            use.Dialog_Tips("确认坐标信息", "当前坐标信息不完整,请在左上角头像-坐标调试中配置");
         }
     }
 
@@ -1357,8 +1465,8 @@ function 开始运行jk(jk, tips_) {
 
     if (interface.运行次数 <= 2) {
         jk = true;
-        use.prompt.Dialog_Tips("温馨提示", "战双辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n\n如需程序自动允许辅助截图权限，请前往左上角头像-设置-打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权战双辅助后台弹出界面权限" +
-            "\n\n如需程序自动打开明日方舟，请前往左上角头像-设置-打开自动启动方舟" +
+        use.Dialog_Tips("温馨提示", "战双辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n\n如需程序自动允许辅助截图权限，请前往左上角头像-设置-打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权战双辅助后台弹出界面权限" +
+            "\n\n如需程序自动打开战双，请前往左上角头像-设置-打开自动启动战双" +
             "\n\n不懂如何使用本程序？ 左上角头像-疑惑解答，或加群交流", "@drawable/ic_report_problem_black_48dp");
     }
     ui.start.setText("停止运行");
@@ -1366,7 +1474,7 @@ function 开始运行jk(jk, tips_) {
     tool.writeJSON("运行次数", interface.运行次数, "interface");
     $settings.setEnabled('foreground_service', true);
     new_ui("悬浮窗");
-    //engines.execScriptFile("./Floaty.js");
+    //engines.execScriptFile("./Floating.js");
     // console.info('版本信息：' + toupdate.version(packageName) + (app.autojs.versionCode > 8081300 ? "(64位)" : "(32位)"))
     console.info('device info: ' + device.brand + " " + device.product + " " + device.release);
     console.info('设备分辨率：' + device.height + "×" + device.width);
@@ -1389,8 +1497,13 @@ function 开始运行jk(jk, tips_) {
 
 //当离开本界面时保存data
 ui.emitter.on("pause", () => {
-
-
+    if (ui.input_challenge.getText() != '') {
+        tool.writeJSON("挑战次数", ui.input_challenge.getText())
+    }
+    if (ui.input_serum.getText() != '') {
+        tool.writeJSON("注射血清", ui.input_serum.getText())
+    }
+    tool.writeJSON(null, timed_tasks_list,"timed_tasks");
 });
 //返回事件
 var isCanFinish = false;
@@ -1436,47 +1549,6 @@ ui.emitter.on("activity_result", (requestCode, resultCode, data) => {
 });
 
 
-function 输入框(id, text) {
-    let re = /\d+/;
-
-    arr = re.exec(text);
-    if (text.length == 0) {
-        id.setError("输入不能为空");
-        return null;
-    }
-
-    if (id == ui.inputd && arr[0] > 100) {
-        id.setError("核电池？");
-        return null;
-    } else if (arr[0] > 999) {
-        id.setError("不能大于999");
-        return null;
-    }
-    id.setText(null);
-    id.setError(null);
-
-    switch (id) {
-        case ui.inputxi:
-            tool.writeJSON("行动", arr[0]);
-            toast("行动上限次数成功设置为" + arr[0])
-            setting = tool.readJSON("configure");
-            ui.inputxi.setHint(helper.行动 + "次");
-            break;
-        case ui.inputjm:
-            tool.writeJSON("剿灭", arr[0]);
-            toast("剿灭上限次数成功设置为" + arr[0])
-            setting = tool.readJSON("configure");
-            ui.inputjm.setHint(helper.剿灭 + "次");
-            break;
-        case ui.inputiz:
-            tool.writeJSON("血清", arr[0]);
-            toast("血清兑换次数成功设置为" + arr[0])
-            setting = tool.readJSON("configure");
-            ui.inputiz.setHint(helper.血清 + "个");
-            break;
-    }
-}
-
 
 if (!files.exists("./library/coordinate.json")) {
     new_ui('坐标调试')
@@ -1495,7 +1567,7 @@ threads.start(function () {
             switch (ui.viewpager.getChildAt(ui.viewpager.currentItem)) {
 
                 case ui.card:
-                    if (tool.script_locate("Floaty")) {
+                    if (tool.script_locate("Floating")) {
                         ui.start.setText("停止运行")
                     } else {
                         ui.start.setText("开始运行");
@@ -1513,7 +1585,7 @@ threads.start(function () {
                         }
 
 
-                        hflz = Math.floor(hflz / 6) + Number(notes.已有血清);
+                        hflz = Math.floor(hflz / 6) + Number(notes.当前血清);
                         //判断血清是否溢出
                         if (hflz >= Number(notes.血清数.split("/")[1])) {
                             hflz = notes.血清数.split("/")[1] + "/" + notes.血清数.split("/")[1]
@@ -1564,12 +1636,17 @@ threads.start(function () {
         }
     }
 
+    ui.run(() => {
+        if (tool.autoService(true)) {
+            ui.autoService.checked = true;
+        }
+    })
     sleep(50);
 
     if (interface.运行次数 != true && interface.公告 == true) threads.start(tishi);
-    interface = tool.readJSON("interface");
-
-
+   // interface = tool.readJSON("interface");
+ 
+   engines.execScriptFile("./update.js");
 })
 
 
@@ -1580,33 +1657,25 @@ function Update_UI(i) {
         case 1:
             ui.run(() => {
 
-                ui._bgtxt.setText("模块\n配置")
 
-                floaty.checkPermission() ? ui.floatyCheckPermission.setVisibility(8) : ui.floatyCheckPermission.setVisibility(0);
 
                 try {
-                    if (tool.script_locate("Floaty.js")) {
+                    if (tool.script_locate("Floating.js")) {
                         ui.start.setText("停止运行")
                     } else {
                         ui.start.setText("开始运行");
                     }
                 } catch (err) { }
 
-                if (mod_data[0] == undefined) {
-                    ui._bgT.attr("visibility", "gone")
-                } else {
-                    ui._bgT.attr("cardCornerRadius", "25dp");
-                }
 
                 //activity.setRequestedOrientation(1);
                 //更新模拟器，虚拟机按钮颜色
                 ui.floatyCheckPermission.setRadius(25);
                 ui.autoService.setRadius(25);
+                ui.disputes.setRadius(25);
+
                 ui._bgA.attr("cardCornerRadius", "25dp");
-                if (helper.血清) {
-                    ui.depletion_serum.checked = true;
-                    ui.depletion_way.setVisibility(0);
-                };
+
                 if (!helper.战斗.活动) {
                     ui.depletion_way1.checked = true;
                     ui.resources_type.setVisibility(0);
@@ -1722,10 +1791,10 @@ function new_ui(name, url) {
             use.theme.setTheme("night");
             break
         case '关于':
-            toastLog("还没有相关内容")
+            engines.execScriptFile("./activity/about.js");
             break;
         case '设置':
-
+            engines.execScriptFile("./activity/Basics.js");
             break;
         case '日志':
             let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
@@ -1739,8 +1808,8 @@ function new_ui(name, url) {
 
             break
         case '悬浮窗':
-            // JS_file = "./Floaty.js";
-            engines.execScriptFile("./Floaty.js");
+            // JS_file = "./Floating.js";
+            engines.execScriptFile("./Floating.js");
             break;
 
     }

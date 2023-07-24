@@ -64,15 +64,18 @@ function updateTheme() {
 }
 
 function getLanguage() {
+    let path = files.exists("activity/languages/zh-CN.json") ? "activity/languages/" :"languages/";
+  
+
     let interface = storages.create("warbler").get("interface");
     let local_language = context.resources.configuration.locale.language + "-" + context.resources.configuration.locale.country;
     if(!interface){
-        return JSON.parse(files.read("activity/languages/zh-CN.json"));
+        return JSON.parse(files.read(path+"zh-CN.json"));
     }
     if (!interface.语言) {
         interface.语言 = "zh-CN";
     }
-    return JSON.parse(files.read("activity/languages/" + (interface["语言"].match(local_language) ? local_language : "zh-CN") + ".json"));
+    return JSON.parse(files.read(path + (interface["语言"].match(local_language) ? local_language : "zh-CN") + ".json"));
 }
 
 theme.setTheme = setTheme;

@@ -19,13 +19,15 @@ try {
 
                 <vertical >
                     <text text="{{language['tips']}}" margin="10 0" />
-
+                    <text id="adaption" textColor="#03a9f4" text="{{language['adaption']}}" layout_gravity="center"  padding="10 8" w="auto" h="auto" foreground="?attr/selectableItemBackground" clickable="true" />
+                   
                     <linear w="*" gravity="center">
 
                         <text id="preset" textColor="#03a9f4" text="{{language['preset']}}"  padding="10 8" w="auto" h="auto" foreground="?attr/selectableItemBackground" clickable="true" />
                         <text id="export" textColor="#03a9f4" text="{{language['export']}}"  padding="10 8" w="auto" h="auto" foreground="?attr/selectableItemBackground" clickable="true" />
                     </linear>
-
+                  
+                  <vertical id="interface" >
                     <linear gravity="center" margin="0 -2">
                         <text text="{{language['hint1']}}" textSize="15" marginLeft="5" />
                         <View bg="#f5f5f5" w="*" h="2" />
@@ -41,6 +43,15 @@ try {
 
                     <horizontal id="主页面">
                         <text text="{{language['mainpage']}}" margin="10 0" textColor="{{theme.text}}" />
+                        <text text="x:" />
+                        <input id="x" layout_weight="3" inputType="number" hint="x" />
+                        <text text="y:" />
+                        <input id="y" layout_weight="3" inputType="number" hint="y" />
+
+                    </horizontal>
+
+                    <horizontal id="主页展开">
+                        <text text="{{language['unfold']}}" margin="10 0" textColor="{{theme.text}}" />
                         <text text="x:" />
                         <input id="x" layout_weight="3" inputType="number" hint="x" />
                         <text text="y:" />
@@ -66,8 +77,8 @@ try {
                         <checkbox id="房间初始化" text="{{language['roominitialization']}}" textColor="{{theme.text}}" />
 
                     </horizontal>
-                    <list id="宿舍6房间位置">
-                        <horizontal margin="10 0">
+                    <list id="宿舍6房间位置" h="250">
+                        <horizontal margin="10 -3">
                             <text text="name:" />
                             <input id="name" layout_weight="3" inputType="textPersonName" hint="{{this.name}}" text="{{this.name ? this.name : ''}}" />
                             <text text="x:" />
@@ -123,7 +134,7 @@ try {
 
                     </horizontal>
                     <vertical marginBottom='50'>
-
+                  </vertical>
                     </vertical>
                 </vertical>
 
@@ -184,6 +195,8 @@ try {
             ui.返回.getChildAt(4).setText(coord.coordinate.返回.y.toString());
             ui.主页面.getChildAt(2).setText(coord.coordinate.主页面.x.toString());
             ui.主页面.getChildAt(4).setText(coord.coordinate.主页面.y.toString());
+            ui.主页展开.getChildAt(2).setText(coord.coordinate.主页展开.x.toString());
+            ui.主页展开.getChildAt(4).setText(coord.coordinate.主页展开.y.toString());
             ui.手册图标位置.getChildAt(2).setText(coord.coordinate.手册图标位置.x.toString());
             ui.手册图标位置.getChildAt(4).setText(coord.coordinate.手册图标位置.y.toString());
             if (coord.宿舍.宿舍房间位置.length != 0) {
@@ -230,7 +243,10 @@ try {
         }
     });
 
-
+    ui.adaption.click(()=>{
+        self_adaption();
+       
+    })
     ui.preset.on("click", () => {
         var dir = "./library/coordinate/";
         var jsFiles = files.listDir(dir, function (name) {
@@ -305,7 +321,11 @@ try {
                 let item = itemHolder.item;
                 coord_dialog.dismiss();
                 let coord = JSON.parse(files.read(item.path));
-                update(coord)
+                try{
+                update(coord);
+                }catch(e){
+                    toastLog(language.fill_tips+e)
+                }
             })
         });
 
@@ -341,21 +361,95 @@ try {
         }
     });
 
+    function self_adaption(){
+        let coord = JSON.parse(files.read("./library/coordinate/1080x2160.json"));
+                update(coord)
+    //获取ui.interface下的所有输入框
+    ui.post(() => {
+        for (let i = 0; i < ui.interface.getChildCount(); i++) {
+            let view_aggregate = ui.interface.getChildAt(i)
+            //不知道咋判断视图类型
+            if (view_aggregate.toString().indexOf("JsListView") > 0) {
+                for (let j = 0; j < view_aggregate.getChildCount(); j++) {
+                    let list_horizontal = view_aggregate.getChildAt(j)
+                    for (let l = 0; l < list_horizontal.getChildCount(); l++) {
+                        let list_horizontal_aggregate = list_horizontal.getChildAt(l);
+                        if (list_horizontal_aggregate.toString().indexOf("JsEditText") > 0 && list_horizontal_aggregate.getInputType() == 2) {
+
+                            console.info(list_horizontal_aggregate.getText())
+                            ui.run(() => {
+                                list_horizontal_aggregate.setText(adaption(list_horizontal_aggregate.getText(), list_horizontal_aggregate.getHint() == "x" ? true : false).toString())
+                            })
+                        }
+                    }
+
+                }
+
+            } else if (view_aggregate.toString().indexOf("JsLinearLayout") > 0) {
+                for (let k = 0; k < view_aggregate.getChildCount(); k++) {
+                    let son_view = view_aggregate.getChildAt(k);
+                    if (son_view.toString().indexOf("JsEditText") > 0 && son_view.getInputType() == 2) {
+
+                        console.info(son_view.getText())
+                        ui.run(() => {
+                            son_view.setText(adaption(son_view.getText(), son_view.getHint() == "x" ? true : false).toString());
+                        })
+                    }
+                }
+
+            }
+
+        }
+        toastLog("换算完成");
+    }, 1000)
+
+
+    function adaption(value, type) {
+
+        /**
+         * 多分辨率x值自适应兼容
+         * @param {number} value 
+         * @returns {number}
+         */
+        function frcx(value) {
+            return Math.floor((height / 2160) * value);
+        }
+
+        /**
+         * 多分辨率y值自适应兼容
+         * @param {number} value 
+         * @returns {number}
+         */
+        function frcy(value) {
+            return Math.floor((width / 1080) * value);
+        }
+       
+        value = Number(value);
+        return type ? frcx(value) : frcy(value)
+
+    }
+
+}
     function stockpile(value) {
         let message = [];
         var 返回 = [Number(ui.返回.getChildAt(2).getText()), Number(ui.返回.getChildAt(4).getText())];
         var 主页面 = [Number(ui.主页面.getChildAt(2).getText()), Number(ui.主页面.getChildAt(4).getText())];
+        var 主页展开 = [Number(ui.主页展开.getChildAt(2).getText()), Number(ui.主页展开.getChildAt(4).getText())];
+
         var 手册图标位置 = [Number(ui.手册图标位置.getChildAt(2).getText()), Number(ui.手册图标位置.getChildAt(4).getText())];
 
 
         if (返回[0] == '' || 返回[1] == '') {
-            message.push("返回")
+            message.push(language.return)
         }
         if (主页面[0] == '' || 主页面[1] == '') {
-            message.push("主页面")
+            message.push(language.mainpage)
+        }
+        if (主页展开[0] == '' || 主页展开[1] == '') {
+            message.push(language.unfold)
         }
         if (手册图标位置[0] == '' || 手册图标位置[1] == '') {
-            message.push("手册图标位置")
+            message.push(language.manualicon)
         }
 
         if (ui.房间初始化.checked) {
@@ -370,7 +464,7 @@ try {
                     message.push('宿舍' + [i + 1] + '位置');
                     break
                 };
-                if ((宿舍6房间位置[i]['y'] = Number(ui.宿舍6房间位置.getChildAt(i).getChildAt(3).getText())) == '') {
+                if ((宿舍6房间位置[i]['y'] = Number(ui.宿舍6房间位置.getChildAt(i).getChildAt(5).getText())) == '') {
                     message.push('宿舍' + [i + 1] + ' 位置');
                 };
             }
@@ -398,13 +492,13 @@ try {
         var 信号球2 = [Number(ui.信号球2.getChildAt(2).getText()), Number(ui.信号球2.getChildAt(4).getText())];
 
         if (攻击键[0] == '' || 攻击键[1] == '') {
-            message.push("攻击键")
+            message.push(language.attackkey)
         }
         if (信号球1[0] == '' || 信号球1[1] == '') {
-            message.push("信号球1")
+            message.push(language.signalball1)
         }
         if (信号球2[0] == '' || 信号球2[1] == '') {
-            message.push("信号球2");
+            message.push(language.signalball2);
         }
 
         if (message.length != 0) {
@@ -440,6 +534,10 @@ try {
                 "主页面": {
                     "x": 主页面[0],
                     "y": 主页面[1]
+                },
+                "主页展开":{
+                    "x":主页展开[0],
+                    "y":主页展开[1]
                 },
                 "手册图标位置": {
                     "x": 手册图标位置[0],
@@ -480,12 +578,12 @@ try {
     }
     function File_selector(mime_Type, fun) {
 
-        toastLog("请选择后缀为.txt类型的文件");
+        toastLog(language["import_prompt"]);
 
         threads.start(function () {
             let FileChooserDialog = require("../utlis/file_chooser_dialog.js");
             FileChooserDialog.build({
-                title: '请选择后缀为.txt的文件',
+                title: language["import_prompt"],
                 type: "app-or-overlay",
                 // 初始文件夹路径
                 dir: "/sdcard/",
@@ -496,12 +594,12 @@ try {
                 // 选择文件后的回调
                 fileCallback: (file) => {
                     if (file == null) {
-                        toastLog("未选择路径");
+                        toastLog(language["null_file"]);
                         return
                     }
                     if (file.indexOf(".json") == -1) {
-                        toast("不是后缀为.json的文件");
-                        console.error("不是后缀为.json的文件");
+                        toast(language["import_error"]);
+                        console.error(language["import_error"]);
                         return
                     }
 

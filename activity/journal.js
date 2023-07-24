@@ -78,7 +78,7 @@ function File_selector(mime_Type, fun) {
     toastLog("请选择后缀为.txt类型的文件");
 
     threads.start(function() {
-        let FileChooserDialog = require("./prototype/file_chooser_dialog");
+        let FileChooserDialog = require("../utlis/file_chooser_dialog");
         FileChooserDialog.build({
             title: '请选择后缀为.txt的文件',
             type: "app-or-overlay",

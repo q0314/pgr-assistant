@@ -74,7 +74,7 @@ ui.input_file2.on("click", () => {
 function File_selector(mime_Type, fun) {
     toastLog("请选择后缀为.js类型的文件");
     threads.start(function() {
-        let FileChooserDialog = require("./prototype/file_chooser_dialog");
+        let FileChooserDialog = require("./utlis/file_chooser_dialog");
         FileChooserDialog.build({
             title: '请选择后缀为.js的文件',
             type: "app-or-overlay",
@@ -203,7 +203,7 @@ ui.日志.click(function() {
     app.startActivity("console");
 });
 ui.停止脚本.click(function() {
-    require('./prototype/script.js').Administration()
+    require('./utlis/script.js').Administration()
     return
     engines.all().map((ScriptEngine) => {
         if (engines.myEngine().toString() !== ScriptEngine.toString()) {

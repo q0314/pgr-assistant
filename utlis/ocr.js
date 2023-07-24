@@ -31,7 +31,7 @@ var $mlKitOcr,
     height = device.height;
 
 var ocr_modular = {
-    初始化Manager类: function (moniqi) {
+    初始化Manager类: function(moniqi) {
         //适配模拟器平板版
         if (moniqi) {
             width = device.height
@@ -52,7 +52,7 @@ var ocr_modular = {
 
         return true
     },
-    识别: function (image, region_, filter) {
+    识别: function(image, region_, filter) {
         let start = new Date()
         let results = null;
         results = $mlKitOcr.detect(image, {
@@ -70,46 +70,25 @@ var ocr_modular = {
                 for (let i = 0; i < quantity; i++) {
                     var re = results[i]
                     var retext = re.label
-                    if (retext == false) {
+<<<<<<< HEAD
+                    retext = 矫正规则("./utlis/ocr修正规则.json", retext)
+                    //console.info(retext)
+                    if (!retext) {
                         continue;
                     }
-                    //对识别错误的文本内容进行矫正
-                    switch (retext) {
-                        case "舍":
-                            retext = "宿舍";
-                            break
-                        case "-键领取":
-                            retext = "一键领取";
-                            break
-                      
-                        case "已售馨":
-                            retext = "已售罄";
-                            break
-                    }
-                    retext = retext.replace("エ", "工");
-                    retext = retext.replace(/(指辉|指择)/g, '指挥')
-                    retext = retext.replace("以员", "成员");
-                    retext = retext.replace("峽想", "映想");
-                    retext = retext.replace("来购", "采购")
-                    retext = retext.replace(/(no0|noo|n00)/g, '/100')
-                    retext = retext.replace('健', '键');
-                    retext = retext.replace("(", "");
-                    retext = retext.replace("+|", "+")
-                    retext = retext.replace("O/", "0/")
-                    retext = retext.replace('抚模', '抚摸');
-                    retext = retext.replace('次數', '次数');
-                    retext = retext.replace(/(抚摸次数 |抚摸次数、)/g, '抚摸次数');
-                    
-                    retext = retext.replace(/(次数O)/g, '次数0');
-                    retext = retext.replace(/(次数S)/g, '次数3');
-                    retext = retext.replace("按取", "接取");
-                    retext = retext.replace("奏托","委托");
-                    retext = retext.replace("今运势","今日运势");
-                    retext = retext.replace("宿含","宿舍");
-                    retext = retext.replace(/(执勒|執勤)/,"执勤");
-                    retext = retext.replace(/(委魏|委)/,"委托");
-                    switch (retext) {
-                        default:
+                    taglb.push({
+                        text: retext,
+                        left: re.bounds.left,
+                        top: re.bounds.top,
+                        right: re.bounds.right,
+                        bottom: re.bounds.bottom,
+                    });
+=======
+                        retext = 矫正规则("./utlis/ocr修正规则.json", retext)
+                        //console.info(retext)
+                        if (!retext) {
+                            continue;
+                        }
                             taglb.push({
                                 text: retext,
                                 left: re.bounds.left,
@@ -117,8 +96,7 @@ var ocr_modular = {
                                 right: re.bounds.right,
                                 bottom: re.bounds.bottom,
                             });
-
-                    }
+>>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
 
 
                 }
@@ -134,11 +112,147 @@ var ocr_modular = {
         results = null;
         return taglb
     },
-    销毁: function () {
+    销毁: function() {
         log("无需销毁模型")
+    },
+    矫正规则测试:function(path,retext){
+       if(!files.exists(path)){
+        toastLog("规则文件不存在,路径:"+path)
+        return 
+       }
+    retext = 矫正规则(path, retext)
+    toastLog(retext)
+    return retext;
     }
+
 };
+<<<<<<< HEAD
+
+=======
+>>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
+function 矫正规则(rectify_json_path, content) {
+    var rectify_json = JSON.parse(
+        files.read(rectify_json_path, (encoding = "utf-8"))
+    );
+    if (rectify_json.replace_some_characters) {
+        rectify_key = Object.keys(rectify_json.replace_some_characters);
+
+        for (let t = 0; t < rectify_key.length; t++) {
+<<<<<<< HEAD
+            // console.verbose(rectify_key[t])
+=======
+           // console.verbose(rectify_key[t])
+>>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
+            if (rectify_json.replace_some_characters[rectify_key[t]].regular) {
+                let matching = content.match(new RegExp(rectify_key[t], "g"));
+                if (matching) {
+                    //直接用matching[0]只能替换一次
+                    content = content.replace(new RegExp(rectify_key[t], "g"), rectify_json.replace_some_characters[rectify_key[t]].correct)
+                }
+            } else {
+                if (content.indexOf(rectify_key[t]) != -1) {
+                    content = content.replace(rectify_key[t], rectify_json.replace_some_characters[rectify_key[t]].correct)
+                }
+            }
+
+        }
+    }
+    if (rectify_json.replace_full_character) {
+        rectify_key = Object.keys(rectify_json.replace_full_character);
+
+        for (let t = 0; t < rectify_key.length; t++) {
+<<<<<<< HEAD
+
+            if (rectify_json.replace_full_character[rectify_key[t]].regular) {
+                let matching = content.match(new RegExp(rectify_key[t], "g"));
+                if (matching) {
+                    content = rectify_json.replace_full_character[rectify_key[t]].correct;
+                }
+            } else {
+                if (content == rectify_key[t]) {
+                    content = rectify_json.replace_full_character[rectify_key[t]].correct;
+                }
+=======
+            if (content == rectify_key[t]) {
+                content = rectify_json.replace_full_character[rectify_key[t]].correct;
+>>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
+            }
+        }
+    }
+
+    if (rectify_json.filter_partial_characters) {
+        rectify_key = Object.keys(rectify_json.filter_partial_characters);
+
+        for (let t = 0; t < rectify_key.length; t++) {
+<<<<<<< HEAD
+            //  console.verbose(rectify_key[t])
+
+            if (rectify_json.filter_partial_characters[rectify_key[t]]) {
+                let matching = content.match(new RegExp(rectify_key[t]));
+                if (matching && (matching.input != matching[0])) {
+                    return false
+                }
+            } else {
+
+                if (content.indexOf(rectify_key[t]) != -1 && (content.length != rectify_key[t].length)) {
+=======
+          //  console.verbose(rectify_key[t])
+
+            if (rectify_json.filter_partial_characters[rectify_key[t]]) {
+                let matching = content.match(new RegExp(rectify_key[t], "g"));
+                if (matching) {
+                    return false
+                }
+            } else {
+                if (content.indexOf(rectify_key[t]) != -1) {
+>>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
+                    return false
+                }
+            }
+        }
+    }
+
+    if (rectify_json.filter_full_characters) {
+        rectify_key = Object.keys(rectify_json.filter_full_characters);
+
+        for (let t = 0; t < rectify_key.length; t++) {
+<<<<<<< HEAD
+            //  console.verbose(rectify_key[t])
+
+            if (rectify_json.filter_full_characters[rectify_key[t]]) {
+                let matching = content.match(new RegExp(rectify_key[t]));
+                if (matching && (matching.input == matching[0])) {
+=======
+          //  console.verbose(rectify_key[t])
+
+            if (rectify_json.filter_full_characters[rectify_key[t]]) {
+                let matching = content.match(new RegExp(rectify_key[t], "g"));
+                if (matching && matching.input == rectify_key[t]) {
+>>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
+                    return false
+                }
+            } else {
+                if (content == rectify_key[t]) {
+                    return false
+                }
+            }
+        }
+    }
+    return content
+}
+<<<<<<< HEAD
+try {
+    module.exports = ocr_modular;
+} catch (e) {
+    let retext = "四流";
+    retext = 矫正规则("/storage/emulated/0/脚本/明日计划64位/lib/prototype/ocr_公招_矫正规则.json", retext)
+    toastLog(retext)
+}
+events.on("exit", function() {
+=======
+
 module.exports = ocr_modular;
 events.on("exit", function () {
+>>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
     sleep(2000);
 })

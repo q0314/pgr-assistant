@@ -20,6 +20,4 @@ function Dialog_Tips(title, text, src) {
     }).show();
 }
 
-var Dialog_Tips_ = {};
-Dialog_Tips_.Dialog_Tips = Dialog_Tips;
-module.exports = Dialog_Tips_;
+module.exports = Dialog_Tips;

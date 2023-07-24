@@ -74,7 +74,10 @@ FileChooser.prototype.selectFile = function (position) {
         }catch(err){
             console.error(err)
             setTimeout(function(){
+                try{
                 this.data[oldSelectedPos].checked = false;
+            }catch(err){
+            }
             },200)
         }
         // 通知这一项更新

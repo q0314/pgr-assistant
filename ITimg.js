@@ -8,7 +8,7 @@ var helper = tool.readJSON("helper");
 var path_ = context.getExternalFilesDir(null).getAbsolutePath();
 var ITimg_state = false,
     cc = threads.atomic(0);
-var Floaty,
+var Floating,
     jiance,
     ocr,
     dingshiqi;
@@ -46,25 +46,18 @@ function initialization(ocr_) {
             threads.start(function () {
                 var is;
 
-                is = 12;
-                console.info("异常界面超时暂停处理：6分钟。" + helper.执行);
+                is = 6;
+                console.info("异常界面超时暂停处理：3分钟。");
 
                 fn = function () {
                     if (cc == is && ITimg_state == null) {
-                        if (is == 12) {
-                            is = 6;
-                        } else {
-                            is = 35;
+                        if (is == 6) {
+                            is = 3;
                         }
                         toast("程序在" + is + "分钟内未能判断当前界面，状态异常，将暂停并返回桌面")
                         console.error("程序在" + is + "分钟内未能判断当前界面，状态异常，将暂停并返回桌面")
-                        for (let i = 0; i < engines.all().length; i++) {
-                            //寻找悬浮窗脚本
-                            if (engines.all()[i].toString().indexOf("Floaty") >= 0) {
-                                Floaty = engines.all()[i];
-                            }
-                        }
-                        Floaty.emit("暂停", "状态异常");
+                       
+                        tool.Floating_emit("暂停", "状态异常");
                     }
                     if (cc == "暂停") {
                         return
@@ -101,8 +94,8 @@ function 申请截图(simulator) {
     while (true) {
         $settings.setEnabled('foreground_service', true);
         sleep(10);
-        if (storages.create("Doolu_download").get("Capture_automatic") != false) {
-            if (storages.create("Doolu_download").get("Capture") != "true") {
+        if (helper.自动授权截图 != false) {
+            if (storages.create("warbler").get("Capture") != true) {
                 sleep(20)
                 console.verbose("确认线程启动中");
                 sleep(30)
@@ -113,7 +106,7 @@ function 申请截图(simulator) {
                             var checked;
                             if (checked = idMatches(/(.*checkbox.*|.*remember.*)/).packageNameContains("com.android.systemui").findOne(1000)) {
                                 checked.click();
-                                storages.create("Doolu_download").put("Capture", "true");
+                                storages.create("warbler").put("Capture", true);
                                 console.info("已勾选请求辅助截图权限不再显示");
                             };
                             //  };
@@ -145,14 +138,8 @@ function 申请截图(simulator) {
                 // 请求截图权限
                 toastLog("请求横屏辅助截图权限失败！");
                 require("./utlis/Dialog_Tips.js").Dialog_Tips("温馨提示", "战双辅助的PRTS辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n如需程序自动允许辅助截图权限，请前往侧边栏-设置，打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权战双辅助后台弹出界面权限", "@drawable/ic_report_problem_black_48dp");
-
-                for (let i = 0; i < engines.all().length; i++) {
-                    //寻找悬浮窗脚本
-                    if (engines.all()[i].toString().indexOf("Floaty") >= 0) {
-                        Floaty = engines.all()[i];
-                    }
-                }
-                Floaty.emit("暂停", "结束程序");
+               
+                tool.Floating_emit("暂停", "结束程序");
                 sleep(500);
                 exit();
             } else {
@@ -164,6 +151,19 @@ function 申请截图(simulator) {
             };
 
         } catch (cap) {
+            if (cap.message.toString().indexOf("Couldn't allocate virtual display, because too much virtual display was created for the uid") != -1) {
+                
+                let tips = "请求截图权限出错,请重启应用:\n" + cap.message
+                toast(tips)
+                console.error(tips)
+                tool.Floating_emit("展示文本", "状态", "状态：请求截图权限出错");
+
+                tool.Floating_emit("暂停", "结束程序");
+                sleep(500);
+                exit();
+            }
+           
+
             $images.stopScreenCapture();
             toast("异常，重新尝试" + cap);
             console.error("申请辅助截图异常，重新尝试\n" + cap);
@@ -232,13 +232,8 @@ function adbSgetScreen() {
     } catch (err) {
         console.error("adb异常，请确认已在Shizuku应用中授权" + err);
         toast("adb异常，请确认已在Shizuku应用中授权" + err);
-        for (let i = 0; i < engines.all().length; i++) {
-            //寻找悬浮窗脚本
-            if (engines.all()[i].toString().indexOf("Floaty") >= 0) {
-                Floaty = engines.all()[i];
-            }
-        }
-        Floaty.emit("暂停", "结束程序");
+        
+        tool.Floating_emit("暂停", "结束程序");
         sleep(500);
         exit();
     }
@@ -411,11 +406,11 @@ function 找图(picture, list) {
         //回收图片
         img_small.recycle();
         cc = threads.atomic(0);
-        ITimg_state.x = ITimg_state.x + random(-10, 10);
-        ITimg_state.y = ITimg_state.y + random(-10, 10);
+        ITimg_state.x = ITimg_state.x + random((ITimg_state.x > 10) ? -10 : 0, 10);
+        ITimg_state.y = ITimg_state.y + random((ITimg_state.y > 10) ? -10 : 0, 10);
         cx = ITimg_state.x + img_small_xy.w / 2;
         cy = ITimg_state.y + img_small_xy.h / 2;
-        switch (list.action) {
+       switch (list.action) {
             case 0:
                 sleep(50);
                 //click_s(cx,cy)
@@ -457,7 +452,7 @@ function 找图(picture, list) {
     } else {
         img_small.recycle();
         sleep(list.nods);
-       console.error(picture  + " 匹配失败\n找图配置：" + JSON.stringify(list));
+       console.error(picture  + " 匹配失败\n-找图配置：" + JSON.stringify(list));
        
         return false;
 
@@ -478,6 +473,7 @@ function 找图(picture, list) {
  * @returns {boolean|object} - 返回值取决于list.action
  */
 function ocr文字识别(words, list) {
+  
     list = {
         action: list.action,
         timing: list.timing || 0,
@@ -528,12 +524,12 @@ function ocr文字识别(words, list) {
 
     if (query_ != undefined) {
         cc = threads.atomic(0);
-        console.info(words + " 匹配成功\n配置：" + JSON.stringify(list) + "内容：" + JSON.stringify(query_))
+       
+        console.info(words + " 匹配成功\n-配置：" + JSON.stringify(list) + "\n--内容：" + JSON.stringify(query_))
         switch (list.action) {
             case undefined:
                 break
             case 0:
-
                 click(query_.left + Math.floor((query_.right - query_.left) / 2), query_.top + Math.floor((query_.bottom - query_.top) / 2))
                 break;
 
@@ -559,7 +555,7 @@ function ocr文字识别(words, list) {
         return true;
     } else {
         sleep(list.nods)
-        console.error( words + " 未匹配到\n配置：" + JSON.stringify(list) + "\n识别结果：" + JSON.stringify(result));
+        console.error( words + " 未匹配到\n-配置：" + JSON.stringify(list) + "\n--识别结果：" + JSON.stringify(result));
         return false;
 
     }

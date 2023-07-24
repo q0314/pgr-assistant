@@ -44,6 +44,12 @@ module.exports = function (__runtime__, scope) {
             scope.images = _o_images
             scope.__asGlobal__(_o_images, ['captureScreen'])
             _o_images = null
+            try{
+                $images.stopScreenCapture();
+            }catch(e){
+                
+            }
+        
           }
         } finally {
           this.writeLock.unlock()

@@ -27,7 +27,7 @@ function readJSON(key, list) {
     } else {
         setting = Disposition.get(key);
         if (setting == undefined) {
-            console.error("无法取得" + key + "的数据,请确认是否已保存")
+            console.error("无法取得" + key + "的数据,请确认是否已保存");
         }
     }
     return setting;
@@ -37,14 +37,22 @@ function readJSON(key, list) {
 }
 /**
  * 把值value保存到本地存储中。value可以是undefined以外的任意数据类型。如果value为undefined则抛出TypeError。
- * @param {string} sett 
+ * @param {string|undefined} sett 
  * @param {string|number|Object|boolean} value 
  * @param {string} key
  */
-function writeJSON(sett, value, key) {
+function writeJSON(sett, value, key,debug) {
     key = key || "helper";
     setting = readJSON(key);
-    setting[sett] = value;
+    if(setting==undefined||sett==undefined){
+        setting=value;
+     }else{
+        setting[sett] = value;
+    }
+    if(debug){
+    log("key:",key)
+    log("vlaue",setting)
+    }
     Disposition.put(key, setting);
 }
 
@@ -283,10 +291,15 @@ function setBackgroundRoundRounded(view, list) {
  * @returns {object|boolean}
  */
 function script_locate(js) {
+    let engine = engines.all();
+    if (!engine) {
+        return false
+    }
+   
     try {
-        for (let i = 0; i < engines.all().length; i++) {
-            if (engines.all()[i].getSource().toString().indexOf(js) != -1) {
-                return engines.all()[i];
+        for (let i = 0; i < engine.length; i++) {
+            if (engine[i].getSource().toString().indexOf(js) != -1) {
+                return engine[i];
             }
         }
         return false
@@ -295,10 +308,31 @@ function script_locate(js) {
     }
 }
 
+function Floating_emit(id,text1,text2) {
+    let engine = engines.all();
+    if (!engine) {
+        return false
+    }
+    let Floating;
+    for (let i = 0; i < engine.length; i++) {
+        //寻找悬浮窗脚本
+        if (engine[i].toString().indexOf("Floating") >= 0) {
+            Floating = engine[i];
+        }
+    }
+    if(!Floating) return false;
+    try{
+        if(id) Floating.emit(id,text1,text2);
+    }catch(e){
+
+    }
+    return Floating;
+}
 
 
 let tool = {}
 tool.script_locate = script_locate;
+tool.Floating_emit = Floating_emit;
 tool.writeJSON = writeJSON;
 tool.readJSON = readJSON;
 tool.autoService = autoService;

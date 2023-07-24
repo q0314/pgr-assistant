@@ -11,7 +11,6 @@ ui.layout(
                     <button id="openImage" text="打开图片"/>
                     
                     <button id="but_q" layout_weight="1" h="auto" text="清空动作"/>
-                    <button id="but_c" layout_weight="1" h="auto" text="撤销动作"/>
                     <button id="but_s" layout_weight="1" h="auto" text="启动测试"/>
                     <button id="but_b" layout_weight="1" h="auto" text="保存并导入模块"/>
                 </horizontal>
@@ -94,9 +93,11 @@ setInterval(() => {
 ui.but_q.click(function() {
     MainGesturesAry = new Array;
 });
+/*
 ui.but_c.click(function() {
     MainGesturesAry.pop();
 });
+*/
 ui.but_s.click(function() {
     测试()
 });
@@ -794,7 +795,7 @@ function 媒体库选择(fun) {
                         <list id="list" w="*">
                             <vertical w="*" margin="5" bg={colors.toString(colors.GRAY)} gravity="center">
                                 <img w="auto" h="auto" margin="6" src="file://{{filePath}}"/>
-                                <text w="*" h="25" margin="2" text="{{title}}" textSize="20sp" line="1"  margin="5" gravity="center"/>
+                                <text w="*" h="25" text="{{title}}" textSize="20sp" line="1"  margin="5" gravity="center"/>
                             </vertical>
                         </list>
                     </vertical>
