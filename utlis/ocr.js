@@ -70,7 +70,6 @@ var ocr_modular = {
                 for (let i = 0; i < quantity; i++) {
                     var re = results[i]
                     var retext = re.label
-<<<<<<< HEAD
                     retext = 矫正规则("./utlis/ocr修正规则.json", retext)
                     //console.info(retext)
                     if (!retext) {
@@ -83,20 +82,6 @@ var ocr_modular = {
                         right: re.bounds.right,
                         bottom: re.bounds.bottom,
                     });
-=======
-                        retext = 矫正规则("./utlis/ocr修正规则.json", retext)
-                        //console.info(retext)
-                        if (!retext) {
-                            continue;
-                        }
-                            taglb.push({
-                                text: retext,
-                                left: re.bounds.left,
-                                top: re.bounds.top,
-                                right: re.bounds.right,
-                                bottom: re.bounds.bottom,
-                            });
->>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
 
 
                 }
@@ -126,10 +111,6 @@ var ocr_modular = {
     }
 
 };
-<<<<<<< HEAD
-
-=======
->>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
 function 矫正规则(rectify_json_path, content) {
     var rectify_json = JSON.parse(
         files.read(rectify_json_path, (encoding = "utf-8"))
@@ -138,11 +119,7 @@ function 矫正规则(rectify_json_path, content) {
         rectify_key = Object.keys(rectify_json.replace_some_characters);
 
         for (let t = 0; t < rectify_key.length; t++) {
-<<<<<<< HEAD
             // console.verbose(rectify_key[t])
-=======
-           // console.verbose(rectify_key[t])
->>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
             if (rectify_json.replace_some_characters[rectify_key[t]].regular) {
                 let matching = content.match(new RegExp(rectify_key[t], "g"));
                 if (matching) {
@@ -161,7 +138,6 @@ function 矫正规则(rectify_json_path, content) {
         rectify_key = Object.keys(rectify_json.replace_full_character);
 
         for (let t = 0; t < rectify_key.length; t++) {
-<<<<<<< HEAD
 
             if (rectify_json.replace_full_character[rectify_key[t]].regular) {
                 let matching = content.match(new RegExp(rectify_key[t], "g"));
@@ -172,10 +148,6 @@ function 矫正规则(rectify_json_path, content) {
                 if (content == rectify_key[t]) {
                     content = rectify_json.replace_full_character[rectify_key[t]].correct;
                 }
-=======
-            if (content == rectify_key[t]) {
-                content = rectify_json.replace_full_character[rectify_key[t]].correct;
->>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
             }
         }
     }
@@ -184,7 +156,6 @@ function 矫正规则(rectify_json_path, content) {
         rectify_key = Object.keys(rectify_json.filter_partial_characters);
 
         for (let t = 0; t < rectify_key.length; t++) {
-<<<<<<< HEAD
             //  console.verbose(rectify_key[t])
 
             if (rectify_json.filter_partial_characters[rectify_key[t]]) {
@@ -195,17 +166,6 @@ function 矫正规则(rectify_json_path, content) {
             } else {
 
                 if (content.indexOf(rectify_key[t]) != -1 && (content.length != rectify_key[t].length)) {
-=======
-          //  console.verbose(rectify_key[t])
-
-            if (rectify_json.filter_partial_characters[rectify_key[t]]) {
-                let matching = content.match(new RegExp(rectify_key[t], "g"));
-                if (matching) {
-                    return false
-                }
-            } else {
-                if (content.indexOf(rectify_key[t]) != -1) {
->>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
                     return false
                 }
             }
@@ -216,19 +176,11 @@ function 矫正规则(rectify_json_path, content) {
         rectify_key = Object.keys(rectify_json.filter_full_characters);
 
         for (let t = 0; t < rectify_key.length; t++) {
-<<<<<<< HEAD
             //  console.verbose(rectify_key[t])
 
             if (rectify_json.filter_full_characters[rectify_key[t]]) {
                 let matching = content.match(new RegExp(rectify_key[t]));
                 if (matching && (matching.input == matching[0])) {
-=======
-          //  console.verbose(rectify_key[t])
-
-            if (rectify_json.filter_full_characters[rectify_key[t]]) {
-                let matching = content.match(new RegExp(rectify_key[t], "g"));
-                if (matching && matching.input == rectify_key[t]) {
->>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
                     return false
                 }
             } else {
@@ -240,7 +192,6 @@ function 矫正规则(rectify_json_path, content) {
     }
     return content
 }
-<<<<<<< HEAD
 try {
     module.exports = ocr_modular;
 } catch (e) {
@@ -249,10 +200,5 @@ try {
     toastLog(retext)
 }
 events.on("exit", function() {
-=======
-
-module.exports = ocr_modular;
-events.on("exit", function () {
->>>>>>> 6efa18a9580de45b729de5a952154521e04f61c4
     sleep(2000);
 })
