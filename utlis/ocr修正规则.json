@@ -84,6 +84,9 @@
             "correct": "执勤",
             "regular": true
         },
+        "活舌":{
+            "correct":"活"
+        },
         "委魏|委|娄": {
             "correct": "委托",
             "regular": true

@@ -1119,8 +1119,10 @@ function 宿舍_抚摸() {
             sleep(150);
             //点击小人旁的抚摸
             click(coordinate.宿舍.快捷头像位置[m].x - frcx(160), coordinate.宿舍.快捷头像位置[m].y);
+            if(helper.检查小人心情){
             sleep(3200);
             try {
+
                 let img = ITimg.captureScreen_();
                 //多点找色,检查心情条;
                 let mood = images.findMultiColors(img, "#47ca4f", [
@@ -1144,6 +1146,9 @@ function 宿舍_抚摸() {
             } catch (e) {
                 console.error("检查心情条错误", e)
             }
+        }else{
+            sleep(1500)
+        }
             let petting = ITimg.ocr("抚摸次数", {
                 action: 5,
                 area: "右上半屏",
@@ -1490,7 +1495,7 @@ function 战斗() {
                 timing: 1500,
                 area: "右半屏",
                 part: true,
-            }) && !ITimg.ocr("开放中", {
+            }) && !ITimg.ocr("进行中", {
                 action: 0,
                 timing: 1500,
                 area: "右半屏",
@@ -1515,7 +1520,36 @@ function 战斗() {
                 action: 0,
                 timing: 1500,
                 part: true,
-            }))
+            }));
+            if(!ITimg.ocr("活动", {
+               // action: 0,
+                timing: 100,
+                part: true,
+                nods:1000,
+            })||!ITimg.ocr("商店", {
+                // action: 0,
+                 timing: 100,
+                 part: true,
+             })){
+                (ITimg.ocr("权限等级", {
+                    action: 0,
+                    timing: 1500,
+                    nods: 1000,
+                    area: "下半屏",
+                    part: true,
+                }) || ITimg.ocr("权限等级", {
+                    action: 0,
+                    timing: 1500,
+                    nods: 1000,
+                    area: "左半屏",
+                    part: true,
+                }) || ITimg.ocr("权限等级", {
+                    action: 0,
+                    timing: 1500,
+                    part: true,
+                }));
+
+             }
             if (!ITimg.ocr("自动作战", {
                 action: 0,
                 timing: 1500,
