@@ -337,6 +337,17 @@ ui.auto_empower_screenshots_id.on("click", () => {
 
 });
 
+//检查小人心情
+ui.check_curs_mood.on("click", (view) => {
+    tool.writeJSON("检查小人心情", view.checked)
+});
+
+ui.check_curs_mood_id.on("click", () => {
+    ui.check_curs_mood.performClick();
+
+});
+
+
 //异常界面超时暂停
 ui.unusual_interface_suspended.on("click", (view) => {
     tool.writeJSON("异常超时", view.checked)
