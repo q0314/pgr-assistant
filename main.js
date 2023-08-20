@@ -945,7 +945,7 @@ ui.autoService.on("click", (checked) => {
                     tool.writeJSON("无障碍提醒", checked, "interface")
                 }).show();
             } else {
-                use.startActivity({
+                app.startActivity({
                     action: "android.settings.ACCESSIBILITY_SETTINGS"
                 });
             }
