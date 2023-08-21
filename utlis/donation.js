@@ -17,7 +17,7 @@ var donationkey = {
         var releaseNotes = "战双辅助是一款免费开源的软件，虽然它并不美好,但正努力前行,如果您觉得好用，可以捐赠支持我们，金额不限，这将会让我们便于提供更优质的服务，促进维护更新\n";
         var rewardViewj = ui.inflate(
             <vertical padding="16 0 16 0" bg="#dcdcdc">
-                        <text>{releaseNotes}(感谢捐赠，捐赠时请备注名字或昵称以显示在捐赠名单)</text>
+                        <text>{releaseNotes}()</text>
                         <horizontal>
                             <card id="ws" w="auto" h="auto" margin="5 10" cardCornerRadius="32" cardBackgroundColor="#22AB38" cardElevation="5dp" foreground="?selectableItemBackground">
                                 <text text=" 微信支持 " h="*" margin="5 5" textColor="#ffffff" textStyle="bold" gravity="center"/>
