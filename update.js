@@ -36,7 +36,7 @@ function update(show_update_dialog) {
                 dialog.on("neutral", () => {
                     showHistoryUpdateInfo(last_version_info["versionCode"] > local_config["versionCode"]);
                 });
-                console.info(last_version_info["versioCcode"])
+                console.info(last_version_info["versionCcode"])
                 if (last_version_info["versionCode"] > local_config["versionCode"]) {
                     dialog.setActionButton("positive", language["update"]);
                     dialog.setActionButton("negative", language["cancel"]);
@@ -140,7 +140,8 @@ function downloadFile(mandatory) {
                                     files.ensureDir(".cache/" + key);
                                     files.write(".cache/" + key, response.body.string());
                                 } else {
-                                    throw new Error("download fail");
+                                    toastLog(key+" download fail")
+                                //    throw new Error("download fail");
                                 }
                             } else {
                                 break;

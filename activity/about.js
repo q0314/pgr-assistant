@@ -140,7 +140,7 @@ ui.donation.on("click", () => {
 });
 
 ui.examine_update.click(() => {
-    require("update.js").updata(true)
+    require("update.js").update(true)
 })
 
 

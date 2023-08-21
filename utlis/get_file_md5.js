@@ -6,9 +6,13 @@ importClass(java.io.FileInputStream);
 importClass(java.io.File);
 importClass(java.math.BigInteger);
 importClass(java.security.MessageDigest);
-//指向一个相对路径
-let path = "../";
-
+/**
+ * 指向一个相对路径
+ * 在战双协作app内也可使用:运行日志-代码测试-第二输入框- ./utlis/get_file_md5.js 执行脚本文件
+*/
+let path = "./";
+let autojs_build_ignore = open(path + ".autojs.build.ignore", mode = "r", encoding = "utf-8");
+autojs_build_ignore = autojs_build_ignore.readlines();
 let agg = {}
 statistical_file(path)
 
@@ -18,10 +22,20 @@ function statistical_file(dir) {
 
     for (let i = 0; i < len; i++) {
         var child = files.join(dir, list[i]);
+
         console.info(child)
+        for (let lines of autojs_build_ignore) {
+            if ("." + lines == child) {
+                console.log(child + " 是项目自动生成文件.或初始应用包已有无需重复下载的文件")
+                child = false;
+            }
+        }
+        if (child === false) {
+            continue;
+        }
         if (files.isFile(child)) {
             let route = files.path(child)
-            child = child.replace(path,"")
+            child = child.replace(path, "")
             agg[child] = {
                 "md5": getFileMD5(route),
                 "size": new FileInputStream(route).available()
@@ -75,10 +89,10 @@ function getFileMD5(file) {
 }
 
 log(JSON.stringify(agg))
-files.ensureDir(path+"config/files_md5.json")
+files.ensureDir(path + "utlis/files_md5.json")
 files.write(
-    path+"config/files_md5.json",
+    path + "utlis/files_md5.json",
     JSON.stringify(agg),
     (encoding = "utf-8")
 )
-toastLog("生成"+path+"config/files_md5.json完成")
+toastLog("生成" + path + "utlis/files_md5.json完成")

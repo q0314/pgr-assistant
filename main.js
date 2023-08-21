@@ -1648,7 +1648,7 @@ threads.start(function () {
  
    threads.start(function() {
  
-    require("update.js").updata()
+    require("update.js").update()
 });
 })
 
