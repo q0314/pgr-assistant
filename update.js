@@ -97,7 +97,7 @@ function showHistoryUpdateInfo(show_update_button) {
  * 更新
  * @param {boolean} mandatory - 强制下载所有文件,不检验MD5 
  */
-function downloadFile(mandatory) {
+function downloadFile_(mandatory) {
     let file_path = files.path("./")
     let cancel = false;
     let dialog = dialogs.build({
@@ -179,7 +179,7 @@ function downloadFile(mandatory) {
     });
 }
 
-function downloadFilezip() {
+function downloadFile() {
     let cancel = false;
     let dialog = dialogs.build({
         type: 'app',
