@@ -78,7 +78,7 @@
     "uuid": "3c963c5d-b8e8-40e3-ab74-404fbab8bc9f"
   },
   "versionCode": 29,
-  "versionName": "1.1.1",
-  "update_content":"\n-优化更新模块"
+  "versionName": "1.1.3",
+  "update_content":"\n-支持热更新\n-新增1440x3200分辨率坐标\n-内置mlkit-ocr插件包"
 
 }

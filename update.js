@@ -225,6 +225,7 @@ function downloadFilezip() {
 
 var toupdate = {}
 toupdate.update = update;
+
 try {
     module.exports = toupdate;
 } catch (err) {

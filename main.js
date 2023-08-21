@@ -1646,7 +1646,10 @@ threads.start(function () {
     if (interface.运行次数 != true && interface.公告 == true) threads.start(tishi);
    // interface = tool.readJSON("interface");
  
-   engines.execScriptFile("./update.js");
+   threads.start(function() {
+ 
+    require("update.js").updata()
+});
 })
 
 
@@ -1713,6 +1716,11 @@ function Update_UI(i) {
 }
 function 检测ocr(tips) {
     let ocr = app.getAppName("com.tony.mlkit.ocr");
+    if(!ocr){
+      if(files.exists("./plugins/com.tony.mlkit.ocr.apk")){
+        ocr = true;
+      }
+    }
     let con_;
     if (tips == true && ocr == null) {
         importClass(android.os.Build);

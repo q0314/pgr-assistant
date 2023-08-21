@@ -7,7 +7,7 @@ var helper = tool.readJSON("helper")
 var theme = require("./theme.js");
 var language = theme.language.about;
 var interface = tool.readJSON("interface");
-var toupdate, gather_link;
+var gather_link;
 
 threads.start(function () {
     try {
@@ -140,8 +140,7 @@ ui.donation.on("click", () => {
 });
 
 ui.examine_update.click(() => {
-    engines.execScriptFile("./update.js");
-   // toastLog("暂未开发")
+    require("update.js").updata(true)
 })
 
 
