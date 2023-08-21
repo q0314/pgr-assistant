@@ -1,4 +1,6 @@
 /.git
+/.vscode
+/plugins/com.tony.mlkit.ocr.apk
 /README.md
 /SECURITY.md
 /library/gallery
