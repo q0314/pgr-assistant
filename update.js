@@ -3,7 +3,7 @@
  * @param {object} language
  */
 var language = require("./theme.js").language.update;
-var tool = require('./utlis/app_tool.js');
+var tool = require('./modules/app_tool.js');
 var base_url = "https://gitee.com/q0314/pgr-assistant/raw/master/";//tool.readJSON("interface").server;
 
 function update(show_update_dialog) {

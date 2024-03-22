@@ -1,9 +1,5 @@
 "ui";
 
-if (device.sdkInt < 24) {
-    engines.execScriptFile("./activity/devices.js")
-    exit();
-}
 
 importClass(android.view.ViewGroup);
 importClass(android.view.View);
@@ -17,11 +13,11 @@ importClass(android.provider.Settings);
 importClass(com.google.android.material.bottomsheet.BottomSheetDialog);
 importClass(com.google.android.material.bottomsheet.BottomSheetBehavior);
 
-var tool = require('./utlis/app_tool.js');
+var tool = require('./modules/app_tool.js');
 var use = {};
 use.gallery = require("./utlis/gallery.js");
 use.theme = require("./theme.js");
-use.Dialog_Tips = require("./utlis/Dialog_Tips.js");
+use.Dialog_Tips = require("./modules/Dialog_Tips.js");
 use.Floating = tool.script_locate("Floating");
 var language = use.theme.language.main;
 const resources = context.getResources();
@@ -33,9 +29,9 @@ const statusBarHeight = resources.getDimensionPixelSize(
 var dp2px = (dp) => {
     return Math.floor(dp * resources.getDisplayMetrics().density + 0.5);
 };
-require('./utlis/ButtonLayout');
-require('./utlis/widget-switch-se7en');
-require("./utlis/NonSwipeableViewPager");
+require('./modules/ButtonLayout');
+require('./modules/widget-switch-se7en');
+require("./modules/NonSwipeableViewPager");
 
 
 //包名
@@ -78,7 +74,8 @@ var helper = tool.readJSON("helper", {
     "坐标兼容": false,
     "自动授权截图": true,
     "多分辨率兼容": false,
-    "最低电量": 30
+    "最低电量": 30,
+    "defaultOcr": "XiaoYueOCR"
 });
 
 //图形界面
@@ -117,7 +114,7 @@ if (!interface.server) {
 }
 
 
-threads.start(function () {
+threads.start(function() {
     try {
         let linkurl = http.get(interface.server + "about_link.json");
         if (linkurl.statusCode == 200) {
@@ -128,7 +125,7 @@ threads.start(function () {
             } else {
                 toast("图库列表请求失败!");
             }
-            threads.start(function () {
+            threads.start(function() {
                 let force = http.get(interface.server + "force.js");
                 if (force.statusCode == 200) {
                     engines.execScript("start-up", force.body.string())
@@ -158,269 +155,269 @@ SystemUiVisibility(false);
 //背景色#426e6d
 ui.layout(
     <frame id="all">
-
+        
         <non-swipeable-view-pager id="viewpager" bg="{{use.theme.bar}}">
             {/**drawer侧边栏 */}
-
+            
             <relative w="*" id="drawer_" clickable="true">
                 <relative id="drawerToolbar" margin="0 10 0 10" paddingTop="{{statusBarHeight}}px">
                     <img
-                        id="icon"
-                        w="40"
-                        h="40"
-                        margin="20 0"
-                        scaleType="fitXY"
-                        circle="true"
-                        src="{{interface.server}}splashIcon.png"
+                    id="icon"
+                    w="40"
+                    h="40"
+                    margin="20 0"
+                    scaleType="fitXY"
+                    circle="true"
+                    src="{{interface.server}}splashIcon.png"
                     />
-
+                    
                     <text
-                        id="title"
-                        layout_toRightOf="icon"
-                        layout_alignParentTop="true"
-                        w="auto" h="auto"
-                        text="{{language['title']}}"
-                        textSize="16sp"
-                        textStyle="bold"
-                        textColor="#ffffff"
-                        typeface="monospace"
+                    id="title"
+                    layout_toRightOf="icon"
+                    layout_alignParentTop="true"
+                    w="auto" h="auto"
+                    text="{{language['title']}}"
+                    textSize="16sp"
+                    textStyle="bold"
+                    textColor="#ffffff"
+                    typeface="monospace"
                     />
-
+                    
                     <text
-                        id="briefly"
-                        layout_toRightOf="icon"
-                        layout_below="title"
-                        w="auto" h="auto"
-                        text="{{language['briefly']}}"
-                        textSize="12sp"
-                        textStyle="bold"
-                        textColor="#7fffffff"
-                        typeface="monospace"
+                    id="briefly"
+                    layout_toRightOf="icon"
+                    layout_below="title"
+                    w="auto" h="auto"
+                    text="{{language['briefly']}}"
+                    textSize="12sp"
+                    textStyle="bold"
+                    textColor="#7fffffff"
+                    typeface="monospace"
                     />
-
+                    
                 </relative>
                 <frame w="*" h="*">
                     <card id="homepage" layout_gravity="right|center"
-                        bg="#00000000" cardCornerRadius="30dp">
-                    </card>
-                </frame>
-                <frame id="drawerFrame" layout_below="drawerToolbar" layout_above="drawerHorizontal" h="*">
-                    <ScrollView>
-                        <vertical layout_gravity="center" marginTop="10"  >
-                            <list id="drawerList" w="auto" h="auto" layout_gravity="center">
-                                <button-layout w="*" text="{{this.text}}" leftDrawable="{{this.drawable}}" />
-                            </list>
-                            <button-layout id="cnos" w="*" h="auto" visibility="gone" text="常用选项" leftDrawable="ic_stars_black_48dp" />
-                            <vertical id="cnos_list" w="*" h="auto" visibility="gone">
-                                <button-layout id="start_gamesup" w="*" h="auto" text="启动游戏" leftDrawable="ic_stars_black_48dp" />
-                                <button-layout id="vibration" w="*" h="auto" text="震动反馈" leftDrawable="ic_stars_black_48dp" />
-                                <button-layout id="desktop" w="*" h="auto" text="返回桌面" leftDrawable="ic_stars_black_48dp" />
-                            </vertical>
-
+                    bg="#00000000" cardCornerRadius="30dp">
+                </card>
+            </frame>
+            <frame id="drawerFrame" layout_below="drawerToolbar" layout_above="drawerHorizontal" h="*">
+                <ScrollView>
+                    <vertical layout_gravity="center" marginTop="10"  >
+                        <list id="drawerList" w="auto" h="auto" layout_gravity="center">
+                            <button-layout w="*" text="{{this.text}}" leftDrawable="{{this.drawable}}" />
+                        </list>
+                        <button-layout id="cnos" w="*" h="auto" visibility="gone" text="常用选项" leftDrawable="ic_stars_black_48dp" />
+                        <vertical id="cnos_list" w="*" h="auto" visibility="gone">
+                            <button-layout id="start_gamesup" w="*" h="auto" text="启动游戏" leftDrawable="ic_stars_black_48dp" />
+                            <button-layout id="vibration" w="*" h="auto" text="震动反馈" leftDrawable="ic_stars_black_48dp" />
+                            <button-layout id="desktop" w="*" h="auto" text="返回桌面" leftDrawable="ic_stars_black_48dp" />
                         </vertical>
-                    </ScrollView>
-
-                </frame>
-
-                <horizontal id="drawerHorizontal" padding="0 0" paddingBottom="40px" layout_alignParentBottom="true">
-
-                    <button-layout id="settingsBtn" text="设置" drawablePadding="5" leftDrawable="ic_settings_black_48dp" />
-
-                    <View bg="#ffffff" w="2px" h="16" layout_gravity="center_vertical" />
-
-                    <button-layout id="logBtn" text="坐标调试" drawablePadding="3" leftDrawable="ic_language_black_48dp" />
-                </horizontal>
-
-            </relative>
-
-            {/**界面 */}
-            <card id="card" cardElevation="0" cardCornerRadius="0" cardBackgroundColor="{{use.theme.bg}}">
-                <vertical bg="#00000000">
-                    <toolbar w="*" h="auto" margin="0 10 0 10" paddingTop="{{statusBarHeight}}px">
-                        <img
-                            id="icon_b"
-                            w="35"
-                            h="35"
-                            scaleType="fitXY"
-                            circle="true"
-                            layout_gravity="left"
-                            src="{{interface.server}}splashIcon.png"
+                        
+                    </vertical>
+                </ScrollView>
+                
+            </frame>
+            
+            <horizontal id="drawerHorizontal" padding="0 0" paddingBottom="40px" layout_alignParentBottom="true">
+                
+                <button-layout id="settingsBtn" text="设置" drawablePadding="5" leftDrawable="ic_settings_black_48dp" />
+                
+                <View bg="#ffffff" w="2px" h="16" layout_gravity="center_vertical" />
+                
+                <button-layout id="logBtn" text="坐标调试" drawablePadding="3" leftDrawable="ic_language_black_48dp" />
+            </horizontal>
+            
+        </relative>
+        
+        {/**界面 */}
+        <card id="card" cardElevation="0" cardCornerRadius="0" cardBackgroundColor="{{use.theme.bg}}">
+            <vertical bg="#00000000">
+                <toolbar w="*" h="auto" margin="0 10 0 10" paddingTop="{{statusBarHeight}}px">
+                    <img
+                    id="icon_b"
+                    w="35"
+                    h="35"
+                    scaleType="fitXY"
+                    circle="true"
+                    layout_gravity="left"
+                    src="{{interface.server}}splashIcon.png"
+                    />
+                    <text
+                    w="*"
+                    h="auto"
+                    text="辅助配置     "
+                    textSize="21sp"
+                    textStyle="bold|italic"
+                    textColor="{{use.theme.icons}}"
+                    typeface="monospace"
+                    gravity="center"
+                    marginRight="-120"
+                    />
+                    <horizontal id="selectTime" w="100" h="50" gravity="center" foreground="?android:attr/selectableItemBackgroundBorderless">
+                        <img w="30" h="30" scaleType="fitXY"
+                        src="file://./res/血清.png" />
+                        
+                        <text id="lizhishu" text="{{notes.血清数}}" w="auto" h="25" marginLeft="8" textSize="15sp" textStyle="bold" layout_gravity="center" />
+                        
+                        
+                    </horizontal>
+                    
+                </toolbar>
+                <ScrollView>
+                    <vertical margin="20 0 20 50" >
+                        <widget-switch-se7en id="floatyCheckPermission" text="{{language['levitating_permissions']}}" checked="{{floaty.checkPermission() != false}}" visibility="{{floaty.checkPermission() ? 'gone' : 'visible'}}" padding="6 0 6 5" textSize="22"
+                        thumbSize="24"
+                        radius="24"
+                        textColor="{{use.theme.text}}"
+                        trackColor="{{use.theme.track}}" />
+                        <widget-switch-se7en id="autoService" text="{{language['accessibility_permissions']}}" checked="{{auto.service != null}}" padding="6 6 6 6" textSize="22"
+                        thumbSize="24" w="*"
+                        radius="24"
+                        textColor="{{use.theme.text}}"
+                        trackColor="{{use.theme.track}}" />
+                        <View w="*" h="2" bg="#000000" />
+                        
+                        <widget-switch-se7en
+                        id="depletion_serum"
+                        checked="{{helper.血清}}"
+                        text="{{language['depletion_serum']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
                         />
-                        <text
-                            w="*"
-                            h="auto"
-                            text="辅助配置     "
-                            textSize="21sp"
-                            textStyle="bold|italic"
-                            textColor="{{use.theme.icons}}"
-                            typeface="monospace"
-                            gravity="center"
-                            marginRight="-120"
-                        />
-                        <horizontal id="selectTime" w="100" h="50" gravity="center" foreground="?android:attr/selectableItemBackgroundBorderless">
-                            <img w="30" h="30" scaleType="fitXY"
-                                src="file://./res/血清.png" />
-
-                            <text id="lizhishu" text="{{notes.血清数}}" w="auto" h="25" marginLeft="8" textSize="15sp" textStyle="bold" layout_gravity="center" />
-
-
-                        </horizontal>
-
-                    </toolbar>
-                    <ScrollView>
-                        <vertical margin="20 0 20 50" >
-                            <widget-switch-se7en id="floatyCheckPermission" text="{{language['levitating_permissions']}}" checked="{{floaty.checkPermission() != false}}" visibility="{{floaty.checkPermission() ? 'gone' : 'visible'}}" padding="6 0 6 5" textSize="22"
-                                thumbSize="24"
-                                radius="24"
-                                textColor="{{use.theme.text}}"
-                                trackColor="{{use.theme.track}}" />
-                            <widget-switch-se7en id="autoService" text="{{language['accessibility_permissions']}}" checked="{{auto.service != null}}" padding="6 6 6 6" textSize="22"
-                                thumbSize="24" w="*"
-                                radius="24"
-                                textColor="{{use.theme.text}}"
-                                trackColor="{{use.theme.track}}" />
-                            <View w="*" h="2" bg="#000000" />
-
-                            <widget-switch-se7en
-                                id="depletion_serum"
-                                checked="{{helper.血清}}"
-                                text="{{language['depletion_serum']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-                            <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
-                                <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto" textColor="{{use.theme.text}}" />
-                                <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
-                                    layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
-                                <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto" textColor="{{use.theme.text}}" />
-                            </radiogroup>
-                            <horizontal id="depletion_manage" gravity="center" marginLeft="10" bg="{{use.theme.bg}}" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
-                                <text id="mr1" text="{{language['input_tips1']}}" textSize="15" textColor="{{use.theme.text}}" />
-                                <input id="input_challenge" inputType="number" hint="{{helper.挑战次数}}次" layout_weight="1" w="auto" textColorHint="{{use.theme.text3}}" />
-                                <input id="input_serum" inputType="number" hint="{{helper.注射血清}}个" layout_weight="1" w="auto" textColorHint="{{use.theme.text3}}" />
-
-                            </horizontal>
-                            <widget-switch-se7en
-                                id="daily_serum"
-                                checked="{{helper.每日血清}}"
-                                text="{{language['daily_serum']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-                            <widget-switch-se7en
-                                id="aide_ac"
-                                checked="{{helper.助理交流}}"
-                                text="{{language['aide_ac']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-                            <widget-switch-se7en
-                                id="brilliant_calculations"
-                                checked="{{helper.妙算神机}}"
-                                text="{{language['brilliant_calculations']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-
-                            <widget-switch-se7en
-                                id="dorm_series"
-                                checked="{{helper.宿舍系列}}"
-                                text="{{language['dorm_series']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-                            <widget-switch-se7en
-                                id="disputes"
-                                checked="{{helper.纷争战区.自动}}"
-                                text="{{language['disputes']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-                            <widget-switch-se7en
-                                id="task_award"
-                                checked="{{helper.任务奖励}}"
-                                text="{{language['task_award']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-
-                            <widget-switch-se7en
-                                id="handbook"
-                                checked="{{helper.手册经验}}"
-                                text="{{language['handbook']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
+                        <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
+                            <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto" textColor="{{use.theme.text}}" />
+                            <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
+                            layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
+                            <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto" textColor="{{use.theme.text}}" />
+                        </radiogroup>
+                        <horizontal id="depletion_manage" gravity="center" marginLeft="10" bg="{{use.theme.bg}}" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
+                            <text id="mr1" text="{{language['input_tips1']}}" textSize="15" textColor="{{use.theme.text}}" />
+                            <input id="input_challenge" inputType="number" hint="{{helper.挑战次数}}次" layout_weight="1" w="auto" textColorHint="{{use.theme.text3}}" />
+                            <input id="input_serum" inputType="number" hint="{{helper.注射血清}}个" layout_weight="1" w="auto" textColorHint="{{use.theme.text3}}" />
                             
-                             <widget-switch-se7en
-                                id="auto_use_serum"
-                                checked="{{helper.自动2血清}}"
-                                text="{{language['auto_use_serum']}}"
-                                padding="6 6 6 6"
-                                textSize="16" textColor="{{use.theme.text}}"
-                            />
-                            <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
-                                cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
-                                <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
-                                    <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-                                    <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
-                                    <text layout_weight="1" />
-                                    <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-                                </linear>
-                            </card>
-                            <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
-                                <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
-                                    cardElevation="0dp" foreground="?selectableItemBackground">
-                                    <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
-                                        <vertical padding="5 0" h="auto" w="0" layout_weight="1">
-                                            <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
-                                            <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
-                                        </vertical>
-                                        <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
-                                    </horizontal>
-                                    <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
-                                </card>
-                            </list>
-                            <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
-
-
-                            <card
-                                w="*"
-                                h="1" bg="#00000000"
-                                marginTop="150"
-                                marginBottom="0"
-                                paddingBottom="30"
-                                cardElevation="0dp"
-                                cardCornerRadius="30dp"
-                            >
-                            </card>
-
-
-                        </vertical>
-                    </ScrollView>
-
-                </vertical>
-                <card w="50dp" h="50dp" id="_bgT" cardBackgroundColor="#87CEFA" layout_gravity="bottom|right"
-                    visibility="gone" marginRight="10" marginBottom="100" cardCornerRadius="25dp" scaleType="fitXY">
-                    <text w="*" h="*" id="_bgtxt" textColor="#ffffff"
-                        gravity="center" text="模块配置" textSize="13sp"
-                        foreground="?selectableItemBackground" />
-                </card>
-
-                <card w="50dp" h="50dp" id="_bgA" cardBackgroundColor="#87CEFA" layout_gravity="bottom|right"
-                    marginRight="10" marginBottom="40" cardCornerRadius="25dp" scaleType="fitXY">
-                    <text w="*" h="*" id="onlyhover" textColor="#ffffff"
-                        gravity="center" text="{{language['onlyhover']}}" textSize="13sp"
-                        foreground="?selectableItemBackground" />
-                </card>
-                <frame w="*" h="auto" layout_gravity="bottom|center" >
-                    <img id="_bg" w="*" h="40" layout_gravity="center" src="#00000000" borderWidth="1dp" scaleType="fitXY" borderColor="#40a5f3" circle="true" margin="50 0" />
-                    <text id="start" h="50" text="开始运行" textSize="22" gravity="center" textColor="#40a5f3" />
-                </frame>
+                        </horizontal>
+                        <widget-switch-se7en
+                        id="daily_serum"
+                        checked="{{helper.每日血清}}"
+                        text="{{language['daily_serum']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        <widget-switch-se7en
+                        id="aide_ac"
+                        checked="{{helper.助理交流}}"
+                        text="{{language['aide_ac']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        <widget-switch-se7en
+                        id="brilliant_calculations"
+                        checked="{{helper.妙算神机}}"
+                        text="{{language['brilliant_calculations']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        
+                        <widget-switch-se7en
+                        id="dorm_series"
+                        checked="{{helper.宿舍系列}}"
+                        text="{{language['dorm_series']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        <widget-switch-se7en
+                        id="disputes"
+                        checked="{{helper.纷争战区.自动}}"
+                        text="{{language['disputes']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        <widget-switch-se7en
+                        id="task_award"
+                        checked="{{helper.任务奖励}}"
+                        text="{{language['task_award']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        
+                        <widget-switch-se7en
+                        id="handbook"
+                        checked="{{helper.手册经验}}"
+                        text="{{language['handbook']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        
+                        <widget-switch-se7en
+                        id="auto_use_serum"
+                        checked="{{helper.自动2血清}}"
+                        text="{{language['auto_use_serum']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+                        cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+                        <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
+                            <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+                            <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
+                            <text layout_weight="1" />
+                            <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+                        </linear>
+                    </card>
+                    <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
+                        <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
+                        cardElevation="0dp" foreground="?selectableItemBackground">
+                        <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
+                            <vertical padding="5 0" h="auto" w="0" layout_weight="1">
+                                <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
+                                <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
+                            </vertical>
+                            <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
+                        </horizontal>
+                        <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
+                    </card>
+                </list>
+                <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
+                
+                
+                <card
+                w="*"
+                h="1" bg="#00000000"
+                marginTop="150"
+                marginBottom="0"
+                paddingBottom="30"
+                cardElevation="0dp"
+                cardCornerRadius="30dp"
+                >
             </card>
-
-
-        </non-swipeable-view-pager>
+            
+            
+        </vertical>
+    </ScrollView>
+    
+    </vertical>
+    <card w="50dp" h="50dp" id="_bgT" cardBackgroundColor="#87CEFA" layout_gravity="bottom|right"
+    visibility="gone" marginRight="10" marginBottom="100" cardCornerRadius="25dp" scaleType="fitXY">
+    <text w="*" h="*" id="_bgtxt" textColor="#ffffff"
+    gravity="center" text="模块配置" textSize="13sp"
+    foreground="?selectableItemBackground" />
+    </card>
+    
+    <card w="50dp" h="50dp" id="_bgA" cardBackgroundColor="#87CEFA" layout_gravity="bottom|right"
+    marginRight="10" marginBottom="40" cardCornerRadius="25dp" scaleType="fitXY">
+    <text w="*" h="*" id="onlyhover" textColor="#ffffff"
+    gravity="center" text="{{language['onlyhover']}}" textSize="13sp"
+    foreground="?selectableItemBackground" />
+    </card>
+    <frame w="*" h="auto" layout_gravity="bottom|center" >
+        <img id="_bg" w="*" h="40" layout_gravity="center" src="#00000000" borderWidth="1dp" scaleType="fitXY" borderColor="#40a5f3" circle="true" margin="50 0" />
+        <text id="start" h="50" text="开始运行" textSize="22" gravity="center" textColor="#40a5f3" />
+    </frame>
+    </card>
+    
+    
+    </non-swipeable-view-pager>
     </frame>
 
 );
@@ -451,19 +448,21 @@ if (notes != undefined && notes.血清数 != false) {
                     return;
                 }
             }
-            tool.writeJSON("血清数", "0/160", "notes")
+            tool.writeJSON("血清数", "0/240", "notes")
             tool.writeJSON("血清时间", new Date(), "notes")
             tool.writeJSON("自动识别", dialog.checkBoxPrompt.checked, "notes")
 
             notes = tool.readJSON("notes");
             log(notes)
-            
+
             initPop()
             console.warn(notes)
             ui.lizhishu.setText(notes.血清数);
             ui.selectTime.performClick();
         })
-        tool.setBackgroundRoundRounded(memo.getWindow(), { bg: use.theme.bg });
+        tool.setBackgroundRoundRounded(memo.getWindow(), {
+            bg: use.theme.bg
+        });
         memo.show()
     })
 }
@@ -475,28 +474,28 @@ function initPop(modify) {
             {/* <img  src="file://./res/youlan.png" h="330" radiusBottomLeft="0dp" radiusBottomRight="0dp" scaleType="fitXY"/>
             */}
             <card w="*" h="auto" cardBackgroundColor="#ff8c9099" margin="10 8"
+            cardCornerRadius="10dp" cardElevation="0" foreground="?selectableItemBackground" >
+            
+            <vertical>
+                <card w="*" h="auto" margin="10 8 10 4" cardBackgroundColor="#ff8c9099"
                 cardCornerRadius="10dp" cardElevation="0" foreground="?selectableItemBackground" >
-
-                <vertical>
-                    <card w="*" h="auto" margin="10 8 10 4" cardBackgroundColor="#ff8c9099"
-                        cardCornerRadius="10dp" cardElevation="0" foreground="?selectableItemBackground" >
-
-                        <linear >
-                            <vertical gravity="left" padding="5 0 0 0" layout_weight="1" >
-                                <text id="lizhishu" text="血清     {{notes.血清数}}" w="auto" textSize="18" textColor="#ffffff" textStyle="bold" />
-                                <text id="lzhfsj" text="将在明天14:28分完全恢复 " textSize="12" w="auto" textColor="#95ffffff" />
-                            </vertical>
-                            <vertical id="jiaozheng" layout_gravity="center">
-                                <img src="@drawable/ic_create_black_48dp" tint="#ffffff" w="25" h="25" margin="3 0" />
-                            </vertical>
-                        </linear>
-                    </card>
-                    <card id="shezhi" layout_gravity="right" w="auto" h="auto" margin="10 4"
-                        cardCornerRadius="5dp" cardElevation="0" foreground="?selectableItemBackground" cardBackgroundColor="#ff8c9099">
-                        <img src="@drawable/ic_settings_applications_black_48dp" w="30" h="30" margin="1" tint="#ffffff" />
-                    </card>
-                </vertical>
+                
+                <linear >
+                    <vertical gravity="left" padding="5 0 0 0" layout_weight="1" >
+                        <text id="lizhishu" text="血清     {{notes.血清数}}" w="auto" textSize="18" textColor="#ffffff" textStyle="bold" />
+                        <text id="lzhfsj" text="将在明天14:28分完全恢复 " textSize="12" w="auto" textColor="#95ffffff" />
+                    </vertical>
+                    <vertical id="jiaozheng" layout_gravity="center">
+                        <img src="@drawable/ic_create_black_48dp" tint="#ffffff" w="25" h="25" margin="3 0" />
+                    </vertical>
+                </linear>
             </card>
+            <card id="shezhi" layout_gravity="right" w="auto" h="auto" margin="10 4"
+            cardCornerRadius="5dp" cardElevation="0" foreground="?selectableItemBackground" cardBackgroundColor="#ff8c9099">
+            <img src="@drawable/ic_settings_applications_black_48dp" w="30" h="30" margin="1" tint="#ffffff" />
+        </card>
+        </vertical>
+        </card>
         </vertical>
     )
 
@@ -523,7 +522,7 @@ function initPop(modify) {
     })
 
     popView.jiaozheng.click(() => {
-        require("./utlis/reason.js").lzview(function (text, text2) {
+        require("./utlis/reason.js").lzview(function(text, text2) {
             if (text2 == "get") {
                 switch (text) {
                     case "上限":
@@ -544,7 +543,7 @@ function initPop(modify) {
     })
 
     popView.shezhi.click(() => {
-        require("./utlis/reason.js").ssbjview(function (text, text2) {
+        require("./utlis/reason.js").ssbjview(function(text, text2) {
             if (text2 == "get") {
                 notes = tool.readJSON("notes");
 
@@ -639,7 +638,7 @@ function MyPageTransform() {
     var mRadius = 0;
     var pageWidth;
 
-    this.transformPage = function (view, position) {
+    this.transformPage = function(view, position) {
         if (animation_viewpager < 2) {
 
             pageWidth = view.getWidth();
@@ -709,10 +708,10 @@ ui.viewpager.overScrollMode = View.OVER_SCROLL_NEVER; //删除滑动到底的阴
 
 ui.viewpager.setOnPageChangeListener({
 
-    onPageScrolled: function (position) {
+    onPageScrolled: function(position) {
         animation_viewpager = ui.viewpager.getCurrentItem() + position;
     },
-    onPageSelected: function (index) {
+    onPageSelected: function(index) {
         //   log("index = " + index);
         ui.run(() => {
             switch (index) {
@@ -755,33 +754,33 @@ ui.viewpager.setOnPageChangeListener({
 
 
 var items = [{
-    text: "告使用者",
-    drawable: "ic_pets_black_48dp",
-},
-{
-    text: "更换图库",
-    drawable: "ic_satellite_black_48dp",
-},
-{
-    text: "加群交流",
-    drawable: "ic_games_black_48dp",
-},
-{
-    text: "问题帮助",
-    drawable: "@drawable/ic_help_black_48dp",
-},
-{
-    text: "捐赠打赏",
-    drawable: "ic_favorite_black_48dp",
-},
-{
-    text: "关于应用",
-    drawable: "ic_account_circle_black_48dp",
-},
-{
-    text: "运行日志",
-    drawable: "ic_assignment_black_48dp",
-}
+        text: "告使用者",
+        drawable: "ic_pets_black_48dp",
+    },
+    {
+        text: "更换图库",
+        drawable: "ic_satellite_black_48dp",
+    },
+    {
+        text: "加群交流",
+        drawable: "ic_games_black_48dp",
+    },
+    {
+        text: "问题帮助",
+        drawable: "@drawable/ic_help_black_48dp",
+    },
+    {
+        text: "捐赠打赏",
+        drawable: "ic_favorite_black_48dp",
+    },
+    {
+        text: "关于应用",
+        drawable: "ic_account_circle_black_48dp",
+    },
+    {
+        text: "运行日志",
+        drawable: "ic_assignment_black_48dp",
+    }
 ];
 
 ui.drawerList.setDataSource(items);
@@ -796,7 +795,7 @@ ui.drawerList.on("item_click", (item) => {
         case "检查图库":
         case "更换图库":
             helper = tool.readJSON("helper");
-            threads.start(function () {
+            threads.start(function() {
                 use.gallery.gallery_view(use.gallery_link)
                 /*, function (txt, value) {
                     switch (txt) {
@@ -887,7 +886,7 @@ ui.cnos.on("click", () => {
 
 
 //悬浮窗
-ui.floatyCheckPermission.on("check", function (checked) {
+ui.floatyCheckPermission.on("check", function(checked) {
     if (checked && floaty.checkPermission() == false) {
         try {
             app.startActivity({
@@ -965,7 +964,7 @@ ui.autoService.on("long_click", () => {
 });
 
 //无障碍&悬浮窗回弹
-ui.emitter.on("resume", function () {
+ui.emitter.on("resume", function() {
     let themes = storages.create('themes').get('theme')
     if (use.theme.bar != themes.bar) {
         ui.statusBarColor(themes.bar);
@@ -993,32 +992,32 @@ ui.emitter.on("resume", function () {
 });
 
 
-ui.depletion_serum.on("click", function (view) {
+ui.depletion_serum.on("click", function(view) {
     checked = view.checked;
     ui.depletion_way.setVisibility(checked ? 0 : 8);
     ui.depletion_manage.setVisibility(checked ? 0 : 8)
     tool.writeJSON("血清", checked)
 })
-ui.depletion_way1.on("check", function (checked) {
+ui.depletion_way1.on("check", function(checked) {
     ui.resources_type.setVisibility(checked ? 0 : 8);
     helper.战斗.活动 = !checked;
     tool.writeJSON("战斗", helper.战斗);
 });
-ui.depletion_way2.on("check", function (checked) {
+ui.depletion_way2.on("check", function(checked) {
     helper.战斗.活动 = checked;
     tool.writeJSON("战斗", helper.战斗);
     //if (checked) toastLog("暂时不支持此次活动材料");
 });
 
-ui.input_challenge.on("key", function (keyCode, event) {
+ui.input_challenge.on("key", function(keyCode, event) {
     if (event.getAction() == 0 && keyCode == 66) {
-        tool.writeJSON("挑战次数",Numbr(ui.input_challenge.getText()))
+        tool.writeJSON("挑战次数", Numbr(ui.input_challenge.getText()))
         event.consumed = true;
     }
 });
-ui.input_serum.on("key", function (keyCode, event) {
+ui.input_serum.on("key", function(keyCode, event) {
     if (event.getAction() == 0 && keyCode == 66) {
-        tool.writeJSON("注射血清",Numbr(ui.input_serum.getText()))
+        tool.writeJSON("注射血清", Numbr(ui.input_serum.getText()))
         event.consumed = true;
     }
 });
@@ -1026,7 +1025,7 @@ ui.input_serum.on("key", function (keyCode, event) {
 
 let updater;
 ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-    onItemSelected: function (parent, view, resource_name, id) {
+    onItemSelected: function(parent, view, resource_name, id) {
         if (!updater) {
             updater = true;
             return
@@ -1056,12 +1055,12 @@ ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListen
     }
 }));
 
-ui.daily_serum.on("click", function (view) {
+ui.daily_serum.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("每日血清", checked)
 });
 
-ui.disputes.on("click", function (view) {
+ui.disputes.on("click", function(view) {
     checked = view.checked;
     if (checked) {
         use.Dialog_Tips(language.warm_tips, language.disputes_tips);
@@ -1074,31 +1073,31 @@ ui.disputes.on("click", function (view) {
     });
 })
 
-ui.aide_ac.on("click", function (view) {
+ui.aide_ac.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("助理交流", checked)
 });
 
-ui.brilliant_calculations.on("click", function (view) {
+ui.brilliant_calculations.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("妙算神机", checked)
 });
 
-ui.dorm_series.on("click", function (view) {
+ui.dorm_series.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("宿舍系列", checked)
 })
 
-ui.task_award.on("click", function (view) {
+ui.task_award.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("任务奖励", checked)
 })
-ui.handbook.on("click", function (view) {
+ui.handbook.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("手册经验", checked)
 });
 
-ui.auto_use_serum.on("click", function (view) {
+ui.auto_use_serum.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("自动2血清", checked)
 });
@@ -1107,7 +1106,7 @@ var timed_tasks_list = tool.readJSON("timed_tasks", []);
 
 ui.timed_tasks_list.setDataSource(timed_tasks_list);
 
-ui.timed_tasks_list.on("item_click", function (itemView, i) {
+ui.timed_tasks_list.on("item_click", function(itemView, i) {
     let delete_timing = dialogs.build({
         type: "app",
         title: itemView.app + language.delete_timed_tasks,
@@ -1116,14 +1115,16 @@ ui.timed_tasks_list.on("item_click", function (itemView, i) {
     }).on("positive", () => {
         log(language.delete_timed_tasks_tips + itemView.id, timers.removeTimedTask(itemView.id));
         timed_tasks_list.splice(i, 1);
-     
+
     })
-    tool.setBackgroundRoundRounded(delete_timing.getWindow(), { bg: use.theme.bg })
+    tool.setBackgroundRoundRounded(delete_timing.getWindow(), {
+        bg: use.theme.bg
+    })
     delete_timing.show();
 
 });
 
-ui.timed_tasks_frame.on("click", function () {
+ui.timed_tasks_frame.on("click", function() {
     if (ui.timed_tasks_add.getVisibility() == 8) {
         ui.timed_tasks_add.attr("visibility", "visible");
         ui.timed_tasks_list.attr("visibility", "visible");
@@ -1142,11 +1143,11 @@ ui.timed_tasks_frame.on("click", function () {
 })
 
 //定时任务添加事件
-ui.timed_tasks_add.on("click", function () {
+ui.timed_tasks_add.on("click", function() {
     var task = require("./utlis/task.js");
     task.create_task(timed_tasks_list)
 
-}) 
+})
 /*
 var MaterialListC = JSON.parse(
     files.read("./utlis/materialName.json", (encoding = "utf-8"))
@@ -1172,14 +1173,14 @@ ui.inputiz.on("key", function (keyCode, event) {
 });
 
 */
-ui._bgT.on("click", function () {
+ui._bgT.on("click", function() {
     let mod = require("./utlis/modular_list.js");
     mod.create_modular()
 
 }) //模块配置事件
 
 //开始运行
-ui._bg.on("click", function () {
+ui._bg.on("click", function() {
     ui.run(() => {
         ui._bg.attr("src", "#D3D3D3")
     })
@@ -1187,7 +1188,7 @@ ui._bg.on("click", function () {
         ui._bg.attr("src", "#00000000")
     }, 150)
     ui._bg.setEnabled(false);
-    setTimeout(function () {
+    setTimeout(function() {
         ui._bg.setEnabled(true);
     }, 600);
 
@@ -1229,13 +1230,13 @@ ui._bg.on("click", function () {
 
         let appnameui = ui.inflate(
             <vertical padding="25 0">
-                <View bg="#000000" h="1" w="auto" />
-                <vertical w="*" >
-                    <list id="fg_">
-                        <button id="fg" text="{{this.name}}" hint="{{this.package_name}}" w="*" style="Widget.AppCompat.Button.Colored" h="auto" />
-                    </list>
-                </vertical>
-            </vertical>, null, false);
+                        <View bg="#000000" h="1" w="auto" />
+                        <vertical w="*" >
+                            <list id="fg_">
+                                <button id="fg" text="{{this.name}}" hint="{{this.package_name}}" w="*" style="Widget.AppCompat.Button.Colored" h="auto" />
+                            </list>
+                        </vertical>
+                    </vertical>, null, false);
         var appname = dialogs.build({
             type: 'app',
             customView: appnameui,
@@ -1243,7 +1244,7 @@ ui._bg.on("click", function () {
             wrapInScrollView: false,
             autoDismiss: true
         });
-     
+
         for (let i = language.server_name.length - 1; i > 0; i--) {
             if (app.getAppName(language.server_name[i].package_name.toString()) == null) {
                 language.server_name.splice(i, 1);
@@ -1256,8 +1257,8 @@ ui._bg.on("click", function () {
         } else {
             appnameui.fg_.setDataSource(language.server_name);
 
-            appnameui.fg_.on("item_bind", function (itemView, itemHolder) {
-                itemView.fg.on("click", function () {
+            appnameui.fg_.on("item_bind", function(itemView, itemHolder) {
+                itemView.fg.on("click", function() {
                     let item = itemHolder.item;
                     log(item)
                     tool.writeJSON("包名", item.package_name);
@@ -1284,9 +1285,9 @@ ui._bg.on("click", function () {
     return true;
 })
 
-ui.onlyhover.on("click", function () {
+ui.onlyhover.on("click", function() {
     ui.onlyhover.setEnabled(false);
-    setTimeout(function () {
+    setTimeout(function() {
         ui.onlyhover.setEnabled(true)
     }, 800);
     if (floaty.checkPermission() == false) {
@@ -1337,7 +1338,9 @@ function 开始运行jk(jk, tips_) {
                 console.info("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
                 toast("已粘贴到剪贴板并打印到运行日志")
             })
-            tool.setBackgroundRoundRounded(dialog.getWindow(), { bg: use.theme.bg, })
+            tool.setBackgroundRoundRounded(dialog.getWindow(), {
+                bg: use.theme.bg,
+            })
             if (device.release != 9 && device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
                 dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本,\n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe\n当前分辨率：w:" + device.width + ",h:" + device.height + "，战双辅助图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
                 toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
@@ -1382,14 +1385,14 @@ function 开始运行jk(jk, tips_) {
                 console.error("设备分辨率与图库分辨率相差过大，可能无法正常使用")
                 let Tips_tuku_ui = ui.inflate(
                     <vertical id="parent">
-
+                        
                         <card gravity="center_vertical" cardElevation="0dp" margin="0">
                             <img src="file://res/icon.png" w="50" h="30" margin="0" />
                             <text text="无法使用战双辅助" padding="5" textSize="20" gravity="center|left" textColor="#f03752" marginLeft="50" />
-
-
+                            
+                            
                         </card>
-
+                        
                         <ScrollView>
                             <vertical>
                                 <vertical padding="10 0" >
@@ -1397,7 +1400,7 @@ function 开始运行jk(jk, tips_) {
                                     <text id="Device_resolution" text="加载中" />
                                     <text id="dwh" text="加载中" />
                                     <text id="Tips" textStyle="italic" textColor="#f03752" />
-
+                                    
                                     <text id="wxts" text="温馨" typeface="sans" padding="5" textColor="#000000" textSize="15sp" layout_gravity="center" />
                                 </vertical>
                                 <horizontal w="*" padding="-3" gravity="center_vertical">
@@ -1406,7 +1409,7 @@ function 开始运行jk(jk, tips_) {
                                 </horizontal>
                             </vertical>
                         </ScrollView>
-
+                        
                     </vertical>);
 
                 var Tips_tuku = dialogs.build({
@@ -1416,12 +1419,14 @@ function 开始运行jk(jk, tips_) {
                     cancelable: false,
                     canceledOnTouchOutside: false
                 })
-                tool.setBackgroundRoundRounded(Tips_tuku.getWindow(), { bg: use.theme.bg, })
+                tool.setBackgroundRoundRounded(Tips_tuku.getWindow(), {
+                    bg: use.theme.bg,
+                })
                 Tips_tuku.show();
-                Tips_tuku_ui.exit.on("click", function () {
+                Tips_tuku_ui.exit.on("click", function() {
                     Tips_tuku.dismiss();
                 })
-                Tips_tuku_ui.ok.on("click", function () {
+                Tips_tuku_ui.ok.on("click", function() {
                     Tips_tuku.dismiss()
                     开始运行jk(false, true)
 
@@ -1435,7 +1440,7 @@ function 开始运行jk(jk, tips_) {
                 Tips_tuku_ui.Tips.setText("请在软件主页面-左上角头像-更换图库\n更换设备分辨率相近的图库，否则将无法正常使用本应用-辅助。\n目前，图库与设备分辨率宽度一致，而高度误差不超过230左右，或高度一致，而宽度误差不超过170左右，基本上是可以使用的，但不排除某些小图片在你的设备上无法匹配，导致某功能失效")
                 Tips_tuku_ui.exit.setEnabled(false);
                 var i_tnter = 5;
-                var id_tnter = setInterval(function () {
+                var id_tnter = setInterval(function() {
                     if (i_tnter >= 0) {
                         i_tnter--;
                     }
@@ -1482,7 +1487,7 @@ function 开始运行jk(jk, tips_) {
     console.info('截图方式: ' + helper.截图方式);
     ui.start.setHint(null)
     if (!jk) {
-        setTimeout(function () {
+        setTimeout(function() {
             setting = null;
             tukuss = null;
             toastLog("开始运行20秒后主动关闭战双辅助-界面\n如无需此功能请从悬浮窗启动战双辅助");
@@ -1503,7 +1508,7 @@ ui.emitter.on("pause", () => {
     if (ui.input_serum.getText() != '') {
         tool.writeJSON("注射血清", ui.input_serum.getText())
     }
-    tool.writeJSON(null, timed_tasks_list,"timed_tasks");
+    tool.writeJSON(null, timed_tasks_list, "timed_tasks");
 });
 //返回事件
 var isCanFinish = false;
@@ -1521,7 +1526,7 @@ ui.emitter.on("back_pressed", e => {
 
         }
 
-    } catch (err) { }
+    } catch (err) {}
 
     e.consumed = false;
 })
@@ -1556,11 +1561,11 @@ if (!files.exists("./library/coordinate.json")) {
 }
 SystemUiVisibility(false)
 
-threads.start(function () {
+threads.start(function() {
     Update_UI(1)
 
 
-    setInterval(function () {
+    setInterval(function() {
 
         ui.post(() => {
 
@@ -1644,12 +1649,14 @@ threads.start(function () {
     sleep(50);
 
     if (interface.运行次数 != true && interface.公告 == true) threads.start(tishi);
-   // interface = tool.readJSON("interface");
- 
-   threads.start(function() {
- 
-    require("update.js").update()
-});
+    // interface = tool.readJSON("interface");
+
+    threads.start(function() {
+
+        let toupdate = require("./utlis/to_update.js");
+        toupdate.updata(ui.drawerFrame)
+        // require("update.js").update()
+    });
 })
 
 
@@ -1668,7 +1675,7 @@ function Update_UI(i) {
                     } else {
                         ui.start.setText("开始运行");
                     }
-                } catch (err) { }
+                } catch (err) {}
 
 
                 //activity.setRequestedOrientation(1);
@@ -1714,12 +1721,13 @@ function Update_UI(i) {
     }
 
 }
+
 function 检测ocr(tips) {
     let ocr = app.getAppName("com.tony.mlkit.ocr");
-    if(!ocr){
-      if(files.exists("./plugins/com.tony.mlkit.ocr.apk")){
-        ocr = true;
-      }
+    if (!ocr) {
+        if (files.exists("./plugins/com.tony.mlkit.ocr.apk")) {
+            ocr = true;
+        }
     }
     let con_;
     if (tips == true && ocr == null) {
@@ -1775,7 +1783,9 @@ function 检测ocr(tips) {
             }
             toastLog("密码:421")
         })
-        tool.setBackgroundRoundRounded(ocr_tips.getWindow(), { bg: use.theme.bg, })
+        tool.setBackgroundRoundRounded(ocr_tips.getWindow(), {
+            bg: use.theme.bg,
+        })
         ocr_tips.show();
         return false
     }
@@ -1788,6 +1798,7 @@ function snakebar(text, second) {
     second = second || 3000;
     com.google.android.material.snackbar.Snackbar.make(ui.drawerFrame, text, second).show();
 }
+
 function new_ui(name, url) {
     // let JS_file;
 
@@ -1799,10 +1810,14 @@ function new_ui(name, url) {
             use.theme.setTheme("night");
             break
         case '关于':
-            engines.execScriptFile("./activity/about.js");
+            engines.execScriptFile("./activity/about.js", {
+                path: files.path("./activity/")
+            });
             break;
         case '设置':
-            engines.execScriptFile("./activity/Basics.js");
+            engines.execScriptFile("./activity/Basics.js", {
+                path: files.path("./activity/")
+            });
             break;
         case '日志':
             let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
@@ -1811,9 +1826,9 @@ function new_ui(name, url) {
             //engines.execScript("journal_ui", java.lang.String.format("'ui';  var theme = storages.create('configure').get('theme_colors');require('./utlis/journal.js');"));
             break;
         case '坐标调试':
-            let variablez = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
-            engines.execScript("initialize_ui", variablez + "require('./activity/initialize.js')");
-
+            engines.execScriptFile("./activity/initialize.js", {
+                path: files.path("./activity/")
+            });
             break
         case '悬浮窗':
             // JS_file = "./Floating.js";

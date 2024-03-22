@@ -1,3 +1,6 @@
+/**
+ * 生成带图标的按钮
+ */
 module.exports = (function() {
     importClass(android.graphics.Color);
     importClass("androidx.core.graphics.drawable.DrawableCompat");
@@ -34,7 +37,7 @@ module.exports = (function() {
     };
 
     function getResourceID(name) {
-        var resource = context.getResources();
+        let resource = context.getResources();
         return resource.getIdentifier(name, "drawable", context.getPackageName());
     }
     ui.registerWidget("button-layout", ButtonLayout);

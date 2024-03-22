@@ -9,12 +9,12 @@ importClass(android.webkit.WebSettings);
 importClass(android.webkit.ValueCallback);
 
 //启动一个线程用于处理可能阻塞UI线程的操作
-var blockHandle = threads.start(function () {
-    setInterval(() => { }, 1000);
+var blockHandle = threads.start(function() {
+    setInterval(() => {}, 1000);
 });
 
 var use = {};
-var tool = require("./utlis/app_tool.js");
+var tool = require("./modules/app_tool.js");
 var theme = require("./theme.js");
 var language = theme.language.floaty;
 var helper = tool.readJSON("helper");
@@ -22,13 +22,13 @@ var helper = tool.readJSON("helper");
 //图标运行状态,是否手动暂停
 var eliminate = false;
 
-var pane = tool.readJSON("pane",{
-        "悬浮窗大小":0.75,
-        "背景颜色": "#a6ccf3",
-        "图标颜色": "#747984",
-        "文字颜色": "#6b5891",
-        "初始暂停":false,
- })
+var pane = tool.readJSON("pane", {
+    "悬浮窗大小": 0.75,
+    "背景颜色": "#a6ccf3",
+    "图标颜色": "#747984",
+    "文字颜色": "#6b5891",
+    "初始暂停": false,
+})
 let size = pane.悬浮窗大小;
 size = Number(size);
 
@@ -77,7 +77,7 @@ var screenAttribute = {
 var 功能图标 = [
     "@drawable/ic_pause_circle_outline_black_48dp",
     "file://./res/ic_Rational_exchange_black_48dp.png",
-   // "@drawable/ic_assignment_ind_black_48dp",
+    // "@drawable/ic_assignment_ind_black_48dp",
     "@drawable/ic_settings_applications_black_48dp",
     "@drawable/ic_power_settings_new_black_48dp",
 ];
@@ -123,7 +123,7 @@ function 创建悬浮窗() {
                     </horizontal>
                     <horizontal w="*" gravity="right|center" id="operation2" visibility="gone">
                         <img id="daxiao" w="{{zoom(75)}}px" h="*" margin="4 0 2 0 " tint="{{layoutAttribute.setColor.theme}}" src="@drawable/ic_crop_free_black_48dp" />
-
+                        
                         <grid id="操作" w="auto" h="auto" spanCount="6" layout_gravity="right">
                             <img text="1" w="{{zoom(60)}}px" h="*" src="{{this}}" tint="{{layoutAttribute.setColor.theme}}" margin="8 0" />
                         </grid>
@@ -135,7 +135,7 @@ function 创建悬浮窗() {
                     <text id="tod" text="挑战：信息待更新中" textColor="{{layoutAttribute.setColor.toast}}" textSize="{{zoom(45)}}px" h="auto" layout_gravity="center" />
                     <text id="tof" text="血清：信息待更新中" textColor="{{layoutAttribute.setColor.toast}}" textSize="{{zoom(45)}}px" h="auto" layout_gravity="bottom" />
                     <horizontal id="Material_Science" w="*" h="20" marginLeft="-3" layout_gravity="bottom">
-
+                        
                     </horizontal>
                     <frame w="auto" h="auto" marginRight="{{zoom(3)}}px" layout_gravity="center_vertical|right">
                         <list id="optionList" w="*" h="auto">
@@ -143,7 +143,7 @@ function 创建悬浮窗() {
                         </list>
                     </frame>
                 </frame>
-
+                
             </vertical>
             <card w="{{layoutAttribute.windowOperate.w}}px" h="{{layoutAttribute.windowOperate.h}}px" cardCornerRadius="{{zoom(40)}}px" backgroundTint="{{layoutAttribute.setColor.bg}}" cardElevation="0">
                 <img id="windowOperate" w="*" h="*" src="@drawable/ic_ac_unit_black_48dp" tint="{{layoutAttribute.setColor.theme}}" />
@@ -199,7 +199,7 @@ function 悬浮窗监听(window) {
 
     var windowX, windowY, downTime, x, y, maxSwipeW, maxSwipeH, swipe;
 
-    window.windowOperate.setOnTouchListener(function (view, event) {
+    window.windowOperate.setOnTouchListener(function(view, event) {
         switch (event.getAction()) {
             case event.ACTION_DOWN:
                 x = event.getRawX();
@@ -227,10 +227,10 @@ function 悬浮窗监听(window) {
                 if (sY >= maxSwipeH) sY = maxSwipeH;
                 if (new Date().getTime() - downTime > 100 && Math.abs(event.getRawY() - y) > 10 && Math.abs(event.getRawX() - x) > 10 || swipe) {
                     /* 第一次滑动时震动30ms，并且将swipe置为true以忽略滑动条件避免卡顿*/
-                    if (swipe == false) (device.vibrate(30), swipe = true);
+                    if (swipe == false)(device.vibrate(30), swipe = true);
                     layoutAttribute.whole.x = sX;
                     layoutAttribute.whole.y = sY;
-                    ui.run(function () {
+                    ui.run(function() {
                         window.setPosition(sX, sY);
                     })
 
@@ -257,7 +257,7 @@ function 悬浮窗监听(window) {
 
 
     let delay = true;
-    window.功能.on("item_click", function (icon) {
+    window.功能.on("item_click", function(icon) {
         switch (icon) {
             case 功能图标[0]:
                 if (delay) {
@@ -272,7 +272,7 @@ function 悬浮窗监听(window) {
                         threads.start(继续);
                     };
                     delay = false;
-                    setTimeout(function () {
+                    setTimeout(function() {
                         delay = true;
                     }, 1000);
                 } else {
@@ -281,7 +281,7 @@ function 悬浮窗监听(window) {
                 break;
             case 功能图标[1]:
                 执行次数()
-             
+
                 break;
             case 功能图标[2]:
                 主页设置()
@@ -295,7 +295,7 @@ function 悬浮窗监听(window) {
                 window.close()
                 toastLog("主动关闭PRTS辅助及悬浮窗");
 
-                setTimeout(function () {
+                setTimeout(function() {
                     let execution = engines.all();
                     for (let i = 0; i < execution.length; i++) {
                         if (execution[i].getSource().toString().indexOf("PRTS辅助") > -1) {
@@ -311,7 +311,7 @@ function 悬浮窗监听(window) {
 
     });
 
-    window.optionList.on("item_click", function (icon) {
+    window.optionList.on("item_click", function(icon) {
 
         switch (icon) {
             case optionList[0]:
@@ -319,7 +319,7 @@ function 悬浮窗监听(window) {
                     Combat_report.view_show();
                     return
                 }
-                if (tool.script_locate("莺尾花")) {
+                if (tool.script_locate("progra")) {
                     toast("请先点击" + window.name.text() + "右侧的图标暂停");
                     return;
                 };
@@ -345,22 +345,22 @@ function 执行次数() {
             
             <View bg="#000000" h="1" w="auto" />
             <Switch  id="depletion_serum"
-                                checked="{{helper.血清}}"
-                                text="{{language['depletion_serum']}}"
-                                padding="6 6 6 6"
-                                textSize="16"
-                            />
-                            <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
-                                <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto"  />
-                                <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
-                                    layout_gravity="right|center" w="auto" h="20dp" visibility="gone" />
-                                <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto"  />
-                            </radiogroup>
+            checked="{{helper.血清}}"
+            text="{{language['depletion_serum']}}"
+            padding="6 6 6 6"
+            textSize="16"
+            />
+            <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
+                <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto"  />
+                <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
+                layout_gravity="right|center" w="auto" h="20dp" visibility="gone" />
+                <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto"  />
+            </radiogroup>
             <Switch id="ysrh" checked="{{helper.黑卡}}" text="仅使用药剂恢复血清" visibility="gone" padding="6 6 6 6" textSize="16sp" />
-       
+            
             <horizontal gravity="center" marginLeft="5">
                 <text id="mr1" text="挑战上限:" textSize="15" textColor="#212121" />
-                 <input id="input_challenge" inputType="number" hint="{{helper.挑战次数}}次" layout_weight="1" paddingLeft="6" w="auto" />
+                <input id="input_challenge" inputType="number" hint="{{helper.挑战次数}}次" layout_weight="1" paddingLeft="6" w="auto" />
                 <text id="mr2" text="磕药/黑卡:" textSize="15" textColor="#212121" />
                 <input id="input_serum" inputType="number" hint="{{helper.注射血清}}个" layout_weight="1" w="auto" />
             </horizontal>
@@ -405,52 +405,52 @@ function 执行次数() {
 
     }
 
-    rewriteView.depletion_serum.on("click", function (view) {
+    rewriteView.depletion_serum.on("click", function(view) {
         checked = view.checked;
         rewriteView.depletion_way.setVisibility(checked ? 0 : 8);
-    //    rewriteView.depletion_manage.setVisibility(checked ? 0 : 8)
+        //    rewriteView.depletion_manage.setVisibility(checked ? 0 : 8)
         tool.writeJSON("血清", checked)
     })
-    rewriteView.depletion_way1.on("check", function (checked) {
+    rewriteView.depletion_way1.on("check", function(checked) {
         rewriteView.resources_type.setVisibility(checked ? 0 : 8);
         helper.战斗.活动 = !checked;
         tool.writeJSON("战斗", helper.战斗);
     });
-    rewriteView.depletion_way2.on("check", function (checked) {
+    rewriteView.depletion_way2.on("check", function(checked) {
         if (checked) toastLog("暂时不支持此次活动材料");
     });
 
     let updater;
     rewriteView.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-    onItemSelected: function (parent, view, resource_name, id) {
-        if (!updater) {
-            updater = true;
-            return
+        onItemSelected: function(parent, view, resource_name, id) {
+            if (!updater) {
+                updater = true;
+                return
+            }
+            switch (resource_name) {
+                case 0:
+                    resource_name = "作战补给"
+                    break
+                case 1:
+                    resource_name = "后勤保养"
+                    break;
+                case 2:
+                    resource_name = "军备突破"
+                    break;
+                case 3:
+                    resource_name = "成员特训"
+                    break;
+                case 4:
+                    resource_name = "螺母大作战"
+                    break;
+                case 5:
+                    resource_name = "战技演习"
+                    break;
+            };
+            helper.战斗.资源名称 = resource_name;
+            tool.writeJSON("战斗", helper.战斗);
         }
-        switch (resource_name) {
-            case 0:
-                resource_name = "作战补给"
-                break
-            case 1:
-                resource_name = "后勤保养"
-                break;
-            case 2:
-                resource_name = "军备突破"
-                break;
-            case 3:
-                resource_name = "成员特训"
-                break;
-            case 4:
-                resource_name = "螺母大作战"
-                break;
-            case 5:
-                resource_name = "战技演习"
-                break;
-        };
-        helper.战斗.资源名称 = resource_name;
-        tool.writeJSON("战斗", helper.战斗);
-    }
-}));
+    }));
 
 
     rewriteView.ysrh.on("check", (checked) => {
@@ -460,33 +460,33 @@ function 执行次数() {
         输入框事件()
     });
 
-   
-    rewriteView.input_challenge.on("key", function (keyCode, event) {
+
+    rewriteView.input_challenge.on("key", function(keyCode, event) {
         if (event.getAction() == 0 && keyCode == 66) {
             输入框事件()
             event.consumed = true;
         }
     });
-    rewriteView.input_serum.on("key", function (keyCode, event) {
+    rewriteView.input_serum.on("key", function(keyCode, event) {
         if (event.getAction() == 0 && keyCode == 66) {
             输入框事件()
             event.consumed = true;
         }
     });
-   
-   
+
+
     rewriteDialogs.show()
-   
+
     function 输入框事件() {
-      
+
         var rwt = rewriteView.input_challenge.text(),
             rwt2 = rewriteView.input_serum.text();
-          
+
         if (rwt.length > 3) {
             rewriteView.input_challenge.setError("最高999次");
             return
         };
-    
+
         if (rwt2.length > 2) {
             rewriteView.input_serum.setError("使用药剂、黑卡\n恢复血清最高99个");
             return
@@ -504,25 +504,25 @@ function 执行次数() {
         } else {
             rewriteView.input_challenge.setError("请输入数字");
         };
-     
 
-        
+
+
         if (rwt.length == 0 && rwt2.length == 0) {
             toastLog("没有输入任何内容，仅生效部分选项");
         }
-         rwt = null;
+        rwt = null;
         rwt2 = null;
-        ui.run(function () {
+        ui.run(function() {
             helper = tool.readJSON("helper");
-            window.tod.setText("挑战：可挑战次数:"+helper.挑战次数);
-            window.tof.setText("血清：可使用:"+helper.注射血清+"&已使用:"+helper.已注射血清);
-            
+            window.tod.setText("挑战：可挑战次数:" + helper.挑战次数);
+            window.tof.setText("血清：可使用:" + helper.注射血清 + "&已使用:" + helper.已注射血清);
+
             rewriteView.input_challenge.setHint(" " + helper.挑战次数);
-         
+
             rewriteView.input_serum.setHint(" " + helper.注射血清);
             rewriteView.input_challenge.setText("");
             rewriteView.input_serum.setText("");
-         
+
 
         });
         rewriteDialogs.dismiss();
@@ -537,8 +537,8 @@ function 主页设置() {
         <vertical margin="10 0">
             <Switch id="dorm_series" checked="{{helper.宿舍系列}}" text="{{language.dorm_series}}" padding="6 6 6 6" textSize="16sp" />
             <Switch id="handbook" checked="{{helper.手册经验}}" text="{{language['handbook']}}"
-                                padding="6 6 6 6"
-                                textSize="16"/>
+            padding="6 6 6 6"
+            textSize="16"/>
         </vertical>);
     var setup = dialogs.build({
         customView: setupView,
@@ -549,12 +549,12 @@ function 主页设置() {
         setup = null;
     })
 
-    setupView.dorm_series.click((view)=>{
-     tool.writeJSON("宿舍系列",view.checked);
+    setupView.dorm_series.click((view) => {
+        tool.writeJSON("宿舍系列", view.checked);
     });
 
-   //    checked ? setupView.gmcs.attr("visibility", "visible") : setupView.gmcs.attr("visibility", "gone");
-      
+    //    checked ? setupView.gmcs.attr("visibility", "visible") : setupView.gmcs.attr("visibility", "gone");
+
     setup.show();
 
 }
@@ -565,13 +565,13 @@ function 暂停(form) {
     form = form || "无";
     功能图标[0] = "@drawable/ic_play_circle_outline_black_48dp";
 
-    ui.run(function () {
+    ui.run(function() {
         window.功能.setDataSource(功能图标);
 
     });
 
     //判断不是手动暂停的
-    
+
     if (eliminate == false) {
         try {
             if (helper.静音 == true && helper.当前音量 != false) {
@@ -581,27 +581,27 @@ function 暂停(form) {
         } catch (err) {
             console.error("恢复音量失败" + err)
         }
-     
+
     }
-    
+
     $settings.setEnabled('foreground_service', false);
 
-    use.progra = tool.script_locate("莺尾花");
-   if (use.progra) {
+    use.progra = tool.script_locate("progra");
+    if (use.progra) {
         use.progra.emit("暂停", "结束程序");
         eliminate = false;
-        setTimeout(function () {
-            use.progra = tool.script_locate("莺尾花");
+        setTimeout(function() {
+            use.progra = tool.script_locate("progra");
             if (use.progra) {
-                console.verbose("强行终止莺尾花")
+                console.verbose("强行终止progra")
                 use.progra.forceStop();
             }
-           ui.run(function () {
-            if(window.tos){
-                window.tos.setText("状态：主程序暂停中");
-            }
+            ui.run(function() {
+                if (window.tos) {
+                    window.tos.setText("状态：主程序暂停中");
+                }
             });
-        
+
         }, 1000)
     }
     /*    files.write("./mrfz/图片路径.txt", "./mrfz/");
@@ -614,10 +614,10 @@ function 暂停(form) {
 function 继续() {
     功能图标[0] = "@drawable/ic_pause_circle_outline_black_48dp";
 
-    ui.run(function () {
+    ui.run(function() {
         window.功能.setDataSource(功能图标);
         window.tos.setText("状态：等待程序重启中");
-        
+
         if (helper.最低电量) {
             if (!device.isCharging() && device.getBattery() < helper.最低电量) {
                 toast("警告:电量低于设定值" + helper.最低电量 + "%且未充电");
@@ -626,7 +626,7 @@ function 继续() {
                 window.tos.setText("警告：电量低且未充电");
             };
         };
-        helper = tool.readJSON("helper"); 
+        helper = tool.readJSON("helper");
         程序();
     });
 
@@ -728,7 +728,7 @@ function 旋转监听() {
         if (getDirection != screenAttribute.direction) {
             screenAttribute.direction = getDirection;
             // screenAttribute.direction == "竖屏" ? (screenAttribute.w = device.width, screenAttribute.h = device.height - screenAttribute.titleH) : (screenAttribute.h = device.width, screenAttribute.w = device.height - screenAttribute.titleH);
-            threads.start(function () {
+            threads.start(function() {
                 悬浮窗复位();
             })
         };
@@ -761,31 +761,34 @@ function 获取屏幕方向() {
 function 程序(implem) {
     helper = tool.readJSON("helper");
     ui.post(() => {
-        if(!helper.血清){
-         window.name.setText("宿舍系列")
+        if (!helper.血清) {
+            window.name.setText("宿舍系列")
         }
-        if(!helper.宿舍系列){
+        if (!helper.宿舍系列) {
             window.name.setText("战斗任务")
         }
-        window.tod.setText("挑战：可挑战次数:"+helper.挑战次数);
-        window.tof.setText("血清：可使用:"+helper.注射血清+"&已使用:"+helper.已注射血清);
+        window.tod.setText("挑战：可挑战次数:" + helper.挑战次数);
+        window.tof.setText("血清：可使用:" + helper.注射血清 + "&已使用:" + helper.已注射血清);
     })
     if (pane.初始暂停) {
         threads.start(暂停);
-        ui.run(function () {
+        ui.run(function() {
             window.tos.setText("状态：主程序暂停中");
         })
         pane = false;
-        tool.writeJSON("初始暂停",false,"pane");
+        tool.writeJSON("初始暂停", false, "pane");
     } else {
         eliminate = false;
         ui.post(() => {
             console.verbose("开始运行")
-            engines.execScript("莺尾花", "auto();require('./progra.js');");
+            engines.execScriptFile("./progra.js", {
+                delay: 200,
+                path: files.path('./'),
+            });
         }, 200)
-        setTimeout(function () {
+        setTimeout(function() {
             if (!eliminate) {
-                if (tool.script_locate("莺尾花") == false) {
+                if (tool.script_locate("progra") == false) {
                     /*
                     if (files.read("./mrfz/Byte.txt") == "true") {
                         files.write("./mrfz/Byte.txt", "false");
@@ -803,7 +806,7 @@ function 程序(implem) {
                             default:
                                 toastLog("战双辅助启动失败，请尝试重新启动");
                                 暂停();
-                                ui.run(function () {
+                                ui.run(function() {
                                     window.tos.setText("状态：战双辅助启动失败");
                                 })
                                 return
@@ -817,12 +820,12 @@ function 程序(implem) {
     }
 }
 
-threads.start(function () {
-    events.on("暂停", function (words) {
+threads.start(function() {
+    events.on("暂停", function(words) {
         暂停();
         switch (words) {
             case "状态异常":
-                ui.run(function () {
+                ui.run(function() {
                     window.tos.setText("状态：异常，超时暂停处理");
                 });
                 home();
@@ -832,7 +835,7 @@ threads.start(function () {
                 if (helper.公告 == true) {
                     关闭应用(helper.执行, "电量低于设定值且未充电");
                 } else {
-                    ui.run(function () {
+                    ui.run(function() {
                         window.tos.setText("状态：暂停，电量低且未充电");
                     })
                 }
@@ -844,24 +847,24 @@ threads.start(function () {
         }
     });
 
-    setTimeout(function () {
-        events.on("展示文本", function (words, text) {
+    setTimeout(function() {
+        events.on("展示文本", function(words, text) {
             if (eliminate) {
                 return
             }
             switch (words) {
                 case "状态":
-                    ui.run(function () {
+                    ui.run(function() {
                         window.tos.setText(text);
                     });
                     break;
                 case "挑战":
-                    ui.run(function () {
+                    ui.run(function() {
                         window.tod.setText(text);
                     });
                     break;
                 case "血清":
-                    ui.run(function () {
+                    ui.run(function() {
                         window.tof.setText(text);
                     });
                     break;
@@ -874,24 +877,24 @@ threads.start(function () {
             }
         });
 
-        events.on("面板", function (words, xy) {
+        events.on("面板", function(words, xy) {
 
             switch (words) {
                 case "展开":
-                    threads.start(function () {
+                    threads.start(function() {
                         layoutAttribute.homepage.show = true;
                         展开主界面();
                     })
 
                     break;
                 case "隐藏":
-                    threads.start(function () {
+                    threads.start(function() {
                         layoutAttribute.homepage.show = false;
                         隐藏主界面();
                     })
                     break;
                 case "复位":
-                    threads.start(function () {
+                    threads.start(function() {
                         悬浮窗复位();
                     })
                     break;
@@ -910,7 +913,7 @@ threads.start(function () {
                             toastLog("不是对象");
                             return
                         }
-                        setTimeout(function () {
+                        setTimeout(function() {
                             layoutAttribute.whole.x = window.getX();
                             layoutAttribute.whole.y = window.getY();
                         }, 500)
@@ -921,7 +924,7 @@ threads.start(function () {
                         console.error("设置面板位置异常：" + err)
                     }
                     break
-        
+
             }
         });
 

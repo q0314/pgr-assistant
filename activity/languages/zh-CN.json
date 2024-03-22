@@ -26,8 +26,7 @@
         "yes": "确定",
         "no": "取消",
         "delete_timed_tasks_tips": "删除定时任务，id=: ",
-        "server_name": [
-            {
+        "server_name": [{
                 "package_name": "com.kurogame.haru.hero",
                 "name": "官服"
             },
@@ -115,9 +114,14 @@
         "check_curs_mood": "检查宿舍内小人心情",
         "check_curs_mood_description": "准备抚摸宿舍内小人时,检查心情是否满80及以上,是则不进行抚摸. 如有抚摸时报错,请关闭该功能",
         "unusual_interface_suspended": "异常界面超时暂停",
-        "unusual_interface_suspended_description": "程序在3分钟内无法判断页面则暂停程序并返回桌面，\n有效防止突发意外情况使程序无法判断页面，出错进入死循环,导致设备一直亮屏，温度过高",
+        "unusual_interface_suspended_description": "程序在3分钟内无法判断页面或程序在当前界面连续识别到同一内容时会判断出现异常，主动暂停并返回桌面，\n有效防止突发意外情况使程序无法判断页面，出错进入死循环,导致设备一直亮屏，温度过高",
         "suspended_desktop": "暂停后返回桌面",
         "suspended_desktop_description": "程序被程序主动暂停时，手动暂停不会返回桌面",
+        "OCRCorrection-rules": "矫正规则",
+        "OCRExtensions": "OCR插件扩展",
+        "OCRExtensions-type": "OCR插件类型",
+        "OCRExtensions-explain": "OCR可为pgr-assistant提供识别图片内文字功能,目前提供的OCR插件需安装应用包后方可使用。\nmlkitOCR:优点：识别速度快，英语识别准确率高，设备兼容性较好。缺点：简中识别准确率差.需配合大量OCR矫正规则使用\nxiaoyueOCR:基于paddle v3。优点:中文识别准确率高",
+
         "auto_accessibility": "自启动无障碍服务",
         "auto_accessibility_description": "授权安全系统设置权限后可在打开应用/点击主页-无障碍服务开关时,自动打开无障碍服务,无需跳转系统设置界面手动打开",
         "cancel_authorization": "取消授权安全系统设置权限方式：\n1.卸载本应用，重新安装， \n2.执行下方ADB相关命令",
@@ -141,16 +145,21 @@
         "image_broker_description": "图片内存资源管理，防止图片内存泄露。有点用,但不多\n出现应用崩溃可禁用此功能尝试,也许有用...",
         "simulator_tablet": "兼容模拟器平板版",
         "simulator_tablet_description": "打开后可兼容模拟器平板版分辨率, 可修复模拟器竖屏, 需选择设备分辨率与图库分辨率相近的，例：720x1280用图库1280x720，1080x1920用图库1920x1080,（推荐雷电、逍遥、夜神）模拟器",
+        "PROJECT_MEDIA": "投影媒体屏幕",
+        "PROJECT_MEDIA-expiain": "点击使用root|shizuku授权后，开始运行时允许录制屏幕的安全提示窗口将不再弹出，或可解决pgr-assistant开始运行时游戏黑屏/卡住。外置ADB授权命令:adb shell appops set %packageName% PROJECT_MEDIA allow",
+
         "self_starting": "允许应用自启动",
         "self_starting_description": "有无障碍异常/杀应用/应用闪退的情况时，请打开尝试\n是否已开启请以系统设置实际显示为准",
         "manageimage_run_script": "管理运行脚本"
     },
     "about": {
-        "name": "战双助手",
-        "apply_version": "应用版本:",
+        "name": "PGRAssistant",
+        "like": "你喜欢我吗",
+        "localVerName": "项目版本：",
+        "apply_version": "应用版本：",
         "engine_version": "引擎版本:Auto.js ",
         "author": "作者:梦月时歌",
-        "open_source": "开源:",
+        "open_source": "源代码",
         "qq_tips": "请先安装QQ或升级QQ",
         "classify_text1": "联系作者",
         "classify_text2": "应用相关",
@@ -175,7 +184,7 @@
     "initialize": {
         "toolbar": "初始化坐标配置",
         "create_options_menu1": "运行图色助手",
-        "tips": "请在下方输入相关坐标信息. 请正确输入坐标信息,否则程序容易出错. x,y获取方式:\n1.右上角运行 图色助手-打开一个图片,绿色框左上角圆点中心就是x,y值. \n2.使用预置坐标信息,前人栽树,后人乘凉.需要分辨率一致,并且战双设置-异形屏适配:无,还会受异形/全面屏的影响,出现坐标偏差\n3.打开系统设置-开发者模式-指针位置显示,点按屏幕,两线相交中心位置即是x,y值. 详情查看屏幕左上角\n4.使用自适应坐标兼容填充,你应当明白此方法的作用, 原理是用1080x2160分辨率的坐标信息与你的设备分辨率进行换算, 得出可能适用的坐标信息. 受异形屏，战双-异形屏适配, 战双自身界面布局的影响, 大概率会出现坐标位置偏差,无法正常使用脚本,",
+        "tips": "请在下方输入相关坐标信息. 请正确输入坐标信息,否则程序容易出错。x,y介绍：\nx轴是水平方向的轴，从左到右表示正方向，y轴是垂直方向的轴，从上到下表示正方向。屏幕/图片左上角为坐标原点，即 0,0\n\nx,y获取方式:\n1.右上角运行 图色助手-打开一个图片,绿色框左上角圆点中心就是x,y值. \n2.使用预置坐标信息,前人栽树,后人乘凉.需要分辨率一致,并且战双设置-异形屏适配:无,还会受异形/全面屏的影响,出现坐标偏差\n3.打开系统设置-开发者模式-指针位置显示,点按屏幕,两线相交中心位置即是x,y值. 详情查看屏幕左上角\n4.使用自适应坐标兼容填充,你应当明白此方法的作用, 原理是用1080x2160分辨率的坐标信息与你的设备分辨率进行换算, 得出可能适用的坐标信息. 受异形屏，战双-异形屏适配, 战双自身界面布局的影响, 大概率会出现坐标位置偏差,无法正常使用脚本,",
         "adaption": "使用自适应坐标兼容填充",
         "preset": "使用预置坐标信息",
         "fill_tips": "填充出错,坐标信息可能不完整:\n",
@@ -186,9 +195,9 @@
         "hint3": "宿舍6房间位置",
         "hint4": "房间内快捷头像坐标信息",
         "hint5": "战斗坐标信息",
-        "return": "返回",
+        "return": "返回(可自动获取)",
         "unfold": "主页-展开",
-        "mainpage": "主页面",
+        "mainpage": "主页面(可自动获取)",
         "manualicon": "手册图标",
         "roominitialization": "自动获取(需宿舍名带有'宿舍')",
         "attackkey": "攻击键",

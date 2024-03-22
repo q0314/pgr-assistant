@@ -40,7 +40,7 @@ module.exports = (function () {
         this.track_color = '#0d84ff';
         
     }
-
+      
     SwitchWidget.prototype.track_color = '#0d84ff'
 
     SwitchWidget.prototype.render = function () {
@@ -164,8 +164,8 @@ module.exports = (function () {
             view.setTrackDrawable(mTrackld);
             view.setThumbDrawable(mThumbld);
             /** Switch Thumb Track TintList */
-            view.setTrackTintList(view.getTrackTintList());
-            view.setThumbTintList(view.getThumbTintList());
+            view.setThumbTintList(createColorStateList('#FFFFFF', '#FFFFFF'));
+            view.setTrackTintList(createColorStateList('#7A999999', view.widget.track_color));
             view.invalidate();
         }
 

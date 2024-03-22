@@ -2,9 +2,11 @@
 try {
     ui.statusBarColor(theme.bar);
 } catch (err) {
-var theme = require("../theme.js");
+    var theme = require("../theme.js");
 
 }
+let path_ = context.getExternalFilesDir(null).getAbsolutePath();
+let _proj_def_n = 'pgr-assistant';
 importClass(android.content.Context);
 
 ui.layout(
@@ -29,7 +31,6 @@ ui.globalconsole.setColor("E", "#b71c1c");
 
 //创建选项菜单(右上角)
 ui.emitter.on("create_options_menu", menu => {
-    menu.add("代码测试");
     menu.add("清空日志");
     menu.add("其他应用打开");
     menu.add("保存至下载目录");
@@ -39,25 +40,40 @@ var packageName = context.getPackageName();
 //监听选项菜单点击
 ui.emitter.on("options_item_selected", (e, item) => {
     switch (item.getTitle()) {
-        case "代码测试":
-            engines.execScriptFile("./activity/debug.js");
-        break
         case "清空日志":
             console.clear();
             ui.globalconsole.clear();
             break;
         case "其他应用打开":
-            app.viewFile("/data/data/"+packageName+"/files/logs/log.txt");
+            if (files.exists(path_ + "/"+_proj_def_n+"_log.txt")) {
+                app.viewFile(path_ + "/"+_proj_def_n+"_log.txt");
+                return
+            }
+            app.viewFile("/data/data/" + packageName + "/files/logs/log.txt");
             break;
         case "保存至下载目录":
-            let path = files.path("/sdcard/Download/战双辅助运行日志.txt");
-            log("文件是否存在："+files.exists("/data/data/"+packageName+"/files/logs/log.txt"))
-            if (files.copy("/data/data/"+packageName+"/files/logs/log.txt", path)){
+            let path = files.path("/sdcard/Download/明日计划运行日志.txt");
+            // log("文件是否存在："+files.exists(path_+"/arkplan_log.txt"));
+            if (files.exists(path_ + "/"+_proj_def_n+"_log.txt")) {
+                log("文件是否存在：" + files.exists(path_ + "/"+_proj_def_n+"_log.txt"));
+                if (files.copy(path_ + "/"+_proj_def_n+"_log.txt", path)) {
+                    toastLog("成功保存至" + path);
+                } else {
+                    toastLog("保存" + path + "失败")
+
+                }
+
+                return
+            };
+
+            log("文件是否存在：" + files.exists("/data/data/" + packageName + "/files/logs/log.txt"));
+            if (files.copy("/data/data/" + packageName + "/files/logs/log.txt", path)) {
                 toastLog("成功保存至" + path);
             } else {
                 toastLog("保存" + path + "失败")
-             
+
             }
+
             break;
         case "导入日志(开发人员使用)":
             File_selector(".txt")
@@ -78,7 +94,7 @@ function File_selector(mime_Type, fun) {
     toastLog("请选择后缀为.txt类型的文件");
 
     threads.start(function() {
-        let FileChooserDialog = require("../utlis/file_chooser_dialog");
+        let FileChooserDialog = require("../subview/file_chooser_dialog");
         FileChooserDialog.build({
             title: '请选择后缀为.txt的文件',
             type: "app-or-overlay",
@@ -103,10 +119,15 @@ function File_selector(mime_Type, fun) {
                 ui.globalconsole.clear();
                 log("清空旧日志")
                 console.info("选择的文件路径：" + file);
-                if (!files.copy(file, "/data/data/"+packageName+"/files/logs/log.txt")) {
+                if (files.exists(path_ + "/"+_proj_def_n+"_log.txt")) {
+                    if (files.copy(file, path_ + "/"+_proj_def_n+"_log.txt")) {
+                        return
+                    };
+                }
+                if (!files.copy(file, "/data/data/" + packageName + "/files/logs/log.txt")) {
                     //   if(!files.copy(file,"/storage/emulated/0/Android/data/org.autojs.autojspro/files/logs/log.txt")){
                     toast("导入日志" + file + "失败")
-                    console.error("导入日志"+file+"失败"+random(0,9999))
+                    console.error("导入日志" + file + "失败" + random(0, 9999))
                 }
             }
 

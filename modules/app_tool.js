@@ -54,6 +54,7 @@ function writeJSON(sett, value, key,debug) {
     log("vlaue",setting)
     }
     Disposition.put(key, setting);
+    return setting;
 }
 
 function autoService(force, mode) {
@@ -330,6 +331,155 @@ function Floating_emit(id,text1,text2) {
 }
 
 
+/**
+ * 获取当前前台应用包名
+ * @returns {string | object} - 当前前台应用包名
+ */
+function getPackage() {
+    if (!runtime.getAccessibilityBridge()) {
+        return currentPackage();
+    }
+    // 通过windowRoot获取根控件的包名，理论上返回一个 速度较快
+    let windowRoots = runtime.getAccessibilityBridge().windowRoots()
+    if (windowRoots && windowRoots.size() > 0) {
+        if (windowRoots && windowRoots.size() >= 2) {
+            console.verbose('windowRoots size: ' + windowRoots.size())
+            //有多个windowRoots时，最后一个比较符合前台应用
+            for (let i = windowRoots.size() - 1; i >= 0; i--) {
+                let root = windowRoots.get(i)
+                console.info(root ? root.getPackageName() : "null");
+                if (root !== null && root.getPackageName()) {
+                    return root.getPackageName()
+                }
+
+            }
+
+        } else {
+            if (windowRoots && windowRoots.get(0)) {
+                return windowRoots.get(0).getPackageName();
+            }
+        }
+
+
+    }
+    // windowRoot获取失败了通过service.getWindows获取根控件的包名，按倒序从队尾开始获取 速度相对慢一点
+    try {
+        let service = runtime.getAccessibilityBridge().getService()
+        let serviceWindows = service !== null ? service.getWindows() : null
+        if (serviceWindows && serviceWindows.size() > 0) {
+            console.verbose('windowRoots未能获取包名信息，尝试service window size: ', serviceWindows.size())
+            for (let i = serviceWindows.size() - 1; i >= 0; i--) {
+                let window = serviceWindows.get(i)
+                if (window && window.getRoot() && window.getRoot().getPackageName()) {
+                    return window.getRoot().getPackageName()
+                }
+            }
+        }
+    } catch (e) {
+        console.error(e)
+    }
+    log('service.getWindows未能获取包名信息，通过currentPackage()返回数据')
+    // 以上方法无法获取的，直接按原方法获取包名
+    return currentPackage();
+}
+/**
+ * 
+ * @param {string} package - 启动应用的包名
+ */
+function launchPackage(package) {
+
+    try {
+        //let intent = new Intent(Intent.ACTION_MAIN);
+        //intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        let intent = new Intent();
+
+        let packageManager = context.getPackageManager();
+        intent = packageManager.getLaunchIntentForPackage(package);
+        intent.setPackage(null);
+        app.startActivity(intent);
+    } catch (e) {
+        console.error("启动" + package + "错误:\n" + e)
+        app.launchPackage(package);
+    }
+    /*
+        setTimeout(() => {
+    
+            let currentPackage = getpackage();
+            switch (currentPackage) {
+                case package:
+                    break
+                default:
+                    console.error(currentPackage + " 与预期包名不符，重新启动");
+    
+                    function uiLaunchApp(appName) {
+                        var script = '"ui";\nvar args = engines.myEngine().execArgv;\nlet appName = args.appName;\app.launchPackage(appName);exit();';
+                        engines.execScript("uiLaunchApp", script, {
+                            arguments: {
+                                appName: appName
+                            }
+                        });
+                    };
+    
+                    uiLaunchApp(setting.包名);
+                    break
+            }
+        }, 2000);
+        */
+}
+
+/**
+ * 过滤非法文件名字符
+ * @param {string} - 文件名
+ */
+function formatFileName(fileName) {
+    //importClass(java.util.regex.Pattern);
+    let pattern = Pattern.compile("[\\s\\\\/:\\*\\?\\\"<>\\|]");
+    let matcher = pattern.matcher(fileName);
+    return matcher.replaceAll("");
+};
+
+let hanZiSimilarBridge = null;
+
+function nlpSimilarity(s1, s2) {
+    if (!hanZiSimilarBridge) {
+        // @ts-expect-error dex包
+        hanZiSimilarBridge = new Packages.cn.zzliux.HanZiSimilarBridge();
+        hanZiSimilarBridge.init(
+            files.read(files.cwd() + '/utlis/java/nlp/bihuashu.txt'),
+            files.read(files.cwd() + '/utlis/java/nlp/bushou.txt'),
+            files.read(files.cwd() + '/utlis/java/nlp/jiegou.txt'),
+            files.read(files.cwd() + '/utlis/java/nlp/sijiao.txt'),
+            files.read(files.cwd() + '/utlis/java/nlp/userdefine.txt')
+        );
+        //  log(files.cwd())
+        log("初始化字形计算\n字符串1：" + s1 + "\n字符串2：" + s2 + "\n相似度：" + hanZiSimilarBridge.similarity(s1, s2));
+    }
+    /*let result =*/
+    return hanZiSimilarBridge.similarity(s1, s2);
+    //console.log('result=${result}');
+    // return result;
+};
+
+function pointerPositionDisplay(open) {
+    let state;
+    try {
+        state = Settings.System.getInt(context.getContentResolver(), Settings.System.POINTER_LOCATION)
+    } catch (e) {
+        console.error(e)
+        state = shell("su -c 'settings get system pointer_location'", {
+            adb: $shell.checkAccess("adb")
+        }).result;
+        log(state);
+    };
+    if (open && state) return true;
+    if (open===false && !state) return true;
+    if (shell("su -c 'settings put system pointer_location " + (state ? "0" : "1") + "'", {
+            adb: $shell.checkAccess("adb")
+        }).code == 0) {
+        return true;
+    }
+}
+
 let tool = {}
 tool.script_locate = script_locate;
 tool.Floating_emit = Floating_emit;
@@ -338,6 +488,14 @@ tool.readJSON = readJSON;
 tool.autoService = autoService;
 tool.checkPermission = checkPermission;
 tool.setBackgroundRoundRounded = setBackgroundRoundRounded;
+
+tool.currentPackage = getPackage;
+tool.launchPackage = launchPackage;
+tool.formatFileName = formatFileName;
+tool.checkPermission = checkPermission;
+tool.pointerPositionDisplay = pointerPositionDisplay;
+tool.nlpSimilarity = nlpSimilarity;
+
 try {
     module.exports = tool;
 } catch (e) {

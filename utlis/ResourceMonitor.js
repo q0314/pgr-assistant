@@ -7,23 +7,24 @@
  */
 //let { config } = require('./config.js')(runtime, this)
 
-function debugInfo(log){
-    console.verbose(log);
+//let { debugInfo, debugForDev, infoLog, errorInfo } = require('./prototype/LogUtils.js')
+function debugInfo(log) {
+  console.info(log);
 }
-function debugForDev(log){
-  //  console.verbose(log);
+function debugForDev(log) {
+    //console.verbose(log);
   return
 }
-
-function isNullOrUndefined (val) {
+//let commonFunctions = require('./prototype/CommonFunction.js')
+function isNullOrUndefined(val) {
   return val === null || typeof val === 'undefined'
 }
 
 module.exports = function (__runtime__, scope) {
   if (typeof scope.resourceMonitor === 'undefined' || scope.resourceMonitor === null) {
     let _o_images = require('__images__.js')(__runtime__, scope)
-    debugInfo('Is _origin_images null?'+isNullOrUndefined(_o_images))
-    function ResourceMonitor () {
+    debugInfo('Is _origin_images null?' + isNullOrUndefined(_o_images))
+    function ResourceMonitor() {
       this.images = []
       // 需要长时间持有的图片，不会自动动态释放
       this.longHoldImages = []
@@ -44,12 +45,11 @@ module.exports = function (__runtime__, scope) {
             scope.images = _o_images
             scope.__asGlobal__(_o_images, ['captureScreen'])
             _o_images = null
-            try{
-                $images.stopScreenCapture();
-            }catch(e){
-                
+            try {
+              $images.stopScreenCapture();
+            } catch (e) {
+
             }
-        
           }
         } finally {
           this.writeLock.unlock()
@@ -96,12 +96,12 @@ module.exports = function (__runtime__, scope) {
         if (this.images.length > 5) {
           if (this.images.length > 20) {
             // 大于20张直接回收一半
-            debugInfo('释放图片');
+            debugInfo('释放图片资源');
             this.recycleImages(this.images.splice(0, 10));
           } else {
             let current = new Date().getTime()
-            // 回收超过2.5秒钟的图片
-            let forRecycle = this.images.filter(imageInfo => current - imageInfo.millis > 3000)
+            // 回收超过5秒钟的图片
+            let forRecycle = this.images.filter(imageInfo => current - imageInfo.millis > 5000)
             this.recycleImages(forRecycle)
             this.images.splice(0, forRecycle.length)
           }
@@ -111,18 +111,19 @@ module.exports = function (__runtime__, scope) {
       }
     }
 
-    function doRecycleImages (forRecycleList, desc) {
+    function doRecycleImages(forRecycleList, desc) {
       let start = new Date().getTime()
       let count = 0
       forRecycleList.forEach(imageInfo => {
         try {
-          imageInfo.img.recycle()
+            imageInfo.img.recycle();
+          
         } catch (e) {
-           console.error('释放图片异常' + e)
+          debugForDev('释放图片异常' + e)
           count++
         }
       })
-      debugForDev(desc + '，耗时' + (new Date().getTime() - start) + (count > 0 ? ', 其中有：' + count + '自动释放了' : ''))
+      debugForDev(desc + '，耗时' + (new Date().getTime() - start) + (count > 0 ? '毫秒, 其中有：' + count + '自动释放了' : ''))
       forRecycleList = null
     }
 
@@ -153,16 +154,16 @@ module.exports = function (__runtime__, scope) {
         let start = new Date().getTime()
         //debugInfo('准备获取截图')
         let img;
-        try{
-        img = _o_images.captureScreen()
-    
-        //debugInfo('获取截图完成，耗时{'+(new Date().getTime() - start)+"}ms")
-        that.addImageToList(img)
-        }catch(err){
-            img = null;
-            console.error("_o_images: "+err);
+        try {
+          img = _o_images.captureScreen()
+
+          //debugInfo('获取截图完成，耗时{'+(new Date().getTime() - start)+"}ms")
+          that.addImageToList(img)
+        } catch (err) {
+          img = null;
+          console.error("_o_images: " + err);
         }
-         //images.save(img,"/sdcard/1.png")
+        //images.save(img,"/sdcard/1.png")
         return img
       }
 
@@ -317,25 +318,25 @@ module.exports = function (__runtime__, scope) {
 
 
       for (let idx in imageFuncs) {
-        try{
-        let func_name = imageFuncs[idx]
-        newImages[func_name] = scope.images[func_name]
-      }catch(err){
-            console.error("newFuncs: "+err);
+        try {
+          let func_name = imageFuncs[idx]
+          newImages[func_name] = scope.images[func_name]
+        } catch (err) {
+          console.error("newFuncs: " + err);
         }
       }
 
       for (let idx in newFuncs) {
-          try{
-        let func_name = newFuncs[idx]
-        if (func_name !== 'constructor' && func_name !== 'init') {
-          // console.verbose('override function: ' + func_name)
-          newImages[func_name] = mImages[func_name]
+        try {
+          let func_name = newFuncs[idx]
+          if (func_name !== 'constructor' && func_name !== 'init') {
+            // console.verbose('override function: ' + func_name)
+            newImages[func_name] = mImages[func_name]
+          }
+        } catch (err) {
+          console.error("newFuncs: " + err);
         }
-        }catch(err){
-            console.error("newFuncs: "+err);
-        }
-        
+
       }
       debugInfo('图片资源代理创建完毕，准备替换scope中的images')
       scope.images = newImages
@@ -344,10 +345,10 @@ module.exports = function (__runtime__, scope) {
     }
 
     let resourceMonitor = new ResourceMonitor()
-    events.on('exit', function() {
-        resourceMonitor.releaseAll(true)
+    events.on('exit', function () {
+      resourceMonitor.releaseAll(true)
     })
-    
+
     scope.resourceMonitor = resourceMonitor
   }
 
