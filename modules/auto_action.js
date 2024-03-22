@@ -63,7 +63,7 @@ let auto_action = {
         try {
             service = com.stardust.autojs.core.accessibility.AccessibilityService.Companion.getInstance();
         } catch (e) {
-            service = com.mrfz.qiao.AccessibilityService.Companion.getInstance();
+            service = com.pgr.assistant.AccessibilityService.Companion.getInstance();
         }
         if (!service) {
             throw new Error("无障碍服务未开启或异常");

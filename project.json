@@ -1,14 +1,21 @@
 {
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
   "assets": [],
   "build": {
-    "build_id": "B00D28EC-1206",
-    "build_number": 1206,
-    "build_time": 1670256277446,
+    "build_id": "D5F7F40C-1209",
+    "build_number": 1209,
+    "build_time": 1711098366025,
     "release": false
   },
-  "encryptLevel": 3,
-  "useFeatures": [],
-  "icon": "res/icon.png",
+  "encryptLevel": 0,
+  "features": {
+    "activityIntentTasks": false,
+    "nodejs": "auto"
+  },
+  "icon": "images/ic_app_logo.png",
   "launchConfig": {
     "displaySplash": true,
     "hideLogs": false,
@@ -19,6 +26,7 @@
   "main": "hotrun.js",
   "name": "PGRAssistant",
   "optimization": {
+    "obfuscateComponents": true,
     "removeAccessibilityService": false,
     "removeOpenCv": false,
     "unusedResources": false
@@ -75,10 +83,9 @@
   "signingConfig": {
     "alias": "qiao0314",
     "keystore": "/storage/emulated/0/脚本/.keystore/桥2.jks",
-    "uuid": "3c963c5d-b8e8-40e3-ab74-404fbab8bc9f"
+    "uuid": "30e8349e-b7be-4217-a506-6072dedc75df"
   },
+  "useFeatures": [],
   "versionCode": 30,
-  "versionName": "1.1.4",
-  "update_content":"\n新增XiaoYueOCR，请在设置中切换\n新增OCR字形相似度计算(模糊匹配)\n-支持热更新\n-新增1440x3200分辨率坐标\n-内置mlkit-ocr插件包"
-
+  "versionName": "1.1.4"
 }

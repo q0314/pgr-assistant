@@ -17,8 +17,8 @@ let UiSelector;
 let AccessibilityService;
 
 if (app.autojs.versionCode > 8082200 && context.getPackageName().indexOf("org.autojs.autojs") == -1) {
-    UiSelector = com.mrfz.qiao.accessibility.UiSelector;
-    AccessibilityService = com.mrfz.qiao.AccessibilityService;
+    UiSelector = com.pgr.assistant.accessibility.UiSelector;
+    AccessibilityService = com.pgr.assistant.AccessibilityService;
 } else {
     UiSelector = com.stardust.autojs.core.accessibility.UiSelector;
     AccessibilityService = com.stardust.autojs.core.accessibility.AccessibilityService;
