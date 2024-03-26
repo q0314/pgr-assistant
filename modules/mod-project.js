@@ -26,12 +26,12 @@ let _ = {
     },
     structure: [
         { name: '/activity', necessary: true },
-        { name: '/subview', necessary: true },
+        { name: '/library', necessary: true },
         { name: '/modules', necessary: true },
-        { name: '/lib', necessary: true },
+        { name: '/utlis', necessary: true },
         { name: 'ITimg.js', necessary: true },
         { name: 'progra.js' },
-        { name: 'Floaty.js' },
+        { name: 'Floating.js' },
         { name: 'main.js' },
         { name: 'theme.js', necessary: true },
         { name: 'timers.js', necessary: true },
@@ -600,7 +600,7 @@ let exp = {
             success_title: _opt.success_title || '部署完成',
             on_interrupt_btn_text: _opt.on_interrupt_btn_text || 'B',
             show_min_max: true,
-            type:"foreground-or-overlay",
+            type:"app",
             onStart(v, d) {
                 _onStart();
                 dialogsx.setProgressColorTheme(d, 'download');

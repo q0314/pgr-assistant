@@ -604,9 +604,6 @@ function 暂停(form) {
 
         }, 1000)
     }
-    /*    files.write("./mrfz/图片路径.txt", "./mrfz/");
-        files.write("./mrfz/Byte.txt", true);
-    */
 
 
 };

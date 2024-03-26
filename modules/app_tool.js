@@ -7,8 +7,15 @@ try {
 } catch (err) { }
 
 var Disposition = storages.create("warbler");
-var Accessibility = false;
-
+var wuzhangai = false;
+var packageName = context.getPackageName();
+var service_name = "/com.stardust.autojs.core.accessibility.AccessibilityService";
+if (app.autojs.versionCode > 8082200 && packageName.indexOf("org.autojs.autojs") == -1) {
+    service_name = "/" + packageName + ".AccessibilityService"
+}
+if (auto.service != null) {
+    service_name = "/" + auto.service.toString().split("@")[0]
+}
 
 /**
  * 从本地存储中取出键值为key的数据并返回。
@@ -76,11 +83,11 @@ function autoService(force, mode) {
                         ui.post(() => {
                             openAccessibility(false);
                         }, 150)
-                        if (!Accessibility) {
-                            Accessibility = true;
+                        if (!wuzhangai) {
+                            wuzhangai = true;
                             setTimeout(() => {
                                 if (auto.rootInActiveWindow == null) {
-                                    let con_ = "检测到无障碍已开启但未运行，程序已尝试重启无障碍,无效。\n请跳转到应用设置停止战双辅助后，重启战双辅助。如仍无效请重启系统";
+                                    let con_ = "检测到无障碍已开启但未运行，明日计划已尝试重启无障碍,无效。\n请跳转到应用设置停止明日计划后，重启明日计划。如仍无效请重启系统";
                                     dialogs.build({
                                         type: "app-or-overlay",
                                         content: con_,
@@ -89,11 +96,11 @@ function autoService(force, mode) {
                                         negative: "取消",
                                         canceledOnTouchOutside: false
                                     }).on("positive", () => {
-                                        openAppSetting(package_name);
+                                        openAppSetting(packageName);
                                     }).show()
 
                                 }
-                                Accessibility = false;
+                                wuzhangai = false;
 
                             }, 2000);
                         }
@@ -114,7 +121,7 @@ function autoService(force, mode) {
 
             if (mode) {
                 if ($shell.checkAccess("root")) {
-                    shell("pm grant " + package_name + " android.permission.WRITE_SECURE_SETTINGS", {
+                    shell("pm grant " + packageName + " android.permission.WRITE_SECURE_SETTINGS", {
                         root: true,
                     });
                     toastLog("root授权安全系统设置权限成功")
@@ -125,7 +132,7 @@ function autoService(force, mode) {
                 }
             } else {
                 if ($shell.checkAccess("adb")) {
-                    shell("pm grant " + package_name + " android.permission.WRITE_SECURE_SETTINGS", {
+                    shell("pm grant " + packageName + " android.permission.WRITE_SECURE_SETTINGS", {
                         adb: true,
                     });
                     toastLog("adb授权安全系统设置权限成功");
@@ -133,14 +140,14 @@ function autoService(force, mode) {
 
                 }
             }
-            if (!Accessibility) {
-                Accessibility = true;
+            if (!wuzhangai) {
+                wuzhangai = true;
                 setTimeout(() => {
                     if (auto.rootInActiveWindow == null) {
                         let enabledServices = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
                         if (enabledServices) {
-                            if (enabledServices.toString().indexOf(package_name) != -1) {
-                                let con_ = "检测到无障碍已开启但未运行。\n请尝试关闭再打开无障碍。如无效请跳转到应用设置停止战双辅助后，重启战双辅助。如仍无效请重启系统";
+                            if (enabledServices.toString().indexOf(packageName) != -1) {
+                                let con_ = "检测到无障碍已开启但未运行。\n请尝试关闭再打开无障碍。如无效请跳转到应用设置停止明日计划后，重启明日计划。如仍无效请重启系统";
                                 dialogs.build({
                                     type: "app-or-overlay",
                                     content: con_,
@@ -154,12 +161,12 @@ function autoService(force, mode) {
                                         action: "android.settings.ACCESSIBILITY_SETTINGS"
                                     });
                                 }).on("negative", () => {
-                                    openAppSetting(package_name);
+                                    openAppSetting(packageName);
                                 }).show()
                             }
                         }
                     }
-                    Accessibility = false;
+                    wuzhangai = false;
 
                 }, 2000);
                 return false
@@ -174,8 +181,11 @@ function autoService(force, mode) {
 
     function openAccessibility(i) {
         try {
-            let mServices = package_name + "/com.stardust.autojs.core.accessibility.AccessibilityService";
+            let mServices = packageName + service_name;
+
             let enabledServices = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+            log("无障碍列表" + enabledServices);
+
             if (enabledServices != null) {
                 if (enabledServices.length > 5) {
                     enabledServices = enabledServices.replace(new RegExp(mServices, "g"), "") + ":";
@@ -191,9 +201,12 @@ function autoService(force, mode) {
             if (enabledServices[0] == ":") {
                 enabledServices = enabledServices[0] = "";
             }
-            enabledServices = enabledServices.replace("::", ":");
+
+
+            enabledServices = enabledServices.replace("::", ":")
             Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "1");
             Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, enabledServices + mServices);
+            console.info("处理后的无障碍列表:" + enabledServices + mServices)
             if (i != false) {
                 toastLog('安全系统设置权限成功开启无障碍');
             } else {
@@ -222,10 +235,11 @@ function autoService(force, mode) {
                 Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, '0')
 
             } else {
-                Service = enabledServices.replace(":" + package_name + "/com.stardust.autojs.core.accessibility.AccessibilityService");
+                Service = enabledServices.replace(":" + packageName + service_name);
+                Service = enabledServices.replace(packageName + service_name);
+
                 Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, Service)
                 Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, '0')
-                Service = enabledServices.replace(package_name + "/com.stardust.autojs.core.accessibility.AccessibilityService");
                 if (Service == "undefined") {
                     Service = "";
                 }
@@ -258,7 +272,6 @@ function autoService(force, mode) {
 
 
 }
-
 function checkPermission(permission) {
     pm = context.getPackageManager();
     return PackageManager.PERMISSION_GRANTED == pm.checkPermission(permission, context.getPackageName().toString());

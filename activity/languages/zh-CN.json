@@ -147,7 +147,12 @@
         "simulator_tablet_description": "打开后可兼容模拟器平板版分辨率, 可修复模拟器竖屏, 需选择设备分辨率与图库分辨率相近的，例：720x1280用图库1280x720，1080x1920用图库1920x1080,（推荐雷电、逍遥、夜神）模拟器",
         "PROJECT_MEDIA": "投影媒体屏幕",
         "PROJECT_MEDIA-expiain": "点击使用root|shizuku授权后，开始运行时允许录制屏幕的安全提示窗口将不再弹出，或可解决pgr-assistant开始运行时游戏黑屏/卡住。外置ADB授权命令:adb shell appops set %packageName% PROJECT_MEDIA allow",
-
+        "identify-permissions": "请先确认设备是否拥有ADB/ROOT权限:",
+        "identify-grant": "请先确认是否已授权明日计划ADB/ROOT权限:",
+        "grant": "授权%results%",
+        "cancel": "取消",
+        "ok": "成功",
+        "no": "失败",
         "self_starting": "允许应用自启动",
         "self_starting_description": "有无障碍异常/杀应用/应用闪退的情况时，请打开尝试\n是否已开启请以系统设置实际显示为准",
         "manageimage_run_script": "管理运行脚本"

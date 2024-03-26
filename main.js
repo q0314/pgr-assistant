@@ -1620,12 +1620,8 @@ threads.start(function() {
     //  files.create(package_path + "coordinate/");
 
 
-    if (files.createWithDirs(files.path("./library/图片路径.txt"))) {
-        files.write("./library/图片路径.txt", "./library/gallery/");
-    }
     files.ensureDir(files.path("./library/gallery_list"))
-    files.create(files.path("./library/Byte.txt"))
-
+  
     while (true) {
         try {
             if (!files.exists("./library/gallery/gallery_message.json")) {
