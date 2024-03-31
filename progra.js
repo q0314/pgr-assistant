@@ -2042,7 +2042,8 @@ function 战斗() {
                     })) {
                     break
                 }
-            }
+            };
+            helper.战斗.作战 = false;
             if (!ITimg.ocr("确认出战", {
                     action: 4,
                     part: true,
