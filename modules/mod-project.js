@@ -679,7 +679,7 @@ let exp = {
                     console.trace(_tar);
                     let _json_name = 'project.json';
                     let _o = JSON.parse(filesx.read(files.join(v.unzipped_proj_path, _json_name), '{}'));
-                    //兼容明日计划32位
+                    //兼容PGRAssistant32位
                     if (this.getLocal().packageName != _o.packageName) {
                         let _json_path = files.join(_tar, _json_name);
                         let _y = JSON.parse(filesx.read(_json_path));

@@ -242,7 +242,7 @@ let XiaoYueOcr = {
         try {
             this.XiaoYueOCR = plugins.load('cn.xiaoyue.ocr');
         } catch (e) {
-            e = "未安装OCR插件，无法使用\n请打开明日计划-侧边栏-设置-OCR插件扩展:\n" + e;
+            e = "未安装OCR插件，无法使用\n请打开PGRAssistant-侧边栏-设置-OCR插件扩展:\n" + e;
             // toast(e);
             console.error(e)
 
@@ -262,8 +262,8 @@ let XiaoYueOcr = {
         }
         let con_;
         let url = 'https://flowus.cn/share/2a01a8fc-6013-4d8e-ae69-73a35073dc07';
-        con_ = "请打开链接跳转到浏览器下载安装xiaoyue ocr 文字识别插件，请注意版本架构是否符合明日计划,否则无法使用\n\n" + url +
-            "\n\n当前明日计划架构：" + Build.CPU_ABI + "，\n建议下载安装" + (self.is64 ? "OCR 64位包" : "OCR 32位包") + "，\n\n安装错误的OCR版本会导致OCR无法识别卡住，应用崩溃。关于应用-明日计划32位只能使用32位OCR插件"
+        con_ = "请打开链接跳转到浏览器下载安装xiaoyue ocr 文字识别插件，请注意版本架构是否符合PGRAssistant,否则无法使用\n\n" + url +
+            "\n\n当前PGRAssistant架构：" + Build.CPU_ABI + "，\n建议下载安装" + (self.is64 ? "OCR 64位包" : "OCR 32位包") + "，\n\n安装错误的OCR版本会导致OCR无法识别卡住，应用崩溃。关于应用-PGRAssistant32位只能使用32位OCR插件"
        
 
         if (con_ != undefined) {

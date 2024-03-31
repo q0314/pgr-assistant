@@ -52,7 +52,7 @@ ui.emitter.on("options_item_selected", (e, item) => {
             app.viewFile("/data/data/" + packageName + "/files/logs/log.txt");
             break;
         case "保存至下载目录":
-            let path = files.path("/sdcard/Download/明日计划运行日志.txt");
+            let path = files.path("/sdcard/Download/PGRAssistant运行日志.txt");
             // log("文件是否存在："+files.exists(path_+"/arkplan_log.txt"));
             if (files.exists(path_ + "/"+_proj_def_n+"_log.txt")) {
                 log("文件是否存在：" + files.exists(path_ + "/"+_proj_def_n+"_log.txt"));

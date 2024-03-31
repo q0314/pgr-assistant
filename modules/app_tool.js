@@ -87,7 +87,7 @@ function autoService(force, mode) {
                             wuzhangai = true;
                             setTimeout(() => {
                                 if (auto.rootInActiveWindow == null) {
-                                    let con_ = "检测到无障碍已开启但未运行，明日计划已尝试重启无障碍,无效。\n请跳转到应用设置停止明日计划后，重启明日计划。如仍无效请重启系统";
+                                    let con_ = "检测到无障碍已开启但未运行，PGRAssistant已尝试重启无障碍,无效。\n请跳转到应用设置停止PGRAssistant后，重启PGRAssistant。如仍无效请重启系统";
                                     dialogs.build({
                                         type: "app-or-overlay",
                                         content: con_,
@@ -147,7 +147,7 @@ function autoService(force, mode) {
                         let enabledServices = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
                         if (enabledServices) {
                             if (enabledServices.toString().indexOf(packageName) != -1) {
-                                let con_ = "检测到无障碍已开启但未运行。\n请尝试关闭再打开无障碍。如无效请跳转到应用设置停止明日计划后，重启明日计划。如仍无效请重启系统";
+                                let con_ = "检测到无障碍已开启但未运行。\n请尝试关闭再打开无障碍。如无效请跳转到应用设置停止PGRAssistant后，重启PGRAssistant。如仍无效请重启系统";
                                 dialogs.build({
                                     type: "app-or-overlay",
                                     content: con_,

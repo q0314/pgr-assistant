@@ -1,5 +1,5 @@
 //启用本脚本的使用安卓资源的特性
-//ui.useAndroidResources();明日计划_
+//ui.useAndroidResources();PGRAssistant_
 
 //设置自定义主题
 //activity.theme.applyStyle(colors.parseColor("#ffff0000"), true);

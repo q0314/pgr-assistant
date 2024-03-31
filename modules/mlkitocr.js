@@ -254,13 +254,13 @@ let MlKitOCR = {
         try {
             this.MlKitOCR = plugins.load('com.tony.mlkit.ocr');
         } catch (e) {
-            e = "未安装OCR插件，无法使用\n请打开明日计划-侧边栏-设置-OCR插件扩展:\n" + e;
+            e = "未安装OCR插件，无法使用\n请打开PGRAssistant-侧边栏-设置-OCR插件扩展:\n" + e;
             // toast(e);
             console.error(e)
 
             return false;
         };
-        log("明日计划架构：" + Build.CPU_ABI);
+        log("PGRAssistant架构：" + Build.CPU_ABI);
         log("OCR支持的架构：" + this.MlKitOCR.get_ABI);
         // if (device.product == "SM-G9750" && device.release == 9) {
         //"雷电9仅可使用x86-32位ocr插件\n\nhttps://234599.lanzouv.com/iyraG0fjzukf"
@@ -272,8 +272,8 @@ let MlKitOCR = {
             //   if (device.product == "SM-G9750" && device.release == 9) {
             //      tips = "雷电9仅可使用x86-32位ocr插件\n\nhttps://234599.lanzouv.com/iNuvL0p9p8fi"
             //      } else {
-            tips = "ocr不可用，请尝试以下方法:\n\n1.OCR包不支持明日计划" + (this.is64 ? "64位" : "32位") + "架构:" + Build.CPU_ABI + ",请更换其它OCR版本尝试" +
-                "\n\n2.32位明日计划无法使用64位OCR包\n请重新下载安装32位ocr包\n\n全版本链接https://234599.lanzouv.com/b00q05mpe 密码:421";
+            tips = "ocr不可用，请尝试以下方法:\n\n1.OCR包不支持PGRAssistant" + (this.is64 ? "64位" : "32位") + "架构:" + Build.CPU_ABI + ",请更换其它OCR版本尝试" +
+                "\n\n2.32位PGRAssistant无法使用64位OCR包\n请重新下载安装32位ocr包\n\n全版本链接https://234599.lanzouv.com/b00q05mpe 密码:421";
             toast(tips);
             console.error(tips);
             //   }
@@ -295,8 +295,8 @@ let MlKitOCR = {
         }
         let con_;
         let url = 'https://flowus.cn/share/2a01a8fc-6013-4d8e-ae69-73a35073dc07';
-        con_ = "请打开链接跳转到浏览器下载安装mlkit ocr 文字识别插件，请注意版本架构是否符合明日计划,否则无法使用\n\n" + url +
-            "\n\n当前明日计划架构：" + Build.CPU_ABI + "，\n建议下载安装" + (self.is64 ? "OCR 64位包" : "OCR 32位包") + "，\n\n安装错误的OCR版本会导致OCR无法识别卡住，应用崩溃。关于应用-明日计划32位只能使用32位OCR插件"
+        con_ = "请打开链接跳转到浏览器下载安装mlkit ocr 文字识别插件，请注意版本架构是否符合PGRAssistant,否则无法使用\n\n" + url +
+            "\n\n当前PGRAssistant架构：" + Build.CPU_ABI + "，\n建议下载安装" + (self.is64 ? "OCR 64位包" : "OCR 32位包") + "，\n\n安装错误的OCR版本会导致OCR无法识别卡住，应用崩溃。关于应用-PGRAssistant32位只能使用32位OCR插件"
         if (device.product == "SM-G9750" && device.release == 9) {
             con_ = "雷电9仅可使用x86-32位ocr插件\n\n" + url;
         }

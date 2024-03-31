@@ -312,7 +312,7 @@ let XiaoYueOcr = {
     install(option) {
         let url = 'https://flowus.cn/share/2a01a8fc-6013-4d8e-ae69-73a35073dc07';
 
-        let con_ = "请在明日计划WebView界面中访问以下链接并下载xiaoyueocr扩展包,建议下载安装" + (this.is64 ? "OCR 64位架构包" : "OCR 32位架构包") + "\n" + url;
+        let con_ = "请在PGRAssistantWebView界面中访问以下链接并下载xiaoyueocr扩展包,建议下载安装" + (this.is64 ? "OCR 64位架构包" : "OCR 32位架构包") + "\n" + url;
         dialogs.build({
             type: "app",
             title: "提醒",

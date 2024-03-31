@@ -77,7 +77,7 @@ ui.layout(
         </list>
     </frame>
         <text textColor="red" textSize="15sp"  margin="15 5"
-        text="明日计划因需要使用无障碍权限，无法在低于安卓7的设备环境使用。本界面仅展示已测试可用的模拟器/虚拟机，其他模拟器/虚拟机请自行测试是否可用" />
+        text="PGRAssistant因需要使用无障碍权限，无法在低于安卓7的设备环境使用。本界面仅展示已测试可用的模拟器/虚拟机，其他模拟器/虚拟机请自行测试是否可用" />
     
         </vertical>
     
@@ -87,21 +87,21 @@ var items = [{
         "name": "雷电4,5,9模拟器",
         "release": "7，9",
         "platform": "Windows",
-        "describe": "默认平板版分辨率，需打开明日计划-设置-兼容模拟器平板版，使用与设备分辨率相反的图库即可。如将更换为手机版分辨率，请关闭兼容模拟器平板版。雷电9在OCR插件方面目前只能使用x86_32位的，其他OCR版本无法识别图片内容",
+        "describe": "默认平板版分辨率，需打开PGRAssistant-设置-兼容模拟器平板版，使用与设备分辨率相反的图库即可。如将更换为手机版分辨率，请关闭兼容模拟器平板版。雷电9在OCR插件方面目前只能使用x86_32位的，其他OCR版本无法识别图片内容",
         "link": "https://www.ldmnq.com/?n=6007"
     },
     {
         "name": "夜神模拟器",
         "release": "7，9",
         "platform": "Windows",
-        "describe": "默认平板版分辨率，需打开明日计划-设置-兼容模拟器平板版，使用与设备分辨率相反的图库即可。如将更换为手机版分辨率，请关闭兼容模拟器平板版",
+        "describe": "默认平板版分辨率，需打开PGRAssistant-设置-兼容模拟器平板版，使用与设备分辨率相反的图库即可。如将更换为手机版分辨率，请关闭兼容模拟器平板版",
         "link": "https://www.yeshen.com/"
     },
     {
         "name": "MuMu模拟器",
         "release": "9,12",
         "platform": "Windows",
-        "describe": "MuMu模拟器初始默认平板版分辨率，需打开明日计划-设置-兼容模拟器平板版，使用与设备分辨率相反的图库即可。或在MUMU设置中心-显示-切换到手机版",
+        "describe": "MuMu模拟器初始默认平板版分辨率，需打开PGRAssistant-设置-兼容模拟器平板版，使用与设备分辨率相反的图库即可。或在MUMU设置中心-显示-切换到手机版",
         "link": "https://mumu.163.com/"
     },
     {
@@ -128,7 +128,7 @@ ui.list.on("item_bind", function(itemView, itemHolder) {
         title: "警告⚠",
         titleColor: "#F44336",
         type: "app",
-        content: "你的设备环境无法使用明日计划，当前安卓版本：" + device.release + "，非兼容版本，明日计划因需要使用无障碍权限进行点击命令，无法在低于安卓7的设备环境使用，请更换为安卓7及以上的版本",
+        content: "你的设备环境无法使用PGRAssistant，当前安卓版本：" + device.release + "，非兼容版本，PGRAssistant因需要使用无障碍权限进行点击命令，无法在低于安卓7的设备环境使用，请更换为安卓7及以上的版本",
         contentColor: "#F44336",
         positive: "我已知晓",
         positiveColor: "#000000",

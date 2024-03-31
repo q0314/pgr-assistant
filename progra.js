@@ -69,11 +69,11 @@ if (helper.监听键 == "上" || helper.监听键 == "下") {
         }
         events.on("key_down", function(keyCode, events) {
             if (keyCode == keys.volume_up && helper.监听键 == "上") {
-                toastLog("音量上键被按下，战双辅助将停止运行");
+                toastLog("音量上键被按下，PGRAssistant将停止运行");
                 tool.Floating_emit("展示文本", "状态", "状态：暂停，音量上键按下");
                 tool.Floating_emit("暂停", "结束程序");
             } else if (keyCode == keys.volume_down && helper.监听键 == "下") {
-                toastLog("音量下键被按下，战双辅助将停止运行");
+                toastLog("音量下键被按下，PGRAssistant将停止运行");
                 tool.Floating_emit("展示文本", "状态", "状态：暂停，音量下键按下");
                 tool.Floating_emit("暂停", "结束程序");
             }

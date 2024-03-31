@@ -49,7 +49,7 @@ function 判断() {
 
 
     if (floaty.checkPermission() == false) {
-        console.error("定时任务启动失败，请先授予明日计划悬浮窗权限！");
+        console.error("定时任务启动失败，请先授予PGRAssistant悬浮窗权限！");
         return;
     }
 

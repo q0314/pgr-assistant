@@ -185,7 +185,7 @@ function 申请截图() {
                 // 请求截图权限
                 toast("申请录屏(横屏辅助截图)权限被拒绝！");
                 console.error("申请录屏(横屏辅助截图)权限被拒绝！");
-                tool.dialog_tips("温馨提示", "明日计划的PRTS辅助是图像识别脚本程序，在工作前必须先获取录屏(横屏辅助截图)权限！！！\n如需程序自动允许录屏(横屏辅助截图)权限，请前往侧边栏-设置，打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权明日计划后台弹出界面权限", "@drawable/ic_report_problem_black_48dp");
+                tool.dialog_tips("温馨提示", "PGRAssistant的PRTS辅助是图像识别脚本程序，在工作前必须先获取录屏(横屏辅助截图)权限！！！\n如需程序自动允许录屏(横屏辅助截图)权限，请前往侧边栏-设置，打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权PGRAssistant后台弹出界面权限", "@drawable/ic_report_problem_black_48dp");
                 tool.Floaty_emit("展示文本", "状态", "状态：申请录屏权限被拒绝");
                 tool.Floaty_emit("暂停", "结束程序");
                 ITimg.exit = true;
@@ -223,7 +223,7 @@ function 申请截图() {
             sleep(300);
         };
 
-        let tips = "明日计划多次尝试申请辅助截图权限失败! 请查看运行日志-确认报错信息,打开相关权限:'通知','后台弹出界面(小米,vivo才有)',或保持后台省电策略无限制。"
+        let tips = "PGRAssistant多次尝试申请辅助截图权限失败! 请查看运行日志-确认报错信息,打开相关权限:'通知','后台弹出界面(小米,vivo才有)',或保持后台省电策略无限制。"
 
         switch (ITimg.results) {
             case 1:
@@ -236,7 +236,7 @@ function 申请截图() {
                 break
             case 3:
                 ITimg.packageName = tool.currentPackage();
-                toastLog(tips + "\n\n现在尝试启动明日计划到前台重新尝试")
+                toastLog(tips + "\n\n现在尝试启动PGRAssistant到前台重新尝试")
                 app.launchPackage(context.getPackageName());
                 sleep(2500);
                 break

@@ -134,7 +134,7 @@ ui.but_b.click(function () {
                 "  let modular_data = {\n" +
                 "id: '屏幕解锁',\n" +
                 "  };\n" +
-                //返回模块信息给明日计划
+                //返回模块信息给PGRAssistant
                 "  return modular_data;\n" +
                 "};\n" +
 

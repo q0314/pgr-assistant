@@ -930,7 +930,7 @@ ui.autoService.on("click", (checked) => {
                 dialogs.build({
                     type: "app-or-overlay",
                     title: "自启动无障碍提醒",
-                    content: "请在接下来跳转的系统界面中打开 已下载服务/已安装的应用程序：战双辅助的无障碍，不知道如何打开请百度或使用音量键快捷方式打开\n\n如需应用自动打开无障碍，请前往左上角头像-左下角设置-自启动无障碍服务，点击了解)",
+                    content: "请在接下来跳转的系统界面中打开 已下载服务/已安装的应用程序：PGRAssistant的无障碍，不知道如何打开请百度或使用音量键快捷方式打开\n\n如需应用自动打开无障碍，请前往左上角头像-左下角设置-自启动无障碍服务，点击了解)",
                     checkBoxPrompt: "不再提示",
                     positive: "我清楚了",
                     positiveColor: "#FF8C00",
@@ -1291,7 +1291,7 @@ ui.onlyhover.on("click", function() {
         ui.onlyhover.setEnabled(true)
     }, 800);
     if (floaty.checkPermission() == false) {
-        use.Dialog_Tips("温馨提示", "请先授予战双辅助悬浮窗权限！");
+        use.Dialog_Tips("温馨提示", "请先授予PGRAssistant悬浮窗权限！");
         return;
     }
 
@@ -1342,13 +1342,13 @@ function 开始运行jk(jk, tips_) {
                 bg: use.theme.bg,
             })
             if (device.release != 9 && device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
-                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本,\n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe\n当前分辨率：w:" + device.width + ",h:" + device.height + "，战双辅助图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
+                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本,\n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe\n当前分辨率：w:" + device.width + ",h:" + device.height + "，PGRAssistant图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
                 toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
                 dialog.show();
                 return
             }
             if (device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
-                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前分辨率：w:" + device.width + ",h:" + device.height + "，战双辅助图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
+                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前分辨率：w:" + device.width + ",h:" + device.height + "，PGRAssistant图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
                 dialog.show();
                 return
             }
@@ -1388,7 +1388,7 @@ function 开始运行jk(jk, tips_) {
                         
                         <card gravity="center_vertical" cardElevation="0dp" margin="0">
                             <img src="file://res/icon.png" w="50" h="30" margin="0" />
-                            <text text="无法使用战双辅助" padding="5" textSize="20" gravity="center|left" textColor="#f03752" marginLeft="50" />
+                            <text text="无法使用PGRAssistant" padding="5" textSize="20" gravity="center|left" textColor="#f03752" marginLeft="50" />
                             
                             
                         </card>
@@ -1470,7 +1470,7 @@ function 开始运行jk(jk, tips_) {
 
     if (interface.运行次数 <= 2) {
         jk = true;
-        use.Dialog_Tips("温馨提示", "战双辅助是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n\n如需程序自动允许辅助截图权限，请前往左上角头像-设置-打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权战双辅助后台弹出界面权限" +
+        use.Dialog_Tips("温馨提示", "PGRAssistant是图像识别脚本程序，在工作前必须先获取屏幕截图权限！！！\n\n如需程序自动允许辅助截图权限，请前往左上角头像-设置-打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权PGRAssistant后台弹出界面权限" +
             "\n\n如需程序自动打开战双，请前往左上角头像-设置-打开自动启动战双" +
             "\n\n不懂如何使用本程序？ 左上角头像-疑惑解答，或加群交流", "@drawable/ic_report_problem_black_48dp");
     }
@@ -1490,7 +1490,7 @@ function 开始运行jk(jk, tips_) {
         setTimeout(function() {
             setting = null;
             tukuss = null;
-            toastLog("开始运行20秒后主动关闭战双辅助-界面\n如无需此功能请从悬浮窗启动战双辅助");
+            toastLog("开始运行20秒后主动关闭PGRAssistant-界面\n如无需此功能请从悬浮窗启动PGRAssistant");
             let runtime = java.lang.Runtime.getRuntime();
             runtime.gc();
             threads.shutDownAll();
@@ -1728,15 +1728,15 @@ function 检测ocr(tips) {
     let con_;
     if (tips == true && ocr == null) {
         importClass(android.os.Build);
-        log("当前战双辅助架构：" + Build.CPU_ABI)
+        log("当前PGRAssistant架构：" + Build.CPU_ABI)
         con_ = "请先下载安装mlkit ocr 文字识别插件，否则无法使用\n\nhttps://234599.lanzouv.com/b00q05mpe 密码:421" +
-            "\n\n当前战双辅助架构：" + Build.CPU_ABI + "，\n建议下载安装" + ((Build.CPU_ABI == "arm64-v8a") ? "OCR 64位包" : "OCR 32位包") + "，\n\n安装错误的OCR版本会导致OCR无法识别卡住，应用崩溃。关于应用-战双辅助32位只能使用32位OCR插件"
+            "\n\n当前PGRAssistant架构：" + Build.CPU_ABI + "，\n建议下载安装" + ((Build.CPU_ABI == "arm64-v8a") ? "OCR 64位包" : "OCR 32位包") + "，\n\n安装错误的OCR版本会导致OCR无法识别卡住，应用崩溃。关于应用-PGRAssistant32位只能使用32位OCR插件"
         if (device.product == "SM-G9750" && device.release == 9) {
             con_ = "雷电9仅可使用x86-32位ocr插件\n\nhttps://234599.lanzouv.com/iwn8u0fk1ebc"
         }
     } else if (tips == true && ocr != null) {
         importClass(android.os.Build);
-        log("战双辅助架构：" + Build.CPU_ABI)
+        log("PGRAssistant架构：" + Build.CPU_ABI)
         ocr = plugins.load('com.tony.mlkit.ocr')
         log("OCR支持的架构：" + ocr.get_ABI)
         if (device.product == "SM-G9750" && device.release == 9) {
@@ -1744,7 +1744,7 @@ function 检测ocr(tips) {
 
         } else {
             if (app.autojs.versionCode <= 8082200 && ocr.get_ABI.indexOf('arm64-v8a') != -1) {
-                con_ = "32位战双辅助无法使用\n64位ocr文字识别插件\n请重新下载安装32位ocr\n\nhttps://234599.lanzouv.com/b00q05mpe 密码:421"
+                con_ = "32位PGRAssistant无法使用\n64位ocr文字识别插件\n请重新下载安装32位ocr\n\nhttps://234599.lanzouv.com/b00q05mpe 密码:421"
             }
         }
     }
