@@ -58,9 +58,6 @@ var helper = tool.readJSON("helper", {
     },
     "纷争战区": {
         "自动": false,
-        "周期": false,
-        "状态": false,
-        "战斗期": false
     },
     "截图方式": "辅助",
     "包名": "com.kurogame.haru.hero",
@@ -305,6 +302,14 @@ ui.layout(
                         textSize="16" textColor="{{use.theme.text}}"
                         />
                         <widget-switch-se7en
+                        id="auto_use_serum"
+                        checked="{{helper.自动2血清}}"
+                        text="{{language['auto_use_serum']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
+                        
+                        <widget-switch-se7en
                         id="aide_ac"
                         checked="{{helper.助理交流}}"
                         text="{{language['aide_ac']}}"
@@ -349,13 +354,7 @@ ui.layout(
                         textSize="16" textColor="{{use.theme.text}}"
                         />
                         
-                        <widget-switch-se7en
-                        id="auto_use_serum"
-                        checked="{{helper.自动2血清}}"
-                        text="{{language['auto_use_serum']}}"
-                        padding="6 6 6 6"
-                        textSize="16" textColor="{{use.theme.text}}"
-                        />
+
                         <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
                         cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
                         <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
@@ -1065,12 +1064,9 @@ ui.disputes.on("click", function(view) {
     if (checked) {
         use.Dialog_Tips(language.warm_tips, language.disputes_tips);
     }
-    tool.writeJSON("纷争战区", {
-        "自动": checked,
-        "周期": helper.纷争战区.周期,
-        "状态": helper.纷争战区.状态,
-        "战斗期": helper.纷争战区.战斗期
-    });
+    
+    helper.纷争战区.自动 = checked;
+    tool.writeJSON("纷争战区",helper.纷争战区);
 })
 
 ui.aide_ac.on("click", function(view) {

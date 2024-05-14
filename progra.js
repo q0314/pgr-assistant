@@ -132,13 +132,12 @@ var combat = {
 let Day = new Date().getMonth(); //月
 let Dat = new Date().getDate(); //日
 
-if (new Date().getHours() < 4) {
+if (new Date().getHours() < 5) {
     Day = Day - 1;
 } else {
     Day = Day + 1;
 }
 if (Day + "." + Dat != helper.今日 || !helper.任务状态) {
-
 
     tool.writeJSON("今日", Day + "." + Dat);
     tool.writeJSON("任务状态", {
@@ -509,19 +508,7 @@ function 交流() {
             area: "右半屏",
             refresh: false,
         })) {
-        //返回主页
-        let staging = ITimg.ocr("主页面", {
-            area: 1,
-            action: 5,
-        });
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("主页面", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.主页面) {
-            click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-            sleep(2000);
-        };
+        返回主页()
     }
     click(height / 2, width / 2);
     sleep(1200)
@@ -714,19 +701,7 @@ function 宿舍() {
             part: true,
         })) {
         toastLog("当前似乎不在主页,尝试返回主页")
-        //返回主页
-        let staging = ITimg.ocr("主页面", {
-            area: 1,
-            action: 5,
-        });
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("主页面", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.主页面) {
-            click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-            sleep(2000);
-        };
+        返回主页()
     }
     if (!ITimg.ocr("宿舍", {
             action: 0,
@@ -921,10 +896,11 @@ function 宿舍_委托() {
                     break
                 }
             };
+            log(entrusted_color[i])
             //单点取色,识别委托级别,
             let entrusted = images.findColor(ITimg.captureScreen_(), entrusted_color[i], {
                 region: [0, Math.floor(width / 5), height - Math.floor(height / 8), frcy(700)],
-                threads: 10
+                threads: 12
             });
             if (entrusted) {
                 //点击委托
@@ -1082,7 +1058,7 @@ function 宿舍_执勤() {
     //遍历识别三次 心情绿色小图
     for (let i = 0; i < 3; i++) {
         //读取小伙伴绿色心情小图
-        duty.mood = images.read(files.read("./library/图片路径.txt") + "宿舍-心情.png")
+        duty.mood = images.read("./library/gallery/宿舍-心情.png");
         //在大图中找出所有心情绿色的小图
         duty.entrusted = images.matchTemplate(ITimg.captureScreen_(), duty.mood, {
             region: [Math.floor(height / 3.5), Math.floor(width / 6), height - Math.floor(height / 3.5), width - Math.floor(width / 6)],
@@ -1296,21 +1272,19 @@ function 宿舍_抚摸() {
                 }
                 click(coordinate.宿舍.快捷头像位置[k].x, coordinate.宿舍.快捷头像位置[k].y);
                 sleep(150);
+
             }
         } catch (e) {
             toastLog("点击快捷头像位置出错:" + e)
         }
-        sleep(3000);
+        sleep(1000);
         //逐个抚摸
         for (m in coordinate.宿舍.快捷头像位置) {
             tool.Floating_emit("展示文本", "状态", "状态：准备抚摸" + coordinate.宿舍.快捷头像位置[m].name);
             //点击小人
             click(coordinate.宿舍.快捷头像位置[m].x, coordinate.宿舍.快捷头像位置[m].y);
-            sleep(150);
-            //点击小人旁的抚摸
-            click(coordinate.宿舍.快捷头像位置[m].x - frcx(160), coordinate.宿舍.快捷头像位置[m].y);
+            sleep(1000);
             if (helper.检查小人心情) {
-                sleep(3200);
                 try {
 
                     let img = ITimg.captureScreen_();
@@ -1346,9 +1320,10 @@ function 宿舍_抚摸() {
                 } catch (e) {
                     console.error("检查心情条错误", e)
                 }
-            } else {
-                sleep(1500)
             }
+            //点击小人旁的抚摸
+            click(coordinate.宿舍.快捷头像位置[m].x - frcx(160), coordinate.宿舍.快捷头像位置[m].y);
+            sleep(800);
             let petting = (ITimg.ocr("抚摸次数", {
                 action: 5,
                 area: 2,
@@ -1638,25 +1613,13 @@ function 宿舍_家具制造() {
 function 战斗() {
     helper = tool.readJSON("helper");
     tool.Floating_emit("展示文本", "状态", "状态：准备作战中")
-    if (ITimg.ocr("任务", {
+    if (!ITimg.ocr("任务", {
             area: "右半屏",
-        }) == false && ITimg.ocr("战斗", {
+        }) && !ITimg.ocr("战斗", {
             area: "右半屏",
             refresh: false,
-        }) == false) {
-        //返回主页
-        let staging = ITimg.ocr("主页面", {
-            area: 1,
-            action: 5,
-        });
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("主页面", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.主页面) {
-            click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-            sleep(2000);
-        };
+        })) {
+        返回主页()
     };
     this.serum = 便笺(1000, true);
 
@@ -1898,7 +1861,8 @@ function 战斗() {
             if (!ITimg.picture("战斗-次数MAX", {
                     action: 0,
                     area: "下半屏",
-                    threshold: 0.7
+                    threshold: 0.7,
+                    nods: 500,
                 }) && !ITimg.ocr("MAX", {
                     action: 0,
                     timing: 1500,
@@ -1908,20 +1872,7 @@ function 战斗() {
                 toastLog("无法调整挑战次数\n请检查图库图片: 战斗-次数MAX");
             }
 
-            sleep(150);
-            if (helper.注射血清 > 0) {
-                (ITimg.ocr("/240", {
-                    action: 1,
-                    area: "右上半屏",
-                    part: true,
 
-                }) || ITimg.ocr("/240", {
-                    action: 1,
-                    area: "上半屏",
-                    part: true,
-                }))
-
-            }
         } else {
             this.serological = ITimg.picture("战斗-次数+", {
                 action: 5,
@@ -1946,7 +1897,7 @@ function 战斗() {
     }
     // ITimg.ocr("MAX", { action: 4, timing: 500, area: "下半屏", part: true })
     if (!ITimg.ocr("确认出战", {
-            action: 4,
+            action: 0,
             timing: 2000,
             part: true,
         })) {
@@ -1975,32 +1926,44 @@ function 战斗() {
         }
 
     }
+    sleep(150);
+    if (helper.注射血清 > 0) {
+        (ITimg.ocr("/240", {
+            action: 1,
+            area: "右上半屏",
+            part: true,
+
+        }) || ITimg.ocr("/240", {
+            action: 1,
+            area: "上半屏",
+            part: true,
+        }))
+
+    }
 
     sleep(1000);
-    if (ITimg.picture("注射血清-确定", {
-            timing: 100,
-            nods: 1000,
-            area: "右下半屏"
-        }) || ITimg.picture("注射血清-确定", {
-            timing: 100,
-            area: "下半屏"
-        }) || ITimg.ocr("确定", {
-            timing: 100,
-            area: 4,
-        })) {
+    staging = (ITimg.picture("注射血清-确定", {
+        timing: 100,
+        nods: 1000,
+        action: 5,
+        area: "右下半屏"
+    }) || ITimg.picture("注射血清-确定", {
+        timing: 100,
+        area: "下半屏",
+        action: 5,
+    }) || ITimg.ocr("确定", {
+        timing: 100,
+        action: 5,
+        area: 4,
+    }));
+
+    if (staging && staging.left < Math.floor(height / 1.4)) {
         tool.Floating_emit("展示文本", "状态", "状态：血清管理中...")
         if (helper.注射血清 > 0) {
             helper.已注射血清 = 0;
             for (let i = 0; i < helper.注射血清; i++) {
-                (ITimg.picture("注射血清-确定", {
-                    action: 0,
-                    timing: 1000,
-                    area: "右下半屏"
-                }) || ITimg.ocr("确定", {
-                    action: 0,
-                    timing: 1000,
-                    area: 4,
-                }))
+                click(staging.right, staging.top);
+                sleep(1000);
                 if (ITimg.picture("获得奖励", {
                         action: 0,
                         timing: 1000,
@@ -2022,12 +1985,6 @@ function 战斗() {
                     }
                 };
             }
-            if (!helper.任务状态.自动2血清 && helper.自动2血清 && helper.已注射血清 >= 2) {
-                helper.任务状态.自动2血清 = true;
-                tool.writeJSON("任务状态", helper.任务状态);
-
-            }
-
             while (true) {
                 sleep(500)
                 if (ITimg.picture("宿舍-家具-关闭", {
@@ -2043,38 +2000,6 @@ function 战斗() {
                     break
                 }
             };
-            helper.战斗.作战 = false;
-            if (!ITimg.ocr("确认出战", {
-                    action: 4,
-                    part: true,
-                    timing: 2000,
-                    part: true,
-                })) {
-                if (!ITimg.picture("战斗-自动作战", {
-                        action: 0,
-                        timing: 1000,
-                        area: "右下半屏"
-                    }) && !ITimg.ocr("自动作战", {
-                        action: 1,
-                        timing: 1000,
-                        area: "下半屏",
-                    })) {
-                    if (!helper.战斗.作战) {
-                        helper.战斗.作战 = (ITimg.ocr("多重挑战", {
-                            action: 4,
-                            timing: 1000,
-                            area: 4,
-                        }) || ITimg.ocr("已开启", {
-                            action: 0,
-                            timing: 1000,
-                            area: 4,
-                            refresh: false,
-                        }));
-                    }
-                }
-
-            }
-
         } else {
             while (true) {
                 sleep(500)
@@ -2092,49 +2017,52 @@ function 战斗() {
                 }
             }
             sleep(1000);
-            //返回主页
-            let staging = ITimg.ocr("主页面", {
-                area: 1,
-                action: 5,
-            });
-            if (staging) {
-                click(staging.left, staging.bottom);
-                坐标配置("主页面", staging.left, staging.bottom)
-                sleep(1500)
-            } else if (coordinate.coordinate.主页面) {
-                click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-                sleep(1500);
-            };
-            //不在主页界时,再点下
-            if (!ITimg.ocr("任务", {
-                    area: "右半屏",
-                }) && !ITimg.ocr("宿舍", {
-                    area: "右半屏",
-                    refresh: false,
-                    part: true,
-                    nods: 1000,
-                }) && !ITimg.ocr("工会", {
-                    area: "右半屏",
-                    part: true,
-                    refresh: false,
-                })) {
-                //返回主页
-                let staging = ITimg.ocr("主页面", {
-                    area: 1,
-                    action: 5,
-                });
-                if (staging) {
-                    click(staging.left, staging.bottom);
-                    坐标配置("主页面", staging.left, staging.bottom)
-                    sleep(3000)
-                } else if (coordinate.coordinate.主页面) {
-                    click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-                    sleep(3000);
-                };
-                return
-            }
+            返回主页()
+            return
         }
     }
+
+    if (!helper.任务状态.自动2血清 && helper.自动2血清 && helper.已注射血清 >= 2) {
+        helper.任务状态.自动2血清 = true;
+        tool.writeJSON("任务状态", helper.任务状态);
+
+    }
+
+
+    helper.战斗.作战 = false;
+    if (!ITimg.ocr("确认出战", {
+            action: 0,
+            part: true,
+            timing: 2000,
+            part: true,
+        })) {
+        if (!ITimg.picture("战斗-自动作战", {
+                action: 0,
+                timing: 1000,
+                area: "右下半屏"
+            }) && !ITimg.ocr("自动作战", {
+                action: 1,
+                timing: 1000,
+                area: "下半屏",
+            })) {
+            if (!helper.战斗.作战) {
+                helper.战斗.作战 = (ITimg.ocr("多重挑战", {
+                    action: 4,
+                    timing: 1000,
+                    area: 4,
+                }) || ITimg.ocr("已开启", {
+                    action: 0,
+                    timing: 1000,
+                    area: 4,
+                    refresh: false,
+                }));
+            }
+        }
+
+    }
+    //
+
+
     //   if(ITimg.ocr("确认出战", { action: 4, timing: 2000, refresh: false })
     if (helper.战斗.作战) {
 
@@ -2222,6 +2150,10 @@ function 战斗() {
         sleep(1000);
     }
 
+    返回主页()
+}
+
+function 返回主页() {
     //返回主页
     let staging = ITimg.ocr("主页面", {
         area: 1,
@@ -2236,81 +2168,18 @@ function 战斗() {
         sleep(1500);
     };
     //不在主页界时,再点下
-    if (ITimg.ocr("任务", {
+    if (!ITimg.ocr("任务", {
             area: "右半屏",
-        }) == false && ITimg.ocr("战斗", {
-            area: "右半屏",
-            refresh: false,
-        }) == false) {
-        //返回主页
-        if (coordinate.coordinate.主页面) {
-            click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-            sleep(3000);
-        }
-    }
-}
-
-function 纷争战区() {
-    if (!helper.纷争战区.自动) {
-        return
-    }
-    let day = new Date().getDay(); //星期
-    let hours = new Date().getHours();
-    console.error(day + " v " + hours)
-    switch (day) {
-        case 2:
-        case 5:
-        case 6:
-            helper.纷争战区.战斗期 = true;
-            helper.纷争战区.状态 = false;
-            break
-        case 1:
-        case 4:
-
-            if (hours < 4) {
-                helper.纷争战区.战斗期 = false;
-            } else {
-                helper.纷争战区.战斗期 = true;
-                //  if (helper.纷争战区.周期 != day) {
-                helper.纷争战区.周期 = day;
-                helper.纷争战区.状态 = false;
-                //  }
-            }
-            break
-        case 3:
-        case 0:
-            if (hours > 17) {
-                helper.纷争战区.战斗期 = false;
-            } else {
-                helper.纷争战区.战斗期 = true;
-                helper.纷争战区.状态 = false;
-            }
-            break
-    }
-
-    tool.writeJSON("纷争战区", {
-        "自动": helper.纷争战区.自动,
-        "周期": helper.纷争战区.周期 ? helper.纷争战区.周期 : 0,
-        "状态": helper.纷争战区.状态 ? helper.纷争战区.状态 : false,
-        "战斗期": helper.纷争战区.战斗期
-    });
-    helper = tool.readJSON("helper");
-    if (helper.纷争战区.状态) {
-        log("纷争战区 此周期已完成")
-        return
-    }
-    if (!helper.纷争战区.战斗期) {
-        toastLog("纷争战区 战斗期未开放")
-        return
-    }
-
-    tool.Floating_emit("展示文本", "状态", "状态：准备纷争战区中")
-    if (ITimg.ocr("任务", {
-            area: "右半屏",
-        }) == false && ITimg.ocr("战斗", {
+        }) && !ITimg.ocr("宿舍", {
             area: "右半屏",
             refresh: false,
-        }) == false) {
+            part: true,
+            nods: 1000,
+        }) && !ITimg.ocr("工会", {
+            area: "右半屏",
+            part: true,
+            refresh: false,
+        })) {
         //返回主页
         let staging = ITimg.ocr("主页面", {
             area: 1,
@@ -2319,11 +2188,92 @@ function 纷争战区() {
         if (staging) {
             click(staging.left, staging.bottom);
             坐标配置("主页面", staging.left, staging.bottom)
-            sleep(2000)
+            sleep(3000)
         } else if (coordinate.coordinate.主页面) {
             click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-            sleep(2000);
+            sleep(3000);
         };
+    }
+}
+
+function 纷争战区() {
+    if (!helper.纷争战区.自动) {
+        return
+    }
+
+    // 获取当前时间
+    let now = new Date();
+
+    // 获取当前时间的星期几
+    const dayOfWeek = now.getDay();
+    // 获取当前时间的小时
+    const hour = now.getHours();
+
+    // 定义开放时间段的起始时间
+    const openHour = 5;
+    const closeHour = 18;
+
+    // 定义上次执行任务的时间
+    let lastExecutionOpenDays = helper.纷争战区.lastExecutionOpenDays || [];
+
+    // 定义记录开放时间段的数组
+    let openDays = helper.纷争战区.openDays || [];
+    //定义上次执行任务的时间
+    let lastExecutionTime = helper.纷争战区.lastExecutionTime || undefined;
+
+    // 判断是否在开放时间段内，全天开放，周一周四05:00开放
+    let isOpenTime = (dayOfWeek == 2 || dayOfWeek == 5 || dayOfWeek == 6) || ((dayOfWeek == 1 || dayOfWeek == 4) && hour >= openHour);
+    //周三周日结算
+    if (!isOpenTime) {
+        isOpenTime = (dayOfWeek == 3 || dayOfWeek == 0) && hour < closeHour;
+    }
+
+    // 判断是否需要执行任务
+    let shouldExecuteTask = isOpenTime && ((!lastExecutionTime || (now.getTime() - new Date(lastExecutionTime).getTime()) >= 4 * 24 * 60 * 60 * 1000) || JSON.stringify(openDays) !== JSON.stringify(lastExecutionOpenDays));
+
+    // 如果需要执行任务，则更新开放时间段记录数组
+    if (shouldExecuteTask) {
+        openDays = [dayOfWeek];
+        //改为完成任务后再记录
+        //  helper.纷争战区.openDays = openDays;
+        //  helper.纷争战区.lastExecutionOpenDays = openDays
+        //  helper.纷争战区.lastExecutionTime = now.toString();
+
+    } else if (isOpenTime) {
+        // 如果当前时间是开放时间段内，但不需要执行任务，检查是否需要更新记录
+        if (openDays.indexOf(dayOfWeek) == -1) {
+            openDays.push(dayOfWeek);
+            helper.纷争战区.openDays = openDays;
+        }
+    }
+    tool.writeJSON("纷争战区", helper.纷争战区);
+    helper = tool.readJSON("helper");
+
+    // 输出结果
+    console.log("是否在开放时间段内：", isOpenTime);
+
+    console.log("是否需要执行任务：", shouldExecuteTask);
+
+    if (!isOpenTime) {
+        toastLog("纷争战区 战斗期未开放");
+        return false;
+    }
+    // 模拟执行其他任务并判断是否需要执行周期的任务
+    if (!shouldExecuteTask) {
+        log("纷争战区 此周期已完成")
+        return false;
+
+    }
+
+
+    tool.Floating_emit("展示文本", "状态", "状态：准备纷争战区中")
+    if (ITimg.ocr("任务", {
+            area: "右半屏",
+        }) == false && ITimg.ocr("战斗", {
+            area: "右半屏",
+            refresh: false,
+        }) == false) {
+        返回主页()
     }
     if (!ITimg.ocr("战斗", {
             action: 2,
@@ -2361,199 +2311,208 @@ function 纷争战区() {
 
 
 
-    let regional = [{
-        "name": "机械工厂",
-        "x": 370,
-        "y": 530
-    }, {
-        "name": "火焰轮回",
-        "x": 880,
-        "y": 320
-    }, {
-        "name": "镭射合金",
-        "x": 1460,
-        "y": 290
-    }, {
-        "name": "暗影深林",
-        "x": 1010,
-        "y": 700
-    }, {
-        "name": "猩红冰原",
-        "x": 1730,
-        "y": 730
-    }]
-    for (let f = 0; f < 5; f++) {
-        console.info("点击" + regional[f].name + " , x" + frcx(regional[f].x) + "y" + frcy(regional[f].y))
-        click(frcx(regional[f].x), frcy(regional[f].y));
-        tool.Floating_emit("面板", "隐藏");
+    let regional = ITimg.contour({
+        action: 5,
+        canvas:true,
+        threshold: 160,
+        type: "BINARY_INV",
+        isdilate: true,
+        size:5,
+        filter_w: frcx(100),
+        filter_h: frcy(100),
+    });
+    //解锁
+    if (!regional) {
+        return false;
+    }
+    for (let f of regional) {
+        //  console.info("点击" + regional[f].name + " , x" + frcx(regional[f].x) + "y" + frcy(regional[f].y))
+        click(f.x + f.w / 2, f.y + f.h / 2);
         sleep(1000);
         if (!ITimg.ocr("确定", {
                 action: 1,
                 timing: 2000,
                 area: "右半屏"
             })) {
-            if (ITimg.ocr("通关", {
-                    part: true,
-                    refresh: false,
-                }) || ITimg.ocr("个人积分", {
-                    part: true,
-                    refresh: false,
-                })) {
-                this.mood = images.read(files.read("./library/图片路径.txt") + "纷争战区-区域.png")
-                //在大图中找出所有小图
-                this.entrusted = images.matchTemplate(ITimg.captureScreen_(), this.mood, {
-                    max: 3,
-                    threshold: 0.7,
-                });
-                tool.Floating_emit("面板", "展开");
-
-                log("原始数据:" + JSON.stringify(this.entrusted));
-                if (this.entrusted.points.length == 0) {
-                    if (coordinate.coordinate.返回) {
-                        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                        sleep(2500);
-                    };
-                    continue;
-                }
-                //冒泡排序
-                for (let k = 0; k < this.entrusted.points.length - 1; k++) {
-                    for (let j = 0; j < this.entrusted.points.length - 1 - k; j++) {
-                        if (this.entrusted.points[j].x > this.entrusted.points[j + 1].x) {
-                            let count = this.entrusted.points[j];
-                            // 反复交换
-                            this.entrusted.points[j] = this.entrusted.points[j + 1];
-                            this.entrusted.points[j + 1] = count;
-                        }
-                    }
-                }
-                log("排序数据:" + JSON.stringify(this.entrusted));
-
-                //遍历点击三个区域的坐标点
-                for (i in this.entrusted.points) {
-
-                    click(this.entrusted.points[i].x, this.entrusted.points[i].y)
-                    sleep(1000);
-                    if (i == 1) {
-                        tool.Floating_emit("面板", "展开");
-                    }
-                    if (ITimg.ocr("自动作战", {
-                            action: 1,
-                            timing: 1000,
-                            area: "下半屏",
-                        }) || ITimg.ocr("自动作战", {
-                            action: 1,
-                            timing: 1000,
-                            area: "下半屏",
-                            part: true,
-                            refresh: false,
-                        })) {
-                        sleep(1000)
-                        click(height / 2, width - frcy(80));
-                        sleep(300);
-                        click(height / 2, width - frcy(80));
-                        sleep(1000);
-                    } else {
-                        if (ITimg.ocr("进入区域", {
-                                action: 1,
-                                timing: 2000,
-                                area: "下半屏",
-                            }) || ITimg.ocr("进入区域", {
-                                action: 1,
-                                timing: 2000,
-                                area: "下半屏",
-                                part: true,
-                                refresh: false,
-                            })) {
-                            (ITimg.ocr("队伍", {
-                                action: 1,
-                                timing: 2000,
-                                area: 2,
-                            }) || ITimg.ocr("预设", {
-                                action: 1,
-                                timing: 2000,
-                                area: "右半屏",
-                                refresh: false,
-                            }));
-
-                            (ITimg.ocr("选择", {
-                                action: 4,
-                                timing: 1000,
-                                area: 3,
-                            }) || ITimg.ocr("选择", {
-                                action: 4,
-                                timing: 1000,
-                                part: true,
-                                area: 34,
-                            }) || ITimg.ocr("选择", {
-                                action: 4,
-                                timing: 1000,
-                                part: true,
-                                refresh: false,
-                            }))
-                            if (ITimg.ocr("作战开始", {
-                                    action: 1,
-                                    timing: 6000,
-                                    area: 4,
-                                }) || ITimg.ocr("作战开始", {
-                                    action: 1,
-                                    timing: 6000,
-                                    area: "右半屏",
-                                    part: true,
-                                    refresh: false,
-                                })) {
-                                //在新线程中运行作战方案,解决冲突
-                                fight_thread = threads.start(作战);
-                                sleep(5000)
-                                while (true) {
-                                    if (ITimg.ocr("退出战斗", {
-                                            area: 4,
-                                        }) || ITimg.ocr("重新开始", {
-                                            nods: 1500,
-                                            area: 4,
-                                            refresh: false,
-                                        })) {
-                                        fight_thread = false;
-                                        if (i >= 2) {
-                                            helper.纷争战区.状态 = true;
-                                            tool.writeJSON("周常任务", true);
-                                        }
-                                        sleep(3000);
-                                        ITimg.ocr("退出战斗", {
-                                            action: 1,
-                                            timing: 1000,
-                                            refresh: false
-                                        })
-                                        let staging = ITimg.ocr("返回", {
-                                            area: 1,
-                                            action: 5,
-                                        });
-                                        if (staging) {
-                                            click(staging.left, staging.bottom);
-                                            坐标配置("返回", staging.left, staging.bottom)
-                                            sleep(2000)
-                                        } else if (coordinate.coordinate.返回) {
-                                            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                                            sleep(2000);
-                                        };
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-
-
-                continue;
-            }
             click(height / 2, width - frcy(80));
             sleep(500);
         } else {
-            f--;
-        };
+            //进入
+            click(f.x + f.w / 2, f.y + f.h / 2);
+            sleep(1000);
+
+        }
+
+
+        if (!ITimg.ocr("通关", {
+                similar: 0.8,
+                nods: 500,
+                area: 4,
+            }) && !ITimg.ocr("个人积分", {
+                part: true,
+                area: 4,
+            })) {
+            return false;
+        }
+        
+        this.mood = ITimg.contour({
+            action: 5,
+            threshold: 90,
+            canvas:true,
+            type: "BINARY_INV",
+            filter_w: frcx(180),
+            filter_h: frcy(200),
+        });
+
+        /*  //冒泡排序
+          for (let k = 0; k < this.entrusted.points.length - 1; k++) {
+              for (let j = 0; j < this.entrusted.points.length - 1 - k; j++) {
+                  if (this.entrusted.points[j].x > this.entrusted.points[j + 1].x) {
+                      let count = this.entrusted.points[j];
+                      // 反复交换
+                      this.entrusted.points[j] = this.entrusted.points[j + 1];
+                      this.entrusted.points[j + 1] = count;
+                  }
+              }
+          }
+          */
+
+        if (!this.mood) {
+            toastLog("无法获取战区区域信息");
+            return false
+        }
+        this.mood.sort((obj1, obj2) => obj1.left - obj2.left)
+
+        log("排序数据:" + JSON.stringify(this.mood));
+
+        //遍历点击三个区域的坐标点
+        for (let i of this.mood) {
+
+            click(i.x + i.w / 2, i.y + i.h / 2);
+            sleep(1000);
+
+            if (ITimg.ocr("自动作战", {
+                    action: 1,
+                    timing: 1000,
+                    area: "下半屏",
+                }) || ITimg.ocr("自动作战", {
+                    action: 1,
+                    timing: 1000,
+                    area: "下半屏",
+                    part: true,
+                    refresh: false,
+                })) {
+                sleep(1000)
+                click(height / 2, width - frcy(80));
+                sleep(300);
+                click(height / 2, width - frcy(80));
+                sleep(1000);
+            } else {
+                if (!ITimg.ocr("进入区域", {
+                        action: 1,
+                        timing: 2000,
+                        area: "下半屏",
+                        refresh: false
+                    }) && !ITimg.ocr("进入区域", {
+                        action: 1,
+                        timing: 2000,
+                        area: "下半屏",
+                        part: true,
+                        refresh: false,
+                        log_policy: true,
+                    })) {
+                    continue;
+                }
+
+                (ITimg.ocr("队伍", {
+                    action: 1,
+                    timing: 2000,
+                    area: 2,
+                }) || ITimg.ocr("预设", {
+                    action: 1,
+                    timing: 2000,
+                    area: "右半屏",
+                    refresh: false,
+                }));
+    while(true){
+                (ITimg.ocr("选择", {
+                    action: 1,
+                    timing: 1000,
+                    area: 3,
+                }) || ITimg.ocr("选择", {
+                    action: 1,
+                    timing: 1000,
+                    part: true,
+                    area: 34,
+                }) || ITimg.ocr("选择", {
+                    action: 1,
+                    timing: 1000,
+                    part: true,
+                    refresh: false,
+                }))
+                if (ITimg.ocr("作战开始", {
+                        action: 1,
+                        timing: 6000,
+                        nods: 500,
+                        area: 4,
+                    }) ||ITimg.ocr("作战开始", {
+                        action: 1,
+                        timing: 6000,
+                        area: "右半屏",
+                        part: true,
+                        refresh: false,
+                        log_policy:true,
+                    })) {
+                    break;
+                }
+    }
+                //在新线程中运行作战方案,解决冲突
+                fight_thread = threads.start(作战);
+                sleep(5000)
+                while (true) {
+                    if (ITimg.ocr("退出战斗", {
+                            area: 4,
+                        }) || ITimg.ocr("重新开始", {
+                            nods: 1500,
+                            area: 4,
+                            refresh: false,
+                        })) {
+                        fight_thread = false;
+                        // if (i >= 2) {
+                        helper.纷争战区.openDays = openDays;
+                        helper.纷争战区.lastExecutionOpenDays = openDays
+                        helper.纷争战区.lastExecutionTime = now.toString();
+                        tool.writeJSON("纷争战区", helper.纷争战区);
+                        tool.writeJSON("周常任务", true);
+                        // }
+                        sleep(3000);
+                        ITimg.ocr("退出战斗", {
+                            action: 1,
+                            timing: 1000,
+                            refresh: false
+                        })
+                        let staging = ITimg.ocr("返回", {
+                            area: 1,
+                            action: 5,
+                        });
+                        if (staging) {
+                            click(staging.left, staging.bottom);
+                            坐标配置("返回", staging.left, staging.bottom)
+                            sleep(2000)
+                        } else if (coordinate.coordinate.返回) {
+                            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
+                            sleep(2000);
+                        };
+
+                        break;
+                    }
+                }
+
+
+            }
+        }
+
+
     }
 
     tool.writeJSON("纷争战区", {
@@ -2575,6 +2534,7 @@ function 纷争战区() {
         click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
         sleep(2000);
     };
+
 
 }
 
@@ -2630,25 +2590,13 @@ function 领取任务奖励(value) {
         return
     }
     tool.Floating_emit("展示文本", "状态", "状态：领取任务奖励")
-    if (ITimg.ocr("任务", {
+    if (!ITimg.ocr("任务", {
             area: "右半屏",
-        }) == false && ITimg.ocr("战斗", {
+        }) && !ITimg.ocr("战斗", {
             area: "右半屏",
             refresh: false,
-        }) == false) {
-        //返回主页
-        let staging = ITimg.ocr("主页面", {
-            area: 1,
-            action: 5,
-        });
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("主页面", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.主页面) {
-            click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-            sleep(2000);
-        };
+        })) {
+        返回主页()
     }
     if (!ITimg.ocr("任务", {
             action: 1,
@@ -2798,19 +2746,7 @@ function 领取任务奖励(value) {
         }
     }
 
-    //返回主页
-    let staging = ITimg.ocr("主页面", {
-        area: 1,
-        action: 5,
-    });
-    if (staging) {
-        click(staging.left, staging.bottom);
-        坐标配置("主页面", staging.left, staging.bottom)
-        sleep(2000)
-    } else if (coordinate.coordinate.主页面) {
-        click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-        sleep(2000);
-    };
+    返回主页()
 
 }
 
@@ -2821,25 +2757,23 @@ function 领取手册经验() {
     tool.Floating_emit("面板", "隐藏");
     tool.Floating_emit("展示文本", "状态", "状态：领取手册经验");
     sleep(1000);
-    if (ITimg.ocr("任务", {
+    if (!ITimg.ocr("任务", {
             area: "右半屏",
-        }) == false && ITimg.ocr("战斗", {
+        }) && !ITimg.ocr("战斗", {
             area: "右半屏",
             refresh: false,
-        }) == false) {
-        //返回主页
-        let staging = ITimg.ocr("返回", {
+        })) {
+        返回主页()
+    }
+    if (!coordinate.coordinate.手册图标位置 || !coordinate.coordinate.手册图标位置.x) {
+        let staging = ITimg.ocr("BP", {
             area: 1,
             action: 5,
+            similar: 0.90,
         });
         if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("返回", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.返回) {
-            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-            sleep(2000);
-        };
+            坐标配置("手册图标位置", staging.left, staging.bottom)
+        }
     }
 
     click(coordinate.coordinate.手册图标位置.x, coordinate.coordinate.手册图标位置.y);
@@ -2876,19 +2810,7 @@ function 领取手册经验() {
         click(height / 2, width - frcy(80));
         sleep(1000);
     }
-    //点击返回
-    let staging = ITimg.ocr("返回", {
-        area: 1,
-        action: 5,
-    });
-    if (staging) {
-        click(staging.left, staging.bottom);
-        坐标配置("返回", staging.left, staging.bottom)
-        sleep(1000)
-    } else if (coordinate.coordinate.返回) {
-        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-        sleep(1000);
-    };
+    返回主页()
     tool.Floating_emit("面板", "展开");
 
 

@@ -456,7 +456,7 @@ try {
             message.push(language.unfold)
         }
         if (手册图标位置[0] == '' || 手册图标位置[1] == '') {
-            message.push(language.manualicon)
+          //  message.push(language.manualicon)
         }
 
         if (ui.房间初始化.checked) {
