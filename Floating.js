@@ -12,11 +12,22 @@ importClass(android.webkit.ValueCallback);
 var blockHandle = threads.start(function() {
     setInterval(() => {}, 1000);
 });
+let {
+    dp2px,
+    px2dp,
+    iStatusBarHeight,
+    createShape
+} = require('./modules/__util__.js');
+
 
 var use = {};
 var tool = require("./modules/app_tool.js");
 var theme = require("./theme.js");
+
 var language = theme.language.floaty;
+language.main = theme.language.main;
+delete theme.language
+
 var helper = tool.readJSON("helper");
 
 //图标运行状态,是否手动暂停
@@ -535,10 +546,50 @@ function 主页设置() {
 
     let setupView = ui.inflate(
         <vertical margin="10 0">
-            <Switch id="dorm_series" checked="{{helper.宿舍系列}}" text="{{language.dorm_series}}" padding="6 6 6 6" textSize="16sp" />
-            <Switch id="handbook" checked="{{helper.手册经验}}" text="{{language['handbook']}}"
-            padding="6 6 6 6"
-            textSize="16"/>
+            {/* <Switch id="dorm_series" checked="{{helper.宿舍系列}}" text="{{language.dorm_series}}" padding="6 6 6 6" textSize="16sp" />*/}
+            <Switch  id="aide_ac"
+            checked="{{helper.助理交流}}"
+            text="{{language.main['aide_ac']}}"
+            padding="6 6 6 6" textSize="16" textColor="{{theme.text}}"
+            />
+            <Switch id="brilliant_calculations"
+            checked="{{helper.妙算神机}}"
+            text="{{language.main['brilliant_calculations']}}"
+            padding="6 6 6 6"  textSize="16" textColor="{{theme.text}}"
+            />
+            
+            <card w="*"  h="*" cardCornerRadius="1"
+            cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+            <vertical>
+                <horizontal id="dorm_series" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                    <text  gravity="center" textSize="16" text="{{language['dorm_series']}}" textColor="{{theme.text}}" />
+                    <text layout_weight="1" />
+                    <img id="claim_rewards_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{theme.text}}" />
+                </horizontal>
+            </vertical>
+        </card>
+        <Switch id="disputes"
+        checked="{{helper.纷争战区.自动}}"
+        text="{{language.main['disputes']}}"
+        padding="6 6 6 6" textSize="16" textColor="{{theme.text}}"
+        />
+        <Switch id="lizhan_mapping"
+        checked="{{helper.历战映射.启用}}"
+        text="{{language.main['lizhan_mapping']}}"
+        padding="6 6 6 6" textSize="16" textColor="{{theme.text}}"
+        />
+        <Switch id="task_award"
+        checked="{{helper.任务奖励}}"
+        text="{{language.main['task_award']}}"
+        padding="6 6 6 6" textSize="16" textColor="{{theme.text}}"
+        />
+        
+        <Switch id="handbook"
+        checked="{{helper.手册经验}}"
+        text="{{language.main['handbook']}}"
+        padding="6 6 6 6" textSize="16" textColor="{{theme.text}}"
+        />
+        
         </vertical>);
     var setup = dialogs.build({
         customView: setupView,
@@ -549,11 +600,89 @@ function 主页设置() {
         setup = null;
     })
 
-    setupView.dorm_series.click((view) => {
+    /* setupView.dorm_series.click((view) => {
         tool.writeJSON("宿舍系列", view.checked);
     });
-
+*/
     //    checked ? setupView.gmcs.attr("visibility", "visible") : setupView.gmcs.attr("visibility", "gone");
+    setupView.disputes.on("click", function(view) {
+        checked = view.checked;
+
+        helper.纷争战区.自动 = checked;
+        tool.writeJSON("纷争战区", helper.纷争战区);
+    });
+
+    setupView.lizhan_mapping.on("click", function(view) {
+        checked = view.checked;
+
+        helper.历战映射.启用 = checked;
+        tool.writeJSON("历战映射", helper.历战映射);
+    });
+
+    setupView.aide_ac.on("click", function(view) {
+        checked = view.checked;
+        tool.writeJSON("助理交流", checked)
+    });
+
+    setupView.brilliant_calculations.on("click", function(view) {
+        checked = view.checked;
+        tool.writeJSON("妙算神机", checked)
+    });
+
+    setupView.task_award.on("click", function(view) {
+        checked = view.checked;
+        tool.writeJSON("任务奖励", checked)
+    })
+    setupView.handbook.on("click", function(view) {
+        checked = view.checked;
+        tool.writeJSON("手册经验", checked)
+    });
+    setupView.dorm_series.click(function(view) {
+        // let index = parent.getParent().indexOfChild(0);
+        let imgview = view.getChildAt(2);
+        let fatherview = view.getParent();
+        if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+            imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+            for (let i in helper.宿舍系列) {
+                let addview = ui.inflate(
+                    '\ <Switch checked="' + helper.宿舍系列[i].启用 + '" hint="' + i + '" text="' + language.main[i] + '"  textSize="16" textColor="{{theme.text}}" padding="6 6 6 6" />', fatherview)
+                fatherview.addView(addview, fatherview.getChildCount());
+                fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                    helper.宿舍系列[view.getHint()].启用 = view.checked;
+                    tool.writeJSON("宿舍系列", helper.宿舍系列);
+
+                });
+                for (let k in helper.宿舍系列[i]) {
+                    if (k == "启用" || k == "执行状态" || typeof helper.宿舍系列[i][k] == "string") {
+                        continue;
+                    }
+                    addview = ui.inflate(
+                        '\ <Switch checked="' + helper.宿舍系列[i][k] + '" hint="' + (i + ',' + k) + '" text="' + language.main[k] + '"  textSize="16" textColor="{{theme.text}}" padding="6 6 6 6" />', fatherview)
+                    fatherview.addView(addview, fatherview.getChildCount());
+                    fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                        let id_ = view.getHint().split(",");
+                        helper.宿舍系列[id_[0]][id_[1]] = view.checked;
+
+                        tool.writeJSON("宿舍系列", helper.宿舍系列);
+
+                    });
+                }
+            }
+
+            fatherview.getParent().setCardElevation(1);
+            //        log(fatherview.getChildAt(1).getChildAt(0))
+        } else {
+            //删除视图监听、视图对象
+            for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
+                fatherview.getChildAt(i).removeAllListeners()
+                fatherview.removeView(fatherview.getChildAt(i));
+            }
+            fatherview.getParent().setCardElevation(0);
+            imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+        }
+
+
+    });
 
     setup.show();
 
@@ -877,6 +1006,11 @@ threads.start(function() {
         events.on("面板", function(words, xy) {
 
             switch (words) {
+                case "id":
+                    ui.run(function() {
+                        window.name.setText(xy);
+                    });
+                    break
                 case "展开":
                     threads.start(function() {
                         layoutAttribute.homepage.show = true;

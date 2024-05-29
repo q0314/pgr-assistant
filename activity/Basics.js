@@ -90,18 +90,6 @@ ui.layout(
             <View bg="#666666" h="1" w="*" margin="10 0" />
             
             
-            <horizontal padding="20 4" id="check_curs_mood_id" >
-                <vertical layout_weight="1" >
-                    <text text="{{language['check_curs_mood']}}" textColor="#000000" textSize="16sp" textStyle="bold" />
-                    <text text="{{language['check_curs_mood_description']}}" textColor="#95000000" textSize="10sp" marginTop="2" />
-                </vertical>
-                <widget-switch-se7en id="check_curs_mood" checked="{{helper.检查小人心情}}"
-                padding="15 5" textSize="18sp"
-                thumbSize='24' radius='24' layout_gravity="center" />
-            </horizontal>
-            <View bg="#666666" h="1" w="*" margin="10 0" />
-            
-            
             <horizontal padding="20 4" id="unusual_interface_suspended_id" >
                 <vertical layout_weight="1" >
                     <text text="{{language['unusual_interface_suspended']}}" textColor="#000000" textSize="16sp" textStyle="bold" />
@@ -404,15 +392,6 @@ ui.auto_empower_screenshots_id.on("click", () => {
 
 });
 
-//检查小人心情
-ui.check_curs_mood.on("click", (view) => {
-    tool.writeJSON("检查小人心情", view.checked)
-});
-
-ui.check_curs_mood_id.on("click", () => {
-    ui.check_curs_mood.performClick();
-
-});
 
 
 //异常界面超时暂停

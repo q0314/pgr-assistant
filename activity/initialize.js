@@ -102,6 +102,7 @@ try {
                                     
                                 </horizontal>
                             </list>
+                            {/*
                             <linear gravity="center" margin="0 -2">
                                 <text text="{{language['hint5']}}" textSize="15" marginLeft="5" />
                                 <View bg="#f5f5f5" w="*" h="2" />
@@ -133,6 +134,7 @@ try {
                                 <input id="y" layout_weight="3" inputType="number" hint="y" />
                                 
                             </horizontal>
+                            */}
                             <vertical marginBottom='50'>
                             </vertical>
                         </vertical>
@@ -213,13 +215,14 @@ try {
                 ui.宿舍6房间位置.setVisibility(8);
             }
             ui.快捷头像位置.setDataSource(coord.宿舍.快捷头像位置);
-
+/*
             ui.攻击键.getChildAt(2).setText(coord.combat.攻击键.x.toString());
             ui.攻击键.getChildAt(4).setText(coord.combat.攻击键.y.toString());
             ui.信号球1.getChildAt(2).setText(coord.combat.信号球1.x.toString());
             ui.信号球1.getChildAt(4).setText(coord.combat.信号球1.y.toString());
             ui.信号球2.getChildAt(2).setText(coord.combat.信号球2.x.toString());
             ui.信号球2.getChildAt(4).setText(coord.combat.信号球2.y.toString());
+            */
         })
     }
 
@@ -492,7 +495,7 @@ try {
 
         }
 
-
+/*
         var 攻击键 = [Number(ui.攻击键.getChildAt(2).getText()), Number(ui.攻击键.getChildAt(4).getText())];
 
         var 信号球1 = [Number(ui.信号球1.getChildAt(2).getText()), Number(ui.信号球1.getChildAt(4).getText())];
@@ -507,7 +510,7 @@ try {
         if (信号球2[0] == '' || 信号球2[1] == '') {
             message.push(language.signalball2);
         }
-
+*/
         if (message.length != 0) {
             let con_ = message + (value ? language['import_tips'] : language['leave_tips'])
             let view = dialogs.build({
@@ -556,8 +559,8 @@ try {
                 "快捷头像位置": 快捷头像位置,
 
 
-            },
-
+            }
+/*
             "combat": {
                 "攻击键": {
                     "x": 攻击键[0],
@@ -572,6 +575,7 @@ try {
                     "y": 信号球2[1]
                 }
             }
+            */
 
         }
         log(JSON.stringify(coordinate))

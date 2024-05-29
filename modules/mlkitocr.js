@@ -144,17 +144,6 @@ let MlKitOCRDetector = function (instance) {
         // 解析结果
 
         let taglb = [];
-        switch (options.rectify_json_path) {
-            case "公招":
-                options.rectify_json_path = "./lib/game_data/ocr_公招_矫正规则.json";
-                break
-            case "信用":
-                options.rectify_json_path = "./lib/game_data/ocr_信用_矫正规则.json";
-                break
-            case "通用":
-                options.rectify_json_path = "./lib/game_data/ocr_通用_矫正规则.json";
-                break
-        }
         if (!options.rectify_json_path || !files.exists(options.rectify_json_path)) {
             console.error("请确保ocr字符修正规则文件存在: " + options.rectify_json_path);
         };

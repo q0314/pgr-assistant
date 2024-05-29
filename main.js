@@ -12,7 +12,12 @@ importClass(android.content.Context);
 importClass(android.provider.Settings);
 importClass(com.google.android.material.bottomsheet.BottomSheetDialog);
 importClass(com.google.android.material.bottomsheet.BottomSheetBehavior);
-
+let {
+    dp2px,
+    px2dp,
+    iStatusBarHeight,
+    createShape
+} = require('./modules/__util__.js');
 var tool = require('./modules/app_tool.js');
 var use = {};
 use.gallery = require("./utlis/gallery.js");
@@ -20,6 +25,7 @@ use.theme = require("./theme.js");
 use.Dialog_Tips = require("./modules/Dialog_Tips.js");
 use.Floating = tool.script_locate("Floating");
 var language = use.theme.language.main;
+delete use.theme.language;
 const resources = context.getResources();
 // 四舍五入 转化到px, 最小 1 像素
 const statusBarHeight = resources.getDimensionPixelSize(
@@ -59,6 +65,32 @@ var helper = tool.readJSON("helper", {
     "纷争战区": {
         "自动": false,
     },
+    "历战映射":{
+        "启用":true
+    },
+    "宿舍系列": {
+        "touch_role": {
+            "启用": true,
+            "执行状态": false,
+            "大于80不抚摸": true,
+        },
+        "委托任务": {
+            "启用": true,
+            "执行状态": false,
+        },
+        "执勤代工": {
+            "启用": true,
+            "执行状态": false,
+        },
+        "家具制造": {
+            "启用": false,
+            "物品": "挂饰"
+        },
+        "领取奖励":{
+            "启用":true,
+        }
+    },
+    
     "截图方式": "辅助",
     "包名": "com.kurogame.haru.hero",
     "模拟器": false,
@@ -109,6 +141,36 @@ if (!interface.server) {
     tool.writeJSON("server", "http://114.132.176.62/pgr_assistant/", "interface");
     interface = tool.readJSON("interface");
 }
+
+if (!helper.历战映射 || !helper.宿舍系列.touch_role) {
+    tool.writeJSON("历战映射",{
+        "启用":true,
+    })
+    helper = tool.writeJSON("宿舍系列", {
+        "touch_role": {
+            "启用": true,
+            "执行状态": false,
+            "大于80不抚摸": true,
+        },
+        "委托任务": {
+            "启用": true,
+            "执行状态": false,
+        },
+        "执勤代工": {
+            "启用": true,
+            "执行状态": false,
+        },
+        "家具制造": {
+            "启用": false,
+            "物品": "挂饰",
+            "执行状态": false,
+        },
+        "领取奖励":{
+            "启用":true,
+        }
+    })
+}
+
 
 
 threads.start(function() {
@@ -324,75 +386,88 @@ ui.layout(
                         textSize="16" textColor="{{use.theme.text}}"
                         />
                         
-                        <widget-switch-se7en
-                        id="dorm_series"
-                        checked="{{helper.宿舍系列}}"
-                        text="{{language['dorm_series']}}"
-                        padding="6 6 6 6"
-                        textSize="16" textColor="{{use.theme.text}}"
-                        />
-                        <widget-switch-se7en
-                        id="disputes"
-                        checked="{{helper.纷争战区.自动}}"
-                        text="{{language['disputes']}}"
-                        padding="6 6 6 6"
-                        textSize="16" textColor="{{use.theme.text}}"
-                        />
-                        <widget-switch-se7en
-                        id="task_award"
-                        checked="{{helper.任务奖励}}"
-                        text="{{language['task_award']}}"
-                        padding="6 6 6 6"
-                        textSize="16" textColor="{{use.theme.text}}"
-                        />
                         
-                        <widget-switch-se7en
-                        id="handbook"
-                        checked="{{helper.手册经验}}"
-                        text="{{language['handbook']}}"
-                        padding="6 6 6 6"
-                        textSize="16" textColor="{{use.theme.text}}"
-                        />
-                        
-
-                        <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+                        <card w="*"  h="*" cardCornerRadius="1"
                         cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
-                        <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
-                            <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-                            <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
-                            <text layout_weight="1" />
-                            <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-                        </linear>
+                        <vertical>
+                            <horizontal id="dorm_series" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                                <text  gravity="center" textSize="16" text="{{language['dorm_series']}}" textColor="{{use.theme.text}}" />
+                                <text layout_weight="1" />
+                                <img id="claim_rewards_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
+                            </horizontal>
+                        </vertical>
                     </card>
-                    <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
-                        <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
-                        cardElevation="0dp" foreground="?selectableItemBackground">
-                        <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
-                            <vertical padding="5 0" h="auto" w="0" layout_weight="1">
-                                <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
-                                <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
-                            </vertical>
-                            <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
-                        </horizontal>
-                        <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
-                    </card>
-                </list>
-                <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
-                
-                
-                <card
-                w="*"
-                h="1" bg="#00000000"
-                marginTop="150"
-                marginBottom="0"
-                paddingBottom="30"
-                cardElevation="0dp"
-                cardCornerRadius="30dp"
-                >
-            </card>
+                    
+                    
+                    <widget-switch-se7en
+                    id="disputes"
+                    checked="{{helper.纷争战区.自动}}"
+                    text="{{language['disputes']}}"
+                    padding="6 6 6 6"
+                    textSize="16" textColor="{{use.theme.text}}"
+                    />
+                    <widget-switch-se7en
+                    id="lizhan_mapping"
+                    checked="{{helper.历战映射.启用}}"
+                    text="{{language['lizhan_mapping']}}"
+                    padding="6 6 6 6"
+                    textSize="16" textColor="{{use.theme.text}}"
+                    />
+                    <widget-switch-se7en
+                    id="task_award"
+                    checked="{{helper.任务奖励}}"
+                    text="{{language['task_award']}}"
+                    padding="6 6 6 6"
+                    textSize="16" textColor="{{use.theme.text}}"
+                    />
+                    
+                    <widget-switch-se7en
+                    id="handbook"
+                    checked="{{helper.手册经验}}"
+                    text="{{language['handbook']}}"
+                    padding="6 6 6 6"
+                    textSize="16" textColor="{{use.theme.text}}"
+                    />
+                    
+                    
+                    <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+                    cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+                    <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
+                        <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+                        <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
+                        <text layout_weight="1" />
+                        <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+                    </linear>
+                </card>
+                <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
+                    <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
+                    cardElevation="0dp" foreground="?selectableItemBackground">
+                    <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
+                        <vertical padding="5 0" h="auto" w="0" layout_weight="1">
+                            <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
+                            <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
+                        </vertical>
+                        <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
+                    </horizontal>
+                    <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
+                </card>
+            </list>
+            <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
             
             
-        </vertical>
+            <card
+            w="*"
+            h="1" bg="#00000000"
+            marginTop="150"
+            marginBottom="0"
+            paddingBottom="30"
+            cardElevation="0dp"
+            cardCornerRadius="30dp"
+            >
+        </card>
+        
+        
+    </vertical>
     </ScrollView>
     
     </vertical>
@@ -1064,10 +1139,19 @@ ui.disputes.on("click", function(view) {
     if (checked) {
         use.Dialog_Tips(language.warm_tips, language.disputes_tips);
     }
-    
+
     helper.纷争战区.自动 = checked;
-    tool.writeJSON("纷争战区",helper.纷争战区);
-})
+    tool.writeJSON("纷争战区", helper.纷争战区);
+});
+
+ui.lizhan_mapping.on("click", function(view) {
+    checked = view.checked;
+    if (checked) {
+        use.Dialog_Tips(language.warm_tips, language.lizhan_mapping_tips);
+    }
+    helper.历战映射.启用 = checked;
+    tool.writeJSON("历战映射", helper.历战映射);
+});
 
 ui.aide_ac.on("click", function(view) {
     checked = view.checked;
@@ -1079,10 +1163,55 @@ ui.brilliant_calculations.on("click", function(view) {
     tool.writeJSON("妙算神机", checked)
 });
 
-ui.dorm_series.on("click", function(view) {
-    checked = view.checked;
-    tool.writeJSON("宿舍系列", checked)
-})
+
+ui.dorm_series.click(function(view) {
+    // let index = parent.getParent().indexOfChild(0);
+    let imgview = view.getChildAt(2);
+    let fatherview = view.getParent();
+    if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+        for (let i in helper.宿舍系列) {
+            log(i)
+            let addview = ui.inflate(
+                '\ <widget-switch-se7en checked="' + helper.宿舍系列[i].启用 + '" hint="' + i + '" text="' + language[i] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
+            fatherview.addView(addview, fatherview.getChildCount());
+            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                helper.宿舍系列[view.getHint()].启用 = view.checked;
+                tool.writeJSON("宿舍系列", helper.宿舍系列);
+
+            });
+            for(let k in helper.宿舍系列[i]){
+                if(k=="启用"||k=="执行状态"||typeof helper.宿舍系列[i][k] == "string"){
+                    continue;
+                }
+                addview = ui.inflate(
+                '\ <widget-switch-se7en checked="' + helper.宿舍系列[i][k] + '" hint="' + (i+','+k) + '" text="' + language[k] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
+            fatherview.addView(addview, fatherview.getChildCount());
+            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                let id_ = view.getHint().split(",");
+                helper.宿舍系列[id_[0]][id_[1]] = view.checked;
+              
+                tool.writeJSON("宿舍系列", helper.宿舍系列);
+
+            });
+            }
+        }
+
+        fatherview.getParent().setCardElevation(1);
+        //        log(fatherview.getChildAt(1).getChildAt(0))
+    } else {
+        //删除视图监听、视图对象
+        for (let i = fatherview.getChildCount()-1;i>0;i--) {
+            fatherview.getChildAt(i).removeAllListeners()
+            fatherview.removeView(fatherview.getChildAt(i));
+        }
+        fatherview.getParent().setCardElevation(0);
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+    }
+
+
+});
+
 
 ui.task_award.on("click", function(view) {
     checked = view.checked;
@@ -1617,7 +1746,7 @@ threads.start(function() {
 
 
     files.ensureDir(files.path("./library/gallery_list"))
-  
+
     while (true) {
         try {
             if (!files.exists("./library/gallery/gallery_message.json")) {
@@ -1812,10 +1941,12 @@ function new_ui(name, url) {
             });
             break;
         case '日志':
-            let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
+          //  let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
 
-            engines.execScript("journal_ui", variabler + "require('./activity/journal.js')");
-            //engines.execScript("journal_ui", java.lang.String.format("'ui';  var theme = storages.create('configure').get('theme_colors');require('./utlis/journal.js');"));
+          //  engines.execScript("journal_ui", variabler + "require('./activity/journal.js')");
+          engines.execScriptFile("./activity/journal.js", {
+                path: files.path("./activity/")
+            });
             break;
         case '坐标调试':
             engines.execScriptFile("./activity/initialize.js", {
