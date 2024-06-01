@@ -65,8 +65,8 @@ var helper = tool.readJSON("helper", {
     "纷争战区": {
         "自动": false,
     },
-    "历战映射":{
-        "启用":true
+    "历战映射": {
+        "启用": true
     },
     "宿舍系列": {
         "touch_role": {
@@ -86,11 +86,11 @@ var helper = tool.readJSON("helper", {
             "启用": false,
             "物品": "挂饰"
         },
-        "领取奖励":{
-            "启用":true,
+        "领取奖励": {
+            "启用": true,
         }
     },
-    
+
     "截图方式": "辅助",
     "包名": "com.kurogame.haru.hero",
     "模拟器": false,
@@ -143,8 +143,8 @@ if (!interface.server) {
 }
 
 if (!helper.历战映射 || !helper.宿舍系列.touch_role) {
-    tool.writeJSON("历战映射",{
-        "启用":true,
+    tool.writeJSON("历战映射", {
+        "启用": true,
     })
     helper = tool.writeJSON("宿舍系列", {
         "touch_role": {
@@ -165,8 +165,8 @@ if (!helper.历战映射 || !helper.宿舍系列.touch_role) {
             "物品": "挂饰",
             "执行状态": false,
         },
-        "领取奖励":{
-            "启用":true,
+        "领取奖励": {
+            "启用": true,
         }
     })
 }
@@ -1099,32 +1099,14 @@ ui.input_serum.on("key", function(keyCode, event) {
 
 let updater;
 ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-    onItemSelected: function(parent, view, resource_name, id) {
+    onItemSelected: function(parent, view, resources_name, id) {
         if (!updater) {
             updater = true;
             return
         }
-        switch (resource_name) {
-            case 0:
-                resource_name = "作战补给"
-                break
-            case 1:
-                resource_name = "后勤保养"
-                break;
-            case 2:
-                resource_name = "军备突破"
-                break;
-            case 3:
-                resource_name = "成员特训"
-                break;
-            case 4:
-                resource_name = "螺母大作战"
-                break;
-            case 5:
-                resource_name = "战技演习"
-                break;
-        };
-        helper.战斗.资源名称 = resource_name;
+        resources_name = language.resources_name.split("|")[resources_name];
+
+        helper.战斗.资源名称 = resources_name;
         tool.writeJSON("战斗", helper.战斗);
     }
 }));
@@ -1171,29 +1153,33 @@ ui.dorm_series.click(function(view) {
     if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
         imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
         for (let i in helper.宿舍系列) {
-            log(i)
             let addview = ui.inflate(
                 '\ <widget-switch-se7en checked="' + helper.宿舍系列[i].启用 + '" hint="' + i + '" text="' + language[i] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
             fatherview.addView(addview, fatherview.getChildCount());
             fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
                 helper.宿舍系列[view.getHint()].启用 = view.checked;
+                if (view.getHint() == "touch_role") {
+                    helper.宿舍系列[view.getHint()].lastExecutionTime = false;
+                }else {
+                    helper.宿舍系列[view.getHint()].执行状态 = false;
+                }
                 tool.writeJSON("宿舍系列", helper.宿舍系列);
 
             });
-            for(let k in helper.宿舍系列[i]){
-                if(k=="启用"||k=="执行状态"||typeof helper.宿舍系列[i][k] == "string"){
+            for (let k in helper.宿舍系列[i]) {
+                if (k == "启用" || k == "执行状态" || typeof helper.宿舍系列[i][k] == "string") {
                     continue;
                 }
                 addview = ui.inflate(
-                '\ <widget-switch-se7en checked="' + helper.宿舍系列[i][k] + '" hint="' + (i+','+k) + '" text="' + language[k] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
-            fatherview.addView(addview, fatherview.getChildCount());
-            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
-                let id_ = view.getHint().split(",");
-                helper.宿舍系列[id_[0]][id_[1]] = view.checked;
-              
-                tool.writeJSON("宿舍系列", helper.宿舍系列);
+                    '\ <widget-switch-se7en checked="' + helper.宿舍系列[i][k] + '" hint="' + (i + ',' + k) + '" text="' + language[k] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
+                fatherview.addView(addview, fatherview.getChildCount());
+                fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                    let id_ = view.getHint().split(",");
+                    helper.宿舍系列[id_[0]][id_[1]] = view.checked;
 
-            });
+                    tool.writeJSON("宿舍系列", helper.宿舍系列);
+
+                });
             }
         }
 
@@ -1201,7 +1187,7 @@ ui.dorm_series.click(function(view) {
         //        log(fatherview.getChildAt(1).getChildAt(0))
     } else {
         //删除视图监听、视图对象
-        for (let i = fatherview.getChildCount()-1;i>0;i--) {
+        for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
             fatherview.getChildAt(i).removeAllListeners()
             fatherview.removeView(fatherview.getChildAt(i));
         }
@@ -1438,7 +1424,7 @@ function 开始运行jk(jk, tips_) {
           console.error("请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常");
           use.Dialog_Tips("温馨提示", "请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常")
       }*/
-    if (!files.exists("./library/gallery/返回.png")) {
+    if (!files.exists("./library/gallery/宿舍-家具-关闭.png")) {
         use.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
         return;
     }
@@ -1941,10 +1927,10 @@ function new_ui(name, url) {
             });
             break;
         case '日志':
-          //  let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
+            //  let variabler = "'ui';var theme = " + JSON.stringify(use.theme) + ";var language = theme.language.initialize;";
 
-          //  engines.execScript("journal_ui", variabler + "require('./activity/journal.js')");
-          engines.execScriptFile("./activity/journal.js", {
+            //  engines.execScript("journal_ui", variabler + "require('./activity/journal.js')");
+            engines.execScriptFile("./activity/journal.js", {
                 path: files.path("./activity/")
             });
             break;

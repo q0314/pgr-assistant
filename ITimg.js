@@ -66,7 +66,7 @@ function Prepare(picture_default, ocr_default, outline_default) {
         area: ocr_default.area || "全屏",
         nods: ocr_default.nods || 0,
         part: ocr_default.part || false,
-        similar: ocr_default.similar || 0.7,
+        similar: ocr_default.similar || 0.75,
         resolution: ocr_default.resolution || undefined,
         ocr_type: ocr_default.ocr_type || helper.defaultOcr,
         correction_path: ocr_default.correction_path || undefined,
@@ -601,36 +601,53 @@ function ocr文字识别(words, list) {
         };
     }
     list.area = regional_division(list.area);
+    if (!list.gather) {
+        if (list.refresh === undefined || list.refresh == true) {
+            //多分辨率兼容
+            if (list.resolution) {
+                try {
+                    if (typeof list.resolution == "object") {
+                        list.picture = images.resize(captureScreen_(), [list.resolution.h, list.resolution.w])
+                    } else {
+                        list.picture = images.resize(captureScreen_(), [height, width])
+                    }
+                } catch (e) {
+                    console.error("缩放失败" + e);
 
-    if (list.refresh === undefined || list.refresh == true) {
-        //多分辨率兼容
-        if (list.resolution) {
-            try {
-                if (typeof list.resolution == "object") {
-                    list.picture = images.resize(captureScreen_(), [list.resolution.h, list.resolution.w])
-                } else {
-                    list.picture = images.resize(captureScreen_(), [height, width])
                 }
-            } catch (e) {
-                console.error("缩放失败" + e);
 
             }
 
-        }
+            ITimg.results = ITimg[list.ocr_type + "_module"].detect((list.picture || captureScreen_()), {
+                "region": list.area,
+                "rectify_json_path": list.correction_path,
+            });
 
-        if (!list.gather) ITimg.results = ITimg[list.ocr_type + "_module"].detect((list.picture || captureScreen_()), {
-            "region": list.area,
-            "rectify_json_path": list.correction_path,
-        });
-
-        if (list.action == 6) {
-            return ITimg.results;
+            if (list.action == 6) {
+                return ITimg.results;
+            }
         }
     }
     query_ = undefined;
     //true=匹配部分文字
     if (list.part) {
-        query_ = (list.gather || ITimg.results).find(ele => ele.text.indexOf(words) != -1);
+        query_ = (list.gather || ITimg.results).find(ele => {
+            if (ele.text.indexOf(words) != -1) {
+                if (list.gather) {
+                    if (ele.left >= list.area[0] &&
+                        ele.left < list.area[0] + list.area[2] && // 修正：判断 left 是否在指定范围内
+                        ele.top >= list.area[1] &&
+                        ele.top < list.area[1] + list.area[3] && // 修正：判断 top 是否在指定范围内
+                        ele.right - ele.left <= list.area[2] &&
+                        ele.bottom - ele.top <= list.area[3]) { // 保持原来的宽度和高度判断
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+
+            }
+        });
         list.similar = undefined;
     } else {
         //模糊匹配
@@ -638,7 +655,19 @@ function ocr文字识别(words, list) {
             let similar = list.similar;
             list.similar = tool.nlpSimilarity(ele.text, words);
             if (list.similar >= similar) {
-                return true;
+                if (list.gather) {
+
+                    if (ele.left >= list.area[0] &&
+                        ele.left < list.area[0] + list.area[2] && // 修正：判断 left 是否在指定范围内
+                        ele.top >= list.area[1] &&
+                        ele.top < list.area[1] + list.area[3] && // 修正：判断 top 是否在指定范围内
+                        ele.right - ele.left <= list.area[2] &&
+                        ele.bottom - ele.top <= list.area[3]) { // 保持原来的宽度和高度判断
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
             } else {
                 list.similar = similar;
                 return false;
@@ -647,6 +676,7 @@ function ocr文字识别(words, list) {
     };
 
     if (query_ != undefined) {
+
         if (ITimg.elements.content == words) {
             ITimg.elements.number = ITimg.elements.number + 1;
         } else {
@@ -748,7 +778,7 @@ function binarized_contour(list) {
     let img_ = list.picture || ITimg.captureScreen_();
     //长时间持有图片
     let img = images.copy(img_, true);
-    !img_.isRecycled() && img_.recycle()
+    !img_.isRecycled() && img_.recycle();
     let roiBitmap;
     try {
         roiBitmap = Bitmap.createBitmap(img.bitmap, list.area[0], list.area[1], list.area[2], list.area[3]);
@@ -1255,78 +1285,113 @@ try {
     new ITimg.Prepare();
 
 
-    let picture = images.read("/storage/emulated/0/DCIM/Screenshots/作战10.jpg");
+    let picture = images.read("/storage/emulated/0/DCIM/Screenshots/55.jpg");
     // let picture = images.read("/sdcard/Pictures/QQ/存档.jpg");
     //let picture = images.read("/storage/emulated/0/脚本/script-module-warehouse/自定义执行模块/script_file/生息演算速刷/cc.jpg")
     // height = 2560;
     // width = 1600;
+    /*
     let data = binarized_contour({
-        canvas: true,
+        canvas: "关卡",
         picture: picture,
         action: 5,
-        //  area: 2,
-        area: [Math.floor(height / 1.6), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
+          area: 4,
+       // area: [Math.floor(height / 1.5), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
         //  area:[0,0,2560,1600],
         //   area: [0, 0, height/4, width /4],
         isdilate: true,
 
-        threshold: 180,
-        size: 5,
+        threshold: 230,
+        size: 15,
         type: "BINARY",
-        filter_w: 100,
-        filter_h: 80,
+        filter_w: 50,
+        filter_h: 50,
     })
+*/
+   // let data = ocr文字识别("集合", {
+     //   picture: picture,
+      //  action: 6
+   // })
+    let vb = [
+    { text: 'P:', left: 2, top: 100, right: 24, bottom: 124 },
+    { text: '0/1', left: 37, top: 97, right: 92, bottom: 123 },
+    { text: 'く返回', left: 166, top: 38, right: 319, bottom: 81 },
+    { text: '0主界面', left: 403, top: 29, right: 610, bottom: 84 },
+    { text: 'dX:', left: 390, top: 99, right: 433, bottom: 122 },
+    { text: '105.5', left: 447, top: 99, right: 515, bottom: 122 },
+    { text: '宿全找了选择执勤伙伴', left: 185, top: 154, right: 850, bottom: 242 },
+    { text: 'L', left: 558, top: 906, right: 570, bottom: 922 },
+    { text: 'dY:', left: 760, top: 95, right: 827, bottom: 128 },
+    { text: '-154.1', left: 833, top: 95, right: 915, bottom: 128 },
+    { text: '产出货币0', left: 512, top: 1040, right: 713, bottom: 1085 },
+    { text: '体力91/100', left: 784, top: 349, right: 998, bottom: 382 },
+    { text: '81', left: 948, top: 409, right: 995, bottom: 438 },
+    { text: '体力92/100', left: 784, top: 572, right: 998, bottom: 606 },
+    { text: '60', left: 955, top: 633, right: 998, bottom: 662 },
+    { text: '体力90/100', left: 784, top: 795, right: 998, bottom: 830 },
+    { text: '65', left: 955, top: 857, right: 998, bottom: 886 },
+    { text: 'L', left: 1100, top: 906, right: 1113, bottom: 920 },
+    { text: 'XV:', left: 1153, top: 94, right: 1204, bottom: 125 },
+    { text: '-0.107', left: 1218, top: 94, right: 1304, bottom: 125 },
+    { text: '体力100/100', left: 1327, top: 349, right: 1541, bottom: 382 },
+    { text: '64', left: 1480, top: 409, right: 1541, bottom: 438 },
+    { text: '体力100/100', left: 1327, top: 573, right: 1541, bottom: 606 },
+    { text: '68', left: 1459, top: 633, right: 1541, bottom: 662 },
+    { text: '体力100/100', left: 1327, top: 796, right: 1541, bottom: 829 },
+    { text: '79', left: 1458, top: 854, right: 1540, bottom: 888 },
+    { text: 'Yv:', left: 1550, top: 100, right: 1591, bottom: 122 },
+    { text: '-0.138', left: 1605, top: 100, right: 1694, bottom: 122 },
+    { text: 'L', left: 1642, top: 906, right: 1653, bottom: 920 },
+    { text: 'Prs:', left: 1927, top: 97, right: 1993, bottom: 126 },
+    { text: '1.0', left: 2005, top: 97, right: 2041, bottom: 126 },
+    { text: '0/8', left: 2050, top: 172, right: 2124, bottom: 216 },
+    { text: '体力100/100', left: 1869, top: 349, right: 2083, bottom: 382 },
+    { text: '66', left: 2039, top: 409, right: 2083, bottom: 438 },
+    { text: '体力100/100', left: 1869, top: 573, right: 2094, bottom: 609 },
+    { text: '82', left: 2026, top: 629, right: 2082, bottom: 662 },
+    { text: '体力100/100', left: 1869, top: 796, right: 2083, bottom: 829 },
+    { text: '79', left: 2039, top: 856, right: 2083, bottom: 886 },
+    { text: '1748', left: 2113, top: 28, right: 2225, bottom: 66 },
+    { text: 'Size:', left: 2319, top: 95, right: 2385, bottom: 124 },
+    { text: '0.02', left: 2398, top: 96, right: 2455, bottom: 125 },
+    { text: '個一键代工', left: 2214, top: 1103, right: 2443, bottom: 1153 }
+];
 
-    // 分组函数
-    function groupColumns(columns) {
-        const groups = [];
-        columns.forEach(column => {
-            delete column.left;
-            delete column.right;
-            delete column.bottom;
-            delete column.top
-            let foundGroup = false;
-            groups.forEach(group => {
-                if (!foundGroup && Math.abs(column.y - group[0].y) <= 50) {
-                    group.push(column);
-                    foundGroup = true;
-                }
-            });
-            if (!foundGroup) {
-                groups.push([column]);
+let results = [];
+function findNearestNumber(array, other, right) {
+    let nearestNumber = null;
+    
+    for (let j = 0; j < array.length; j++) {
+        let otherElement = array[j];
+        if (otherElement.text.match(/(\d+)/)) {
+            
+           let distance = Math.abs(other.right - otherElement.right) <= 10 && Math.abs(other.bottom - otherElement.top) <= 30;
+           
+            if (distance) {
+                nearestNumber = otherElement;
             }
-        });
-        return groups;
-    }
-
-    // 查找相似列函数
-    function findSimilarColumns(column, columns) {
-        return columns.filter(col => {
-            return (Math.abs(col.w - column.w) <= 5 && Math.abs(col.h - column.h) <= 5 && Math.abs(parseFloat(col.circularity) - parseFloat(column.circularity)) <= 0.03);
-        });
-    }
-
-
-    //比较数据
-    function isDeepEqual(obj1, obj2) {
-        if (typeof obj1 !== 'object' || obj1 === null ||
-            typeof obj2 !== 'object' || obj2 === null) {
-            return obj1 === obj2;
         }
+    }
+    return nearestNumber;
+}
 
-        if (Object.keys(obj1).length !== Object.keys(obj2).length) {
-            return false;
-        }
-
-        for (let key in obj1) {
-            if (!obj2.hasOwnProperty(key) || !isDeepEqual(obj1[key], obj2[key])) {
-                return false;
+for (let i = 0; i < vb.length; i++) {
+    let element = vb[i];
+    if (element.text.startsWith('体力') && element.text.endsWith('/100')) {
+        let match = element.text.match(/(\d+)/);
+        console.warn(match)
+        if (match) {
+            log(match)
+            let value = parseInt(match[1]);
+            let nearestNumber = findNearestNumber(vb, element);
+            if (nearestNumber) {
+                results.push([ value,element ,nearestNumber]);
             }
         }
-
-        return true;
     }
+}
 
+console.info(results);
 
 
 
@@ -1334,6 +1399,7 @@ try {
     let pngPtah = package_path + "/binarized_contour_visualization.jpg";
 
     app.viewFile(pngPtah)
+
 
     exit();
 }

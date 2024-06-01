@@ -363,7 +363,7 @@ function 执行次数() {
             />
             <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
                 <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto"  />
-                <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
+                <spinner id="resources_type" textSize="16" entries="{{language.main['resources_type']}}"
                 layout_gravity="right|center" w="auto" h="20dp" visibility="gone" />
                 <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto"  />
             </radiogroup>
@@ -390,27 +390,11 @@ function 执行次数() {
     if (!helper.战斗.活动) {
         rewriteView.depletion_way1.checked = true;
         rewriteView.resources_type.setVisibility(0);
-        // let 资源类型 = language.resources_type.split("|");
-        switch (helper.战斗.资源名称) {
-            case "作战补给":
-                rewriteView.resources_type.setSelection(0);
-                break
-            case "后勤保养":
-                rewriteView.resources_type.setSelection(1);
-                break;
-            case "军备突破":
-                rewriteView.resources_type.setSelection(2);
-                break;
-            case "成员特训":
-                rewriteView.resources_type.setSelection(3);
-                break;
-            case "螺母大作战":
-                rewriteView.resources_type.setSelection(4);
-                break;
-            case "战技演习":
-                rewriteView.resources_type.setSelection(5);
-                break;
-        };
+        let 资源类型 = language.main.resources_name.split("|");
+        资源类型 = 资源类型.indexOf(helper.战斗.资源名称);
+        if (资源类型 != -1) {
+            rewriteView.resources_type.setSelection(资源类型);
+        }
     } else {
         rewriteView.depletion_way2.checked = true;
 
@@ -433,31 +417,13 @@ function 执行次数() {
 
     let updater;
     rewriteView.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-        onItemSelected: function(parent, view, resource_name, id) {
+        onItemSelected: function(parent, view, resources_name, id) {
             if (!updater) {
                 updater = true;
                 return
             }
-            switch (resource_name) {
-                case 0:
-                    resource_name = "作战补给"
-                    break
-                case 1:
-                    resource_name = "后勤保养"
-                    break;
-                case 2:
-                    resource_name = "军备突破"
-                    break;
-                case 3:
-                    resource_name = "成员特训"
-                    break;
-                case 4:
-                    resource_name = "螺母大作战"
-                    break;
-                case 5:
-                    resource_name = "战技演习"
-                    break;
-            };
+            resource_name = language.main.resources_name.split("|")[resource_name];
+
             helper.战斗.资源名称 = resource_name;
             tool.writeJSON("战斗", helper.战斗);
         }
@@ -649,6 +615,11 @@ function 主页设置() {
                 fatherview.addView(addview, fatherview.getChildCount());
                 fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
                     helper.宿舍系列[view.getHint()].启用 = view.checked;
+                    if (view.getHint() == "touch_role") {
+                        helper.宿舍系列[view.getHint()].lastExecutionTime = false;
+                    }else {
+                        helper.宿舍系列[view.getHint()].执行状态 = false;
+                    }
                     tool.writeJSON("宿舍系列", helper.宿舍系列);
 
                 });
