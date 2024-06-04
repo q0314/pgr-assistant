@@ -1285,118 +1285,39 @@ try {
     new ITimg.Prepare();
 
 
-    let picture = images.read("/storage/emulated/0/DCIM/Screenshots/55.jpg");
-    // let picture = images.read("/sdcard/Pictures/QQ/存档.jpg");
-    //let picture = images.read("/storage/emulated/0/脚本/script-module-warehouse/自定义执行模块/script_file/生息演算速刷/cc.jpg")
     // height = 2560;
     // width = 1600;
-    /*
+   
+   let name = {
+       picture_name:"112",
+       canvas_name:"节点"
+   }
+    let picture = images.read("/storage/emulated/0/DCIM/Screenshots/"+name.picture_name+".jpg");
+    // let picture = images.read("/sdcard/Pictures/QQ/存档.jpg");
+    //let picture = images.read("/storage/emulated/0/脚本/script-module-warehouse/自定义执行模块/script_file/生息演算速刷/cc.jpg")
+   
     let data = binarized_contour({
-        canvas: "关卡",
+        canvas: name.canvas_name,
         picture: picture,
         action: 5,
-          area: 4,
+          area: 0,
        // area: [Math.floor(height / 1.5), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
         //  area:[0,0,2560,1600],
         //   area: [0, 0, height/4, width /4],
-        isdilate: true,
+        isdilate: false,
 
-        threshold: 230,
-        size: 15,
+        threshold: 200,
+        size: 0,
         type: "BINARY",
-        filter_w: 50,
-        filter_h: 50,
+        filter_w: 30,
+        filter_h: 30,
     })
-*/
-   // let data = ocr文字识别("集合", {
-     //   picture: picture,
-      //  action: 6
-   // })
-    let vb = [
-    { text: 'P:', left: 2, top: 100, right: 24, bottom: 124 },
-    { text: '0/1', left: 37, top: 97, right: 92, bottom: 123 },
-    { text: 'く返回', left: 166, top: 38, right: 319, bottom: 81 },
-    { text: '0主界面', left: 403, top: 29, right: 610, bottom: 84 },
-    { text: 'dX:', left: 390, top: 99, right: 433, bottom: 122 },
-    { text: '105.5', left: 447, top: 99, right: 515, bottom: 122 },
-    { text: '宿全找了选择执勤伙伴', left: 185, top: 154, right: 850, bottom: 242 },
-    { text: 'L', left: 558, top: 906, right: 570, bottom: 922 },
-    { text: 'dY:', left: 760, top: 95, right: 827, bottom: 128 },
-    { text: '-154.1', left: 833, top: 95, right: 915, bottom: 128 },
-    { text: '产出货币0', left: 512, top: 1040, right: 713, bottom: 1085 },
-    { text: '体力91/100', left: 784, top: 349, right: 998, bottom: 382 },
-    { text: '81', left: 948, top: 409, right: 995, bottom: 438 },
-    { text: '体力92/100', left: 784, top: 572, right: 998, bottom: 606 },
-    { text: '60', left: 955, top: 633, right: 998, bottom: 662 },
-    { text: '体力90/100', left: 784, top: 795, right: 998, bottom: 830 },
-    { text: '65', left: 955, top: 857, right: 998, bottom: 886 },
-    { text: 'L', left: 1100, top: 906, right: 1113, bottom: 920 },
-    { text: 'XV:', left: 1153, top: 94, right: 1204, bottom: 125 },
-    { text: '-0.107', left: 1218, top: 94, right: 1304, bottom: 125 },
-    { text: '体力100/100', left: 1327, top: 349, right: 1541, bottom: 382 },
-    { text: '64', left: 1480, top: 409, right: 1541, bottom: 438 },
-    { text: '体力100/100', left: 1327, top: 573, right: 1541, bottom: 606 },
-    { text: '68', left: 1459, top: 633, right: 1541, bottom: 662 },
-    { text: '体力100/100', left: 1327, top: 796, right: 1541, bottom: 829 },
-    { text: '79', left: 1458, top: 854, right: 1540, bottom: 888 },
-    { text: 'Yv:', left: 1550, top: 100, right: 1591, bottom: 122 },
-    { text: '-0.138', left: 1605, top: 100, right: 1694, bottom: 122 },
-    { text: 'L', left: 1642, top: 906, right: 1653, bottom: 920 },
-    { text: 'Prs:', left: 1927, top: 97, right: 1993, bottom: 126 },
-    { text: '1.0', left: 2005, top: 97, right: 2041, bottom: 126 },
-    { text: '0/8', left: 2050, top: 172, right: 2124, bottom: 216 },
-    { text: '体力100/100', left: 1869, top: 349, right: 2083, bottom: 382 },
-    { text: '66', left: 2039, top: 409, right: 2083, bottom: 438 },
-    { text: '体力100/100', left: 1869, top: 573, right: 2094, bottom: 609 },
-    { text: '82', left: 2026, top: 629, right: 2082, bottom: 662 },
-    { text: '体力100/100', left: 1869, top: 796, right: 2083, bottom: 829 },
-    { text: '79', left: 2039, top: 856, right: 2083, bottom: 886 },
-    { text: '1748', left: 2113, top: 28, right: 2225, bottom: 66 },
-    { text: 'Size:', left: 2319, top: 95, right: 2385, bottom: 124 },
-    { text: '0.02', left: 2398, top: 96, right: 2455, bottom: 125 },
-    { text: '個一键代工', left: 2214, top: 1103, right: 2443, bottom: 1153 }
-];
 
-let results = [];
-function findNearestNumber(array, other, right) {
-    let nearestNumber = null;
-    
-    for (let j = 0; j < array.length; j++) {
-        let otherElement = array[j];
-        if (otherElement.text.match(/(\d+)/)) {
-            
-           let distance = Math.abs(other.right - otherElement.right) <= 10 && Math.abs(other.bottom - otherElement.top) <= 30;
-           
-            if (distance) {
-                nearestNumber = otherElement;
-            }
-        }
-    }
-    return nearestNumber;
-}
-
-for (let i = 0; i < vb.length; i++) {
-    let element = vb[i];
-    if (element.text.startsWith('体力') && element.text.endsWith('/100')) {
-        let match = element.text.match(/(\d+)/);
-        console.warn(match)
-        if (match) {
-            log(match)
-            let value = parseInt(match[1]);
-            let nearestNumber = findNearestNumber(vb, element);
-            if (nearestNumber) {
-                results.push([ value,element ,nearestNumber]);
-            }
-        }
-    }
-}
-
-console.info(results);
 
 
 
     picture.recycle();
-    let pngPtah = package_path + "/binarized_contour_visualization.jpg";
+    let pngPtah = package_path + "/binarized_contour_"+ name.picture_name +"visualization.jpg";
 
     app.viewFile(pngPtah)
 

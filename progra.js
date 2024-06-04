@@ -129,6 +129,7 @@ if (new Date().getHours() < 5) {
 } else {
     Day = Day + 1;
 }
+console.info("日期:" + Day + "." + Dat + "，记录：" + helper.今日);
 if (Day + "." + Dat != helper.今日) {
 
     for (let i in helper.宿舍系列) {
@@ -141,7 +142,7 @@ if (Day + "." + Dat != helper.今日) {
     tool.writeJSON("宿舍任务", helper.宿舍任务);
     tool.writeJSON("今日", Day + "." + Dat);
 
-    helper = tool.writeJSON("任务状态", {
+    tool.writeJSON("任务状态", {
         "每日登录": false,
         "日常补给": false,
         "妙算神机": false,
@@ -157,7 +158,7 @@ if (Day + "." + Dat != helper.今日) {
     tool.writeJSON("宿舍任务", helper.宿舍任务);
 
 }
-tool.writeJSON("宿舍系列", helper.宿舍系列);
+helper = tool.writeJSON("宿舍系列", helper.宿舍系列);
 
 主程序();
 
@@ -305,14 +306,79 @@ function 坐标配置(name, x, y) {
 }
 
 function 矩阵循生() {
-    let collection = ITimg.ocr("获取屏幕所有文本", {
-        action: 6,
-    });
-    if (ITimg.ocr("启程", {
-            action: 1,
+    var collection;
+    var recruiting_energy = 3;
+    /*  new ITimg.Prepare({}, {
+    gather:collection,
+    correction_path: "./utlis/ocr_矫正规则.json"
+});
+*/
+    while (true) {
+        collection = ITimg.ocr("获取屏幕所有文本", {
+            action: 6,
+        });
+        while (true) {
+            if (ITimg.ocr("启程", {
+                    action: 1,
+                    area: 4,
+                    timing: 1500,
+                    nods: 1500,
+                    gather: collection,
+                })) {
+                break
+            }
+        }
+        if (ITimg.ocr("下一步", {
+                action: 1,
+                area: 4,
+                timing: 1000,
+                gather: collection,
+            })) {
+            continue;
+        }
+        staging = ITimg.ocr("开始演算", {
             area: 4,
-        })) {
+            gather: collection,
+        }) && ITimg.ocr("首发", {
+            area: 1,
+            action: 5,
+            gather: collection,
+        });
+        if (staging) {
+            click(staging.left, staging.bottom + frcy(50));
+            sleep(500);
+            continue;
+        }
+        if (staging = ITimg.ocr("编入", {
+                area: 4,
+                action: 5,
+                gather: collection,
+            })) {
+            if (recruiting_energy == 3) {
 
+                click(staging.left, staging.top);
+                sleep(1000);
+                continue;
+            }
+
+        }
+        if (ITimg.ocr("队伍调整", {
+                action: 5,
+                area: 4,
+                gather: collection,
+            }) && ITimg.ocr("开始演算", {
+                action: 1,
+                area: 4,
+                gather: collection,
+                timing: 1200,
+            })) {
+            click(height / 2, width / 2);
+            sleep(800);
+            continue;
+        }
+        /*
+        贴心
+        */
     }
 }
 
@@ -457,49 +523,68 @@ function 采购() {
                 timing: 1500,
                 area: "左上半屏",
                 part: true,
+                log_policy: "简短",
             }) || ITimg.ocr("免费", {
                 action: 1,
                 timing: 1500,
                 area: "左上半屏",
                 part: true,
+                refresh: false,
             })) {
+
+            let week = ITimg.ocr("每周限购", {
+                action: 5,
+                area: 34,
+                log_policy: "简短",
+            }) || ITimg.ocr("每周限购", {
+                action: 5,
+                area: 34,
+                refresh: false,
+                part: true,
+            });
             (ITimg.ocr("购买", {
                 action: 1,
                 timing: 1500,
-                area: "下半屏",
+                area: 34,
                 nods: 500,
             }) || ITimg.ocr("购买", {
                 action: 1,
                 timing: 1500,
                 area: 34,
                 part: true,
+                refresh: false,
+                log_policy: "简短",
             }));
 
             click(height / 2, width - frcy(80));
             sleep(1000);
-            let week = ITimg.ocr("每周限购1", {
-                action: 5,
-                area: "左半屏",
-            });
-            let free = ITimg.ocr("免费", {
-                action: 5,
-                refresh: false,
-            });
 
-            if (week && free) {
-                if (week.left > free.left) {
-                    click(free.left, free.top);
-                    sleep(1000);
+            //第二次，购买每日的
+            if (week) {
+                if (ITimg.ocr("每日", {
+                        action: 1,
+                        timing: 1500,
+                        area: "左上半屏",
+                        part: true,
+                    }) || ITimg.ocr("免费", {
+                        action: 1,
+                        timing: 1500,
+                        area: "左上半屏",
+                        part: true,
+                        refresh: false,
+                    })) {
                     (ITimg.ocr("购买", {
                         action: 1,
                         timing: 1500,
-                        area: "下半屏",
+                        area: 34,
                         nods: 500,
                     }) || ITimg.ocr("购买", {
                         action: 1,
                         timing: 1500,
                         area: 34,
                         part: true,
+                        refresh: false,
+                        log_policy: "简短",
                     }));
                     click(height / 2, width - frcy(80));
                 }
@@ -554,27 +639,31 @@ function 交流() {
         })) {
         返回主页()
     }
-    click(height / 2, width / 2);
-    sleep(1200)
-    if (ITimg.ocr("交流", {
-            action: 4,
-            timing: 2500,
-            nods: 2500,
-            area: "左上半屏",
-        }) || ITimg.ocr("交流", {
-            action: 2,
-            timing: 2500,
-            area: "左半屏",
-            part: true,
-            nods: 3000,
-        }) || ITimg.ocr("交流", {
-            action: 2,
-            timing: 2500,
-            area: 13,
-            similar: 0.72,
-        })) {
-        helper.任务状态.助理交流 = true;
-        tool.writeJSON("任务状态", helper.任务状态);
+    while (true) {
+        click(height / 2, width / 2);
+        sleep(1000)
+        if (ITimg.ocr("交流", {
+                action: 4,
+                timing: 2500,
+                nods: 2500,
+                area: "左上半屏",
+            }) || ITimg.ocr("交流", {
+                action: 2,
+                timing: 2500,
+                area: "左半屏",
+                part: true,
+                nods: 3000,
+            }) || ITimg.ocr("交流", {
+                action: 2,
+                timing: 2500,
+                area: 13,
+                similar: 0.72,
+            })) {
+            helper.任务状态.助理交流 = true;
+            tool.writeJSON("任务状态", helper.任务状态);
+
+            break
+        }
         //点击返回
         let staging = (ITimg.ocr("返回", {
             area: 1,
@@ -593,9 +682,7 @@ function 交流() {
             click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
             sleep(2000);
         };
-    } else {
-        toastLog("无法匹配到交流");
-    };
+    }
 
 }
 
@@ -2410,69 +2497,26 @@ function 纷争战区() {
     }
 
     // 获取当前时间
-    let now = new Date();
+    let today = new Date();
+    let currentTime = today.getHours() * 60 + today.getMinutes(); // 当前时间（分钟）
+    let mondayOpenTime = 5 * 60; // 周一开放时间（05:00）
+    let sundayCloseTime = 18 * 60; // 周日截止时间（18:00）
+    let dayOfWeek = today.getDay(); // 获取当前日期的星期几
+    let isOpen = (dayOfWeek === 1 && currentTime <= mondayOpenTime) || (dayOfWeek === 0 && currentTime >= sundayCloseTime);
 
-    // 获取当前时间的星期几
-    const dayOfWeek = now.getDay();
-    // 获取当前时间的小时
-    const hour = now.getHours();
+    if (isOpen) {
 
-    // 定义开放时间段的起始时间
-    const openHour = 5;
-    const closeHour = 18;
-
-    // 定义上次执行任务的时间
-    let lastExecutionOpenDays = helper.纷争战区.lastExecutionOpenDays || [];
-
-    // 定义记录开放时间段的数组
-    let openDays = helper.纷争战区.openDays || [];
-    //定义上次执行任务的时间
-    let lastExecutionTime = helper.纷争战区.lastExecutionTime || undefined;
-
-    // 判断是否在开放时间段内，全天开放，周一周四05:00开放
-    let isOpenTime = (dayOfWeek == 2 || dayOfWeek == 5 || dayOfWeek == 6) || ((dayOfWeek == 1 || dayOfWeek == 4) && hour >= openHour);
-    //周三周日结算
-    if (!isOpenTime) {
-        isOpenTime = (dayOfWeek == 3 || dayOfWeek == 0) && hour < closeHour;
-    }
-
-    // 判断是否需要执行任务
-    let shouldExecuteTask = isOpenTime && ((!lastExecutionTime || (now.getTime() - new Date(lastExecutionTime).getTime()) >= 4 * 24 * 60 * 60 * 1000) || JSON.stringify(openDays) !== JSON.stringify(lastExecutionOpenDays));
-
-    // 如果需要执行任务，则更新开放时间段记录数组
-    if (shouldExecuteTask) {
-        openDays = [dayOfWeek];
-        //改为完成任务后再记录
-        //  helper.纷争战区.openDays = openDays;
-        //  helper.纷争战区.lastExecutionOpenDays = openDays
-        //  helper.纷争战区.lastExecutionTime = now.toString();
-
-    } else if (isOpenTime) {
-        // 如果当前时间是开放时间段内，但不需要执行任务，检查是否需要更新记录
-        if (openDays.indexOf(dayOfWeek) == -1) {
-            openDays.push(dayOfWeek);
-            helper.纷争战区.openDays = openDays;
-        }
-    }
-    tool.writeJSON("纷争战区", helper.纷争战区);
-    helper = tool.readJSON("helper");
-
-    // 输出结果
-    console.log("是否在开放时间段内：", isOpenTime);
-
-    console.log("是否需要执行任务：", shouldExecuteTask);
-
-    if (!isOpenTime) {
         toastLog("纷争战区 战斗期未开放");
         return false;
     }
-    // 模拟执行其他任务并判断是否需要执行周期的任务
-    if (!shouldExecuteTask) {
-        log("纷争战区 此周期已完成")
-        return false;
+    if (helper.纷争战区.lastExecutionTime && (today.getTime() - new Date(helper.纷争战斗.lastExecutionTime).getTime()) <= 6 * 24 * 60 * 60 * 1000) {
 
+        if (helper.纷争战区.执行状态) {
+            log("纷争战区 此周期已完成")
+            return false;
+
+        }
     }
-
 
     tool.Floating_emit("展示文本", "状态", "状态：准备纷争战区中")
     if (ITimg.ocr("任务", {
@@ -2509,26 +2553,15 @@ function 纷争战区() {
         similar: 0.8,
         area: 34,
     }));
-    let test;
-    test = ITimg.ocr("纷争战区", {
-        action: 5,
+    (ITimg.ocr("纷争战区", {
+        action: 1,
         timing: 1000,
         area: 34,
-    })
-    if (test) {
-        if (ITimg.ocr("战斗期", {
-                action: 4,
-                timing: 1500,
-                area: [test.left, test.top, test.right, width - test.bottom],
-            })) {
-            sleep(1000);
-        } else {
-            tips = "没有识别到‘战斗期‘文本，纷争战区未开放";
-            toast(tips);
-            console.error(tips);
-            return false;
-        }
-    }
+    }) || ITimg.ocr("任务奖励已刷新", {
+        action: 1,
+        timing: 1000,
+        area: 34,
+    }))
 
     let place = ["猩红冰原", "暗影深林", "镭射合金", "火焰轮回", "机械工厂", "空域浮台"]
 
@@ -2638,9 +2671,8 @@ function 纷争战区() {
                 fight_thread = false;
 
                 // if (i >= 2) {
-                helper.纷争战区.openDays = openDays;
-                helper.纷争战区.lastExecutionOpenDays = openDays
-                helper.纷争战区.lastExecutionTime = now.toString();
+                helper.纷争战区.执行状态 = true;
+                helper.纷争战区.lastExecutionTime = today.toString();
                 tool.writeJSON("纷争战区", helper.纷争战区);
                 tool.writeJSON("周常任务", true);
                 // }
@@ -3704,8 +3736,8 @@ function 领取手册经验() {
             timing: 500,
             area: 34,
         })
-    }else{
-        click(height/2,width- frcy(80));
+    } else {
+        click(height / 2, width - frcy(80));
         sleep(1000);
     }
 
