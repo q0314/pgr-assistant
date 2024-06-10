@@ -26,7 +26,7 @@
         "onlyhover": "悬浮窗",
         "warm_tips": "温馨提示",
         "disputes_tips": "自动作战:\n第3区域会调用人工智障进行战斗\n不过还是建议在队伍预设,编队1放一个没养过的构造体送死,也可通关,\n自动领取纷争战区任务奖励:暂不支持",
-        "lizhan_mapping_tips":"自动作战:\n自动选择第一个已预设队伍，进行战斗，战斗至高算力区4-4，再结算有150算符，同时会锚点到4/14。原理：循环打完4-4再结算。再高以人工智障的操作估计打不过\nps：队伍战力低于5500可能打不过",
+        "lizhan_mapping_tips":"自动作战:\n自动选择第一个已预设队伍，进行战斗，战斗至高算力区4-4，再结算有150算符，同时会锚点到4/14。原理：循环打完4-4再结算。再高以人工智障的操作估计打不过\nps：队伍战力低于6500可能打不过",
         
         "accessibility_permissions": "无障碍服务",
         "levitating_permissions": "悬浮窗权限",
@@ -164,7 +164,8 @@
         "no": "失败",
         "self_starting": "允许应用自启动",
         "self_starting_description": "有无障碍异常/杀应用/应用闪退的情况时，请打开尝试\n是否已开启请以系统设置实际显示为准",
-        "manageimage_run_script": "管理运行脚本"
+        "manageimage_run_script": "管理运行脚本",
+        "debugging":"调试信息"
     },
     "about": {
         "name": "PGRAssistant",

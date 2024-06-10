@@ -339,6 +339,14 @@ ui.layout(
     <text text='开发相关' margin="10 5 10 0" h="35dp" id="text_bg4"
     gravity="center|left" textSize='16sp' textColor='{{theme.bar}}'>
     </text>
+    <horizontal padding="20 4" id="debugging_id" >
+        <vertical layout_weight="1" >
+            <text text="{{language['debugging']}}" textColor="#000000" textSize="16sp" textStyle="bold" />
+        </vertical>
+        <widget-switch-se7en id="debugging" layout_gravity="center" 
+        padding="15 5" textSize="18sp" checked="{{helper.调试}}"
+     thumbSize='24' radius='24' />
+    </horizontal>
     
     <horizontal padding="20 4" id="manageimage_run_script_id" >
         <vertical layout_weight="1" >
@@ -658,7 +666,9 @@ ui.manageimage_run_script_id.click((view) => {
     require('./script.js').Administration()
 })
 
-
+ui.debugging.click((view) => {
+    tool.writeJSON("调试", view.checked);
+})
 
 
 //使用高级权限截图

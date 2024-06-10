@@ -98,39 +98,17 @@ events.on("暂停", function(words) {
 var fight_thread = false;
 
 var coordinate = JSON.parse(files.read("./library/coordinate.json"));
-/**
- * 战斗相关配置
- * 资源.资源 - false时程序会去打活动
- * 资源.资源名称 - 想打的资源名称
- * 活动.关卡 - true = 只刷-1,掉落活动代币，false = 刷-2,掉落代币+意识
- 
-var 战斗 = {
-
-    资源: {
-        资源: false,
-        //资源名称
-        资源名称: "成员经验",
-    },
-    活动: {
-        活动: true,
-        关卡: true,
-    },
-    //是否需要打怪,不用管,程序会决定
-    作战: false,
-}
-*/
 
 
-let Day = new Date().getMonth(); //月
-let Dat = new Date().getDate(); //日
+let refreshTime = new Date();
+refreshTime.setHours(5, 0, 0, 0);
 
-if (new Date().getHours() < 5) {
-    Day = Day - 1;
-} else {
-    Day = Day + 1;
-}
-console.info("日期:" + Day + "." + Dat + "，记录：" + helper.今日);
-if (Day + "." + Dat != helper.今日) {
+let Day = refreshTime.getMonth() + 1; //月 
+let Dat = refreshTime.getDate(); //日
+
+if (new Date() >= refreshTime && helper.今日 != Day + "." + Dat) {
+    // 刷新日常任务时间记录
+    console.log("日常任务时间记录已刷新");
 
     for (let i in helper.宿舍系列) {
         if (helper.宿舍系列[i].启用) {
@@ -139,8 +117,8 @@ if (Day + "." + Dat != helper.今日) {
         helper.宿舍系列[i].执行状态 = false;
     }
 
-    tool.writeJSON("宿舍任务", helper.宿舍任务);
     tool.writeJSON("今日", Day + "." + Dat);
+    tool.writeJSON("宿舍任务", helper.宿舍任务);
 
     tool.writeJSON("任务状态", {
         "每日登录": false,
@@ -151,7 +129,7 @@ if (Day + "." + Dat != helper.今日) {
     });
 } else {
     for (let i in helper.宿舍系列) {
-        if (helper.宿舍系列[i].启用) {
+        if (helper.宿舍系列[i].启用 && !helper.宿舍系列[i].执行状态) {
             helper.宿舍任务 = true;
         }
     }
@@ -163,6 +141,7 @@ helper = tool.writeJSON("宿舍系列", helper.宿舍系列);
 主程序();
 
 function 主程序() {
+    //return
     进入主页();
     helper = tool.readJSON("helper");
 
@@ -181,7 +160,9 @@ function 主程序() {
         timing: 2000,
         area: "上半屏",
     });
-
+    if (!coordinate.combat || !coordinate.combat.攻击) {
+        坐标配置("战斗");
+    }
     if (helper.血清) {
         //领取每日登录血清
         if (!helper.任务状态.每日登录) {
@@ -278,16 +259,202 @@ function 启动(package_) {
 }
 
 function 坐标配置(name, x, y) {
+    if (name == "战斗") {
+        tool.Floating_emit("展示文本", "状态", "状态：获取键位布局..");
+        if (!coordinate.combat) {
+            coordinate.combat = {};
+        }
+        let setup_xy = [frcx(2470), frcy(1090)];
+        返回主页();
+        //sleep(1000);
+        //click.apply(click, setup_xy);
+        sleep(1000);
+        tool.Floating_emit("展示文本", "状态", "状态：准备进入设置");
+        let setup_list = ITimg.contour({
+            action: 5,
+            area: 4,
+            canvas: "设置",
+            threshold: 240,
+            isdilate: true,
+            size: 5,
+            type: "BINARY",
+            filter_w: frcx(10),
+            filter_h: frcy(10),
+        });
+        if (!setup_list || !setup_list.length) {
+            return false;
+        }
+        // log(setup_list);
+        setup_list.sort((a, b) => b.y - a.y);
+        click(setup_list[0].x, setup_list[0].y);
+        sleep(1500);
+        setup_list = ITimg.contour({
+            action: 5,
+            area: 4,
+            canvas: "设置",
+            threshold: 240,
+            isdilate: true,
+            size: 5,
+            type: "BINARY",
+            filter_w: frcx(10),
+            filter_h: frcy(10),
+        });
+        if (!setup_list || !setup_list.length) {
+            return false;
+        }
+        // log(setup_list);
+        setup_list.sort((a, b) => b.y - a.y);
+        click(setup_list[0].x, setup_list[0].y);
+        sleep(1000);
+        while (true) {
+            ITimg.ocr("键位", {
+                action: 1,
+                area: 13,
+                similar: 0.75,
+                timing: 1000,
+            });
+
+            if (ITimg.ocr("前往设置", {
+                    action: 1,
+                    area: 2,
+                    similar: 0.75,
+                    timing: 2000,
+                })) {
+                break
+            }
+        }
+
+        let key_list;
+        key_list = ITimg.contour({
+            canvas: "键位",
+            action: 5,
+            area: 0,
+            isdilate: false,
+            threshold: 200,
+            size: 0,
+            type: "BINARY",
+            filter_w: frcx(50),
+            filter_h: frcy(50),
+        });
+        if (!key_list || key_list.length < 9) {
+            sleep(1000);
+            key_list = ITimg.contour({
+                canvas: "键位",
+                action: 5,
+                area: 0,
+                isdilate: false,
+                threshold: 160,
+                size: 0,
+                type: "BINARY",
+                filter_w: frcx(60),
+                filter_h: frcy(90),
+            });
+        }
+
+        key_list = groupColumns(key_list, true);
+        let key_position = [];
+        for (let id of key_list) {
+            if (id.length > 1 && id[0].shape == "正方形") {
+
+                id.sort((a, b) => b.x - b.x);
+                key_position.push(id);
+
+            } else {
+                id = id[0];
+                if (id.shape == "长方形" && id.w < id.h) {
+                    coordinate.combat["角色1"] = {
+                        "x": id.x,
+                        "y": id.y,
+                        "w": id.w,
+                        "h": parseInt(id.h / 2),
+                    };
+                    coordinate.combat["角色2"] = {
+                        "x": id.x,
+                        "y": id.y + parseInt(id.h / 2),
+                        "w": id.w,
+                        "h": parseInt(id.h / 2),
+
+                    };
+                } else if (id.shape == "正方形" && id.x + id.w < height / 2 && id.y + id.h > parseInt(width / 1.5)) {
+                    coordinate.combat["移动"] = {
+                        "x": id.x,
+                        "y": id.y,
+                        "w": id.w,
+                        "h": id.h,
+                    };
+                } else if (id.x < height / 2 && id.x + id.w > parseInt(height / 1.2)) {
+                    coordinate.combat["信号球"] = {
+                        "x": id.x,
+                        "y": id.y,
+                        "w": id.w,
+                        "h": id.h,
+                    };
+                }
+            }
+        }
+        let key_ = key_position[0][0];
+        if (key_.w > key_position[1][0].w && key_.h > key_position[1][0].h) {
+            key_position.reverse();
+            key_ = key_position[0][0];
+        }
 
 
-    coordinate.coordinate[name] = {
-        "x": x,
-        "y": y
-    };
-    log("保存坐标: " + name + "---" + JSON.stringify({
-        "x": x,
-        "y": y
-    }));
+        coordinate.combat["辅助机"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+
+        };
+
+        key_ = key_position[1][0];
+        coordinate.combat["闪避"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+        };
+        key_ = key_position[1][1];
+        coordinate.combat["攻击"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+        };
+        key_ = key_position[1][2];
+        coordinate.combat["大招"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+        };
+
+
+        while (!ITimg.ocr("退出", {
+                action: 1,
+                timing: 1000,
+                area: 13,
+                nods: 1000,
+            })) {
+
+        }
+
+        tool.Floating_emit("展示文本", "状态", "状态：保存键位布局成功");
+        toastLog("保存键位布局成功");
+    } else {
+
+
+        coordinate.coordinate[name] = {
+            "x": x,
+            "y": y
+        };
+        log("保存坐标: " + name + "---" + JSON.stringify({
+            "x": x,
+            "y": y
+        }));
+    }
+
+    log(coordinate.combat)
     coordinate = {
         "name": width + "x" + height,
         "w": width,
@@ -296,7 +463,6 @@ function 坐标配置(name, x, y) {
         "宿舍": coordinate.宿舍,
         "combat": coordinate.combat
     };
-
     files.write(
         "./library/coordinate.json",
         JSON.stringify(coordinate),
@@ -349,6 +515,7 @@ function 矩阵循生() {
             sleep(500);
             continue;
         }
+
         if (staging = ITimg.ocr("编入", {
                 area: 4,
                 action: 5,
@@ -383,7 +550,7 @@ function 矩阵循生() {
 }
 
 function 进入主页() {
-    tool.Floating_emit("展示文本", "状态", "状态：准备进入主页")
+    tool.Floating_emit("展示文本", "状态", "状态：准备进入主页");
 
     sleep(1000);
     if (tool.currentPackage() != helper.包名) {
@@ -664,25 +831,26 @@ function 交流() {
 
             break
         }
-        //点击返回
-        let staging = (ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            similar: 0.72,
-        }) || ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            part: true,
-        }));
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("返回", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.返回) {
-            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-            sleep(2000);
-        };
     }
+    //点击返回
+    let staging = (ITimg.ocr("返回", {
+        area: 1,
+        action: 5,
+        similar: 0.72,
+    }) || ITimg.ocr("返回", {
+        area: 1,
+        action: 5,
+        part: true,
+    }));
+    if (staging) {
+        click(staging.left, staging.bottom);
+        坐标配置("返回", staging.left, staging.bottom)
+        sleep(2000)
+    } else if (coordinate.coordinate.返回) {
+        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
+        sleep(2000);
+    };
+
 
 }
 
@@ -725,8 +893,22 @@ function 指挥局() {
             part: true,
             refresh: false,
         })) {
-        toastLog("没有识别到公会,无法执行与妙算神机交互");
-        return
+        click(coordinate.coordinate.主页展开.x, coordinate.coordinate.主页展开.y)
+        sleep(1000);
+        if (!ITimg.ocr("公会", {
+                action: 4,
+                timing: 4000,
+                area: 4
+            }) && !ITimg.ocr("公会", {
+                action: 4,
+                timing: 4000,
+                area: 4,
+                part: true,
+                refresh: false,
+            })) {
+            toastLog("没有识别到公会,无法执行与妙算神机交互");
+            return
+        }
     }
     while (true) {
         if (ITimg.ocr("新版指挥局", {
@@ -833,7 +1015,6 @@ function 宿舍() {
     if (!helper.宿舍系列 || !helper.宿舍任务) {
         return false;
     }
-    tool.writeJSON("宿舍任务", false);
     tool.Floating_emit("展示文本", "状态", "状态：准备执行宿舍系列任务")
     if (!ITimg.ocr("任务", {
             area: "右半屏",
@@ -859,15 +1040,33 @@ function 宿舍() {
             action: 0,
             timing: 3000,
             area: "右半屏",
-        })(!ITimg.ocr("宿舍", {
+        }) && (!ITimg.ocr("宿舍", {
             action: 1,
             part: true,
         }) && !ITimg.ocr("公会", {
             timing: 3000,
             refresh: false,
         }))) {
-        toastLog("无法识别到宿舍");
-        return
+        click(coordinate.coordinate.主页展开.x, coordinate.coordinate.主页展开.y)
+        sleep(1000);
+        if (!ITimg.ocr("宿舍", {
+                action: 0,
+                timing: 3000,
+                nods: 1500,
+            }) && !ITimg.ocr("宿舍", {
+                action: 0,
+                timing: 3000,
+                area: "右半屏",
+            }) && (!ITimg.ocr("宿舍", {
+                action: 1,
+                part: true,
+            }) && !ITimg.ocr("公会", {
+                timing: 3000,
+                refresh: false,
+            }))) {
+            toastLog("无法识别到宿舍");
+            return
+        }
     }
     let matching_i = 0;
     while (true) {
@@ -947,6 +1146,9 @@ function 宿舍() {
                     action: 5,
                 })) {
                 toastLog("今日宿舍任务已完成");
+                helper.宿舍系列.领取奖励.执行状态 = true;
+                tool.writeJSON("宿舍系列", helper.宿舍系列);
+                tool.writeJSON("宿舍任务", false);
             } else {
                 if (ITimg.ocr("一键领取", {
                         action: 1,
@@ -1000,6 +1202,8 @@ function 宿舍() {
         click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
         sleep(1000);
     };
+
+
 }
 
 function 宿舍_委托() {
@@ -1369,9 +1573,7 @@ function 宿舍_执勤() {
 }
 
 function 宿舍_抚摸() {
-    if (helper.宿舍系列.touch_role.执行状态) {
-        return false;
-    }
+
 
     // 获取当前时间
     let now = new Date();
@@ -1379,7 +1581,15 @@ function 宿舍_抚摸() {
         tips = "4个小时内抚摸过所有宿舍小人\nps:开关抚摸角色重置记录";
         toast(tips);
         console.warn(tips);
+        helper.宿舍系列.touch_role.执行状态 = true;
+        tool.writeJSON("宿舍系列", helper.宿舍系列);
         return false
+    } else {
+        helper.宿舍系列.touch_role.执行状态 = false;
+
+    }
+    if (helper.宿舍系列.touch_role.执行状态) {
+        return false;
     }
 
     sleep(1000);
@@ -1735,7 +1945,7 @@ function 宿舍_抚摸() {
             sleep(1500);
         };
     }
-
+    helper.宿舍系列.touch_role.执行状态 = true;
     helper.宿舍系列.touch_role.lastExecutionTime = now.toString();
     tool.writeJSON("宿舍系列", helper.宿舍系列);
     tool.Floating_emit("面板", "展开");
@@ -2450,10 +2660,15 @@ function 消耗血清() {
 
 function 返回主页() {
     //返回主页
-    let staging = ITimg.ocr("主页面", {
+    let staging = (ITimg.ocr("主页面", {
         area: 1,
         action: 5,
-    });
+    }) || ITimg.ocr("主界面", {
+        action: 5,
+        part: true,
+        refresh: false,
+        log_policy: "简短",
+    }));
     if (staging) {
         click(staging.left, staging.bottom);
         坐标配置("主页面", staging.left, staging.bottom)
@@ -2462,32 +2677,41 @@ function 返回主页() {
         click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
         sleep(1500);
     };
-    //不在主页界时,再点下
-    if (!ITimg.ocr("任务", {
-            area: "右半屏",
-        }) && !ITimg.ocr("宿舍", {
-            area: "右半屏",
-            refresh: false,
-            part: true,
-            nods: 1000,
-        }) && !ITimg.ocr("工会", {
-            area: "右半屏",
-            part: true,
-            refresh: false,
-        })) {
-        //返回主页
-        let staging = ITimg.ocr("主页面", {
-            area: 1,
-            action: 5,
-        });
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("主页面", staging.left, staging.bottom)
-            sleep(3000)
-        } else if (coordinate.coordinate.主页面) {
-            click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
-            sleep(3000);
-        };
+    while (true) {
+        //不在主页界时,再点下
+        if (ITimg.ocr("公会", {
+                action: 5,
+                area: "右半屏",
+            }) && ITimg.ocr("成员", {
+                area: "右半屏",
+                refresh: false,
+            }) && ITimg.ocr("采购", {
+                area: "右半屏",
+                refresh: false,
+                part: true,
+                nods: 1000,
+            })) {
+            break
+        } else {
+            //返回主页
+            staging = (ITimg.ocr("主页面", {
+                area: 1,
+                action: 5,
+            }) || ITimg.ocr("主界面", {
+                action: 5,
+                part: true,
+                refresh: false,
+                log_policy: "简短",
+            }))
+            if (staging) {
+                click(staging.left, staging.bottom);
+                坐标配置("主页面", staging.left, staging.bottom)
+                sleep(3000)
+            } else if (coordinate.coordinate.主页面) {
+                click(coordinate.coordinate.主页面.x, coordinate.coordinate.主页面.y);
+                sleep(3000);
+            };
+        }
     }
 }
 
@@ -2495,7 +2719,7 @@ function 纷争战区() {
     if (!helper.纷争战区.自动) {
         return
     }
-
+    tool.Floating_emit("面板", "id", "纷争战区");
     // 获取当前时间
     let today = new Date();
     let currentTime = today.getHours() * 60 + today.getMinutes(); // 当前时间（分钟）
@@ -2509,9 +2733,9 @@ function 纷争战区() {
         toastLog("纷争战区 战斗期未开放");
         return false;
     }
-    if (helper.纷争战区.lastExecutionTime && (today.getTime() - new Date(helper.纷争战斗.lastExecutionTime).getTime()) <= 6 * 24 * 60 * 60 * 1000) {
+    if (helper.纷争战区.lastExecutionTime1 && (today.getTime() - new Date(helper.纷争战区.lastExecutionTime).getTime()) <= 6 * 24 * 60 * 60 * 1000) {
 
-        if (helper.纷争战区.执行状态) {
+        if (helper.纷争战区.执行状态1) {
             log("纷争战区 此周期已完成")
             return false;
 
@@ -2555,36 +2779,40 @@ function 纷争战区() {
     }));
     (ITimg.ocr("纷争战区", {
         action: 1,
-        timing: 1000,
+        timing: 1500,
         area: 34,
     }) || ITimg.ocr("任务奖励已刷新", {
         action: 1,
-        timing: 1000,
+        timing: 1500,
         area: 34,
     }))
-
+    sleep(1500);
     let place = ["猩红冰原", "暗影深林", "镭射合金", "火焰轮回", "机械工厂", "空域浮台"]
 
     let place_collection = ITimg.ocr("集合文本", {
         action: 6,
         area: 24,
     });
-    if (!place_collection || place_collection.length == 0) {
-        place_collection = [];
+    let place_agg = [];
+    console.warn("战区列表信息:", place_collection);
+    if (place_collection && place_collection.length) {
         for (let place_text of place) {
             if (place_text = ITimg.ocr(place_text, {
                     action: 5,
+                    gather: place_collection,
                 })) {
-                place_collection.push(place_text);
+                place_agg.push(place_text);
             }
         }
     }
+    console.warn("可挑战的战区列表:", place_agg)
 
-    for (let f of place_collection) {
-        if (tool.nlpSimilarity(f.text, "未挑战") < 0.80 && f.text != "未挑战") {
-            continue;
-        }
-        console.info("点击" + f.text + " , x" + f.x + "y" + f.y);
+    for (let f of place_agg) {
+        /*  if (tool.nlpSimilarity(f.text, "未挑战") < 0.80 && f.text != "未挑战") {
+              continue;
+          }
+          */
+        console.info("点击" + f.text + " , x:" + f.left + ",y:" + f.top);
         click(f.left, f.bottom);
         sleep(1500);
         if (!ITimg.ocr("战斗准备", {
@@ -2644,8 +2872,9 @@ function 纷争战区() {
             }
         }
         //在新线程中运行作战方案,解决冲突
+        tool.pointerPositionDisplay(true);
         fight_thread = threads.start(作战);
-        sleep(5000)
+        sleep(5000);
         while (true) {
             if (fight_thread && !fight_thread.isAlive()) {
                 toastLog("重启作战线程");
@@ -2699,7 +2928,7 @@ function 纷争战区() {
                 break;
             }
         }
-
+        tool.pointerPositionDisplay(false);
 
 
     }
@@ -2806,19 +3035,42 @@ function 历战映射() {
         }))
     }
     while (true) {
-        if (ITimg.ocr("前往作战", {
+        if (!ITimg.ocr("前往作战", {
                 action: 1,
                 timing: 2000,
                 area: 4,
-            }) || ITimg.ocr("前往作战", {
+            }) && !ITimg.ocr("前往作战", {
                 action: 1,
                 timing: 2000,
                 area: 34,
             })) {
-            break
-        } else {
+
             click(operator.left, operator.top);
             sleep(1500);
+        }
+        if (ITimg.ocr("情报解析", {
+                action: 5,
+                area: 12,
+            }) || ITimg.ocr("环境情报", {
+                action: 5,
+                area: 12,
+                log_policy: "简短",
+            })) {
+            click(height / 2, frcy(80));
+            sleep(500);
+            break
+        }
+        if (ITimg.ocr("开始挑战", {
+                action: 5,
+                area: 4,
+            }) || ITimg.ocr("/14", {
+                action: 5,
+                nods: 1500,
+                part: true,
+                refresh: false,
+                log_policy: "简短",
+            })) {
+            break
         }
     }
     while (settlement_frequency) {
@@ -2831,6 +3083,8 @@ function 历战映射() {
                 area: 4,
                 part: true,
                 refresh: false,
+                log_policy: "简短",
+
             })) {
 
             continue;
@@ -2866,20 +3120,27 @@ function 历战映射() {
                     area: "右半屏",
                     refresh: false,
                 }));
-                if (ITimg.ocr("选择", {
+                (ITimg.ocr("选择", {
+                    action: 1,
+                    timing: 1000,
+                    area: 3,
+                }) || ITimg.ocr("选择", {
+                    action: 1,
+                    timing: 1000,
+                    part: true,
+                    area: 34,
+                }) || ITimg.ocr("选择", {
+                    action: 1,
+                    timing: 1000,
+                    part: true,
+                    refresh: false,
+                }))
+
+                if (ITimg.ocr("作战开始", {
                         action: 1,
+                        nods: 500,
                         timing: 1000,
-                        area: 3,
-                    }) || ITimg.ocr("选择", {
-                        action: 1,
-                        timing: 1000,
-                        part: true,
-                        area: 34,
-                    }) || ITimg.ocr("选择", {
-                        action: 1,
-                        timing: 1000,
-                        part: true,
-                        refresh: false,
+                        area: 4,
                     })) {
                     break
                 }
@@ -2928,18 +3189,18 @@ function 历战映射() {
 
             if (ITimg.ocr("开始挑战", {
                     action: 1,
-                    timing: 1000,
+                    timing: 1500,
                     area: 4,
                     refresh: false,
                 }) || ITimg.ocr("开始挑战", {
                     action: 1,
-                    timing: 1000,
+                    timing: 1500,
                     area: 34,
                 })) {
 
                 if (ITimg.ocr("确定", {
                         action: 1,
-                        timing: 3000,
+                        timing: 4000,
                         area: 4,
                     })) {
                     click(height / 2, width - frcy(80));
@@ -2947,13 +3208,19 @@ function 历战映射() {
                 }
                 ITimg.ocr("保存", {
                     action: 1,
-                    timing: 1000,
+                    timing: 1500,
                     refresh: false,
-                })
+                    nods: 1500,
+                });
+                click(height / 2, width - frcy(80));
+
+                break
             }
+
         }
         //在新线程中运行作战方案,解决冲突
         fight_thread = threads.start(作战);
+        tool.pointerPositionDisplay(true);
         sleep(5000);
         while (true) {
             if (fight_thread && !fight_thread.isAlive()) {
@@ -2983,6 +3250,7 @@ function 历战映射() {
 
             }
         }
+        tool.pointerPositionDisplay(false);
     }
 
     if (coordinate.coordinate.返回) {
@@ -3065,27 +3333,6 @@ function 作战() {
     tool.Floating_emit("展示文本", "状态", "状态：战斗中..");
     释放信号球 = function() {
         //   try{
-        // 分组函数
-        function groupColumns(columns) {
-            const groups = [];
-            columns.forEach(column => {
-                delete column.left;
-                delete column.right;
-                delete column.bottom;
-                delete column.top
-                let foundGroup = false;
-                groups.forEach(group => {
-                    if (!foundGroup && Math.abs(column.y - group[0].y) <= frcy(50)) {
-                        group.push(column);
-                        foundGroup = true;
-                    }
-                });
-                if (!foundGroup) {
-                    groups.push([column]);
-                }
-            });
-            return groups;
-        }
 
         // 查找相似列函数
         function findSimilarColumns(column, columns) {
@@ -3117,28 +3364,30 @@ function 作战() {
 
 
         let data = ITimg.contour({
-            canvas: true,
+            canvas: "信号球",
             action: 5,
-            area: 34,
+            area: [coordinate.combat.信号球.x, coordinate.combat.信号球.y, coordinate.combat.信号球.w, coordinate.combat.信号球.h],
             isdilate: true,
             threshold: 250,
-            size: 10,
+            size: 15,
             type: "BINARY",
-            filter_w: frcx(30),
-            filter_h: frcy(25),
+            filter_w: frcx(20),
+            filter_h: frcy(20),
         });
         if (!data || data.length == 0) {
             return false;
         }
 
         // 处理数据
-        let groupedData = groupColumns(data);
-        let largestGroupIndex = groupedData.reduce((largestIndex, group, index) => {
+        let groupedData; // = groupColumns(data);
+        /*  let largestGroupIndex = groupedData.reduce((largestIndex, group, index) => {
             return group.length > groupedData[largestIndex].length ? index : largestIndex;
         }, 0);
-
-        let largestGroup = groupedData[largestGroupIndex].sort((a, b) => b.x - a.x);
-        largestGroupIndex = null;
+*/
+        let largestGroup = data.sort((a, b) => b.x - a.x);
+        //groupedData[largestGroupIndex].sort((a, b) => b.x - a.x);
+        let largestGroupIndex = null;
+        log(largestGroup)
         if (largestGroup.length < 3) {
             console.verbose("信号球数量不足3个");
             data = null;
@@ -3213,7 +3462,7 @@ function 作战() {
 
 
         });
-
+        sleep(100);
         for (let k in groupedData) {
             k = Number(k);
             let eliminate = false;
@@ -3224,7 +3473,7 @@ function 作战() {
                     console.verbose("移除中间球：" + m.x, m.y);
                     click(m.x, m.y);
                     click(m.x, m.y);
-                    sleep(150);
+                    sleep(200);
                 }
                 // }
                 eliminate = true;
@@ -3237,11 +3486,12 @@ function 作战() {
                 if (groupedData[k].adjacent == 0) {
                     k && k--;
                 }
+
                 for (let m of groupedData[k].middleball) {
                     console.verbose("_移除中间球：" + m.x, m.y);
                     click(m.x, m.y);
                     click(m.x, m.y);
-                    sleep(150);
+                    sleep(200);
                 }
                 eliminate = true;
             }
@@ -3267,72 +3517,26 @@ function 作战() {
 
     切换角色 = function() {
 
-        if (!coordinate.combat || !coordinate.combat.角色1 || !coordinate.combat.角色1.x) {
-
-            let role_list = ITimg.contour({
-                action: 5,
-                area: [Math.floor(height / 1.2), 0, height - Math.floor(height / 1.2), width / 2],
-                isdilate: true,
-                threshold: 200,
-                canvas: "角色",
-                size: 15,
-                type: "BINARY",
-                filter_w: frcx(70),
-                filter_h: frcy(59),
-            });
-            if (role_list && role_list.length > 1) {
-                if (!ITimg.ocr("00:0", {
-                        action: 5,
-                        similar: 0.80,
-                        area: [Math.floor(height / 1.2), 0, height - Math.floor(height / 1.2), parseInt(width / 3)],
-                    }) || ITimg.ocr("00:1", {
-                        action: 5,
-                        similar: 0.80,
-                        refresh: false,
-                        area: [Math.floor(height / 1.2), 0, height - Math.floor(height / 1.2), parseInt(width / 3)],
-                    })) {
-                    return false;
-                }
-                role_list.sort((a, b) => a.y - b.y);
-                if (role_list[0].w > frcx(250) || role_list[0].h > frcy(250)) {
-                    return false
-                }
-                if (role_list[1].w > frcx(250) || role_list[1].h > frcy(250)) {
-                    return false
-                }
-                if (role_list[1].y + role_list[1].h > role_list[0].y) {
-                    role_list.splice(0, 1);
-                    if (!role_list[1]) {
-                        return false
-                    }
-                }
-                if (!coordinate.combat) {
-                    coordinate.combat = {};
-                }
-                coordinate.combat.角色1 = {
-                    x: role_list[0].x + role_list[0].w / 2,
-                    y: role_list[0].y + role_list[0].h / 2
-                }
-                coordinate.combat.角色2 = {
-                    x: role_list[1].x + role_list[1].w / 2,
-                    y: role_list[1].y + role_list[1].h / 2
-                }
-                console.warn("角色1信息：", role_list[0]);
-                toastLog("保存角色1、2键位坐标：" + JSON.stringify(coordinate.combat))
-            } else {
-                console.error("获取角色1、2键位坐标结果：", role_list);
-                return false;
-            }
-
-        };
         let role_ = random(1, 2);
         console.info("---点击切换角色" + role_ + "：" + JSON.stringify(coordinate.combat["角色" + role_]));
-        click(coordinate.combat["角色" + role_].x, coordinate.combat["角色" + role_].y);
+        click(coordinate.combat["角色" + role_].x + coordinate.combat["角色" + role_].w / 2, coordinate.combat["角色" + role_].y + coordinate.combat["角色" + role_].h / 2);
 
-        sleep(150);
+        sleep(100);
+        ITimg.contour({
+            canvas: "角色",
+            action: 5,
+            area: [coordinate.combat.角色1.x, coordinate.combat.角色1.y, coordinate.combat.角色1.w, coordinate.combat.角色1.h * 2],
+            isdilate: true,
+            threshold: 200,
+            size: 5,
+            type: "BINARY",
+            filter_w: frcx(30),
+            filter_h: frcy(30),
+        });
+
         if (random(0, 1)) {
             if (!role_timing) {
-                click(coordinate.combat["角色" + role_].x, coordinate.combat["角色" + role_].y);
+                click(coordinate.combat["角色" + role_].x + coordinate.combat["角色" + role_].w / 2, coordinate.combat["角色" + role_].y + coordinate.combat["角色" + role_].h / 2);
                 sleep(150);
                 role_timing = true;
                 setTimeout(function() {
@@ -3342,64 +3546,9 @@ function 作战() {
             }
         }
 
-        /*
-        if (role_list && role_list.length) {
-            // if (random(0, 1)) role_list.reverse();
-
-            console.info("---切换角色：" + (role_list[1] ? "2, " + JSON.stringify(role_list[1]) : "1, " + JSON.stringify(role_list[0])));
-            click((role_list[1] ? role_list[1].x + role_list[1].w / 2 : role_list[0].x + role_list[0].w / 2), (role_list[1] ? role_list[1].y + role_list[1].h / 2 : role_list[0].y + role_list[0].h / 2));
-            sleep(150);
-            if (random(0, 1)) {
-                if (!role_timing) {
-                    click((role_list[1] ? role_list[1].x + role_list[1].w / 2 : role_list[0].x + role_list[0].w / 2), (role_list[1] ? role_list[1].y + role_list[1].h / 2 : role_list[0].y + role_list[0].h / 2));
-                    sleep(150);
-                    role_timing = true;
-                    setTimeout(function() {
-                        role_timing = false;
-                    }, 10000);
-
-                }
-            }
-        }
-        */
-        role_list = null;
     }
     攻击 = function() {
 
-        if (!coordinate.combat || !coordinate.combat.闪避键 || !coordinate.combat.闪避键.x) {
-
-            let operation_list = ITimg.contour({
-                action: 5,
-                canvas: "攻击闪避",
-                area: [Math.floor(height / 1.6), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
-                isdilate: true,
-                threshold: 180,
-                size: 5,
-                type: "BINARY",
-                filter_vertices: 3,
-                filter_w: frcx(60),
-                filter_h: frcy(45),
-            });
-            operation_list && operation_list.sort((a, b) => b.x - a.x);
-
-            if (operation_list && operation_list.length == 2 && operation_list[0].shape == "圆形") {
-                if (!coordinate.combat) {
-                    coordinate.combat = {};
-                }
-                coordinate.combat.闪避键 = {
-                    x: operation_list[0].x + operation_list[0].w / 2,
-                    y: operation_list[0].y + operation_list[0].h
-                }
-                coordinate.combat.攻击键 = {
-                    x: operation_list[1].x,
-                    y: operation_list[1].y
-                }
-                toastLog("保存攻击、闪避键位坐标：" + JSON.stringify(coordinate.combat))
-            } else {
-                console.error("获取攻击、闪避键位坐标失败，结果：", operation_list);
-                return false;
-            }
-        }
         switch (random(1, 22)) {
             case 20:
             case 19:
@@ -3407,7 +3556,7 @@ function 作战() {
 
                 if (!dodge_timing) {
                     log("---点击闪避键");
-                    click(coordinate.combat.闪避键.x, coordinate.combat.闪避键.y);
+                    click(coordinate.combat.闪避.x + coordinate.combat.闪避.w / 2, coordinate.combat.闪避.y + coordinate.combat.闪避.h / 2);
 
                     //连续点击两次闪避后，两秒内不能再次点击闪避
                     if (dodge_timing === false) {
@@ -3417,22 +3566,22 @@ function 作战() {
                         setTimeout(function() {
                             dodge_timing = false;
                         }, 2500);
-                        console.log("---点击攻击键_:" + JSON.stringify(coordinate.combat.攻击键))
-                        click(coordinate.combat.攻击键.x, coordinate.combat.攻击键.y);
+                        console.log("---点击攻击键_:" + JSON.stringify(coordinate.combat.攻击))
+                        click(coordinate.combat.攻击.x + coordinate.combat.攻击.w / 2, coordinate.combat.攻击.y + coordinate.combat.攻击.h / 2);
 
                     }
 
 
                 } else {
-                    console.log("---点击攻击键__:" + JSON.stringify(coordinate.combat.攻击键))
-                    click(coordinate.combat.攻击键.x, coordinate.combat.攻击键.y);
-
+                    console.log("---点击攻击键__:" + JSON.stringify(coordinate.combat.攻击))
+                    click(coordinate.combat.攻击.x + coordinate.combat.攻击.w / 2, coordinate.combat.攻击.y + coordinate.combat.攻击.h / 2);
                 }
+                sleep(100);
                 break
             case 17:
             case 16:
-                log("---长按闪避键");
-                press(coordinate.combat.闪避键.x, coordinate.combat.闪避键.y, 350);
+                log("---长按闪避键", coordinate.combat.闪避);
+                press(coordinate.combat.闪避.x + coordinate.combat.闪避.w / 2, coordinate.combat.闪避.y + coordinate.combat.闪避.h / 2, 350);
 
 
                 break
@@ -3440,27 +3589,9 @@ function 作战() {
             case 14:
             case 13:
             case 12:
-                operation_list = ITimg.contour({
-                    action: 5,
-                    canvas: true,
-                    area: [Math.floor(height / 1.6), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
-                    isdilate: true,
-                    threshold: 180,
-                    size: 5,
-                    type: "BINARY",
-                    filter_vertices: 3,
-                    filter_w: frcx(60),
-                    filter_h: frcy(45),
-                });
-                if (!operation_list || operation_list.length < 3) {
-                    console.log("---点击攻击键_:" + JSON.stringify(coordinate.combat.攻击键))
-                    click(coordinate.combat.攻击键.x, coordinate.combat.攻击键.y);
 
-                    break
-                }
-
-                console.info("---释放大招" + operation_list[2].x + "," + operation_list[2].y);
-                click(operation_list[2].x, operation_list[2].y);
+                console.info("---释放大招", coordinate.combat.大招);
+                click(coordinate.combat.大招.x + coordinate.combat.大招.w / 2, coordinate.combat.大招.y + coordinate.combat.大招.h / 2);
                 sleep(200);
                 role_timing = true;
                 setTimeout(function() {
@@ -3469,18 +3600,26 @@ function 作战() {
 
 
                 break
+            case 11:
+                console.log("---点击辅助机:" + JSON.stringify(coordinate.combat.辅助机));
+                click(coordinate.combat.辅助机.x + coordinate.combat.辅助机.w / 2, coordinate.combat.辅助机.y + coordinate.combat.辅助机.h / 2);
+                sleep(100);
+
+                break
             case 3:
             case 2:
             case 1:
-                console.log("---长按攻击键:" + JSON.stringify(coordinate.combat.攻击键))
-                press(coordinate.combat.攻击键.x, coordinate.combat.攻击键.y, 350);
+                console.log("---长按攻击键:" + JSON.stringify(coordinate.combat.攻击))
+                press(coordinate.combat.攻击.x + coordinate.combat.攻击.w / 2, coordinate.combat.攻击.y + coordinate.combat.攻击.h / 2, 350);
+
 
                 break
 
             default:
 
-                console.log("---点击攻击键:" + JSON.stringify(coordinate.combat.攻击键))
-                click(coordinate.combat.攻击键.x, coordinate.combat.攻击键.y);
+                console.log("---点击攻击键:" + JSON.stringify(coordinate.combat.攻击))
+                click(coordinate.combat.攻击.x + coordinate.combat.攻击.w / 2, coordinate.combat.攻击.y + coordinate.combat.攻击.h / 2);
+                sleep(100);
                 break
 
         }
@@ -3498,13 +3637,10 @@ function 作战() {
          * */
 
         let ran_ = random(1, 15);
-        if (coordinate.combat && (!coordinate.combat.角色1) && frequency > 15) {
-            ran_ = 15;
-        }
 
         switch (ran_) {
             case 15:
-                //  case 14:
+            case 14:
                 切换角色();
                 break
             case 11:
@@ -3841,6 +3977,29 @@ function 便笺(sleep_, value) {
 
 }
 
-
+//相似轮廓分组函数
+function groupColumns(columns, shape) {
+    let groups = [];
+    columns.forEach(column => {
+        delete column.left;
+        delete column.right;
+        delete column.bottom;
+        delete column.top
+        let foundGroup = false;
+        groups.forEach(group => {
+            if (!foundGroup && Math.abs(column.y - group[0].y) <= frcy(50)) {
+                if (shape && column.shape != group[0].shape) {
+                    return false
+                }
+                group.push(column);
+                foundGroup = true;
+            }
+        });
+        if (!foundGroup) {
+            groups.push([column]);
+        }
+    });
+    return groups;
+}
 
 //--------------------------------------------------------

@@ -891,7 +891,7 @@ function binarized_contour(list) {
             let area = Imgproc.contourArea(contour);
             let perimeter = Imgproc.arcLength(new MatOfPoint2f(contour.toArray()), true);
             let circularity = 4 * Math.PI * area / (perimeter * perimeter);
-            circularity_ = circularity.toFixed(2)
+            circularity_ = circularity.toFixed(2);
 
             if (circularity >= 0.85) {
                 shape = "圆形"
@@ -899,7 +899,6 @@ function binarized_contour(list) {
                 shape = "其他形状"
             }
         }
-
 
 
         query_contour.push({
@@ -950,7 +949,7 @@ function binarized_contour(list) {
     if (list.canvas) {
 
         list.canvas.img = list.canvas.img.toImage();
-        let pngPtah = package_path + "/binarized_contour_" + (list.canvas.name || "") + "visualization.jpg";
+        let pngPtah = package_path + "/binarized_contour/" + (list.canvas.name || "") + "_visualization.jpg";
         files.ensureDir(pngPtah);
 
         images.save(list.canvas.img, pngPtah, "jpg", 50);
@@ -962,7 +961,7 @@ function binarized_contour(list) {
         return ITimg.results_contour;
     }
 
-    list.canvas ? list.canvas = undefined : undefined;
+    list.canvas ? list.canvas = list.canvas.name : undefined;
     if (list.picture) {
         !list.picture.isRecycled() && list.picture.recycle()
         list.picture = "隐藏"
@@ -1287,21 +1286,21 @@ try {
 
     // height = 2560;
     // width = 1600;
-   
-   let name = {
-       picture_name:"112",
-       canvas_name:"节点"
-   }
-    let picture = images.read("/storage/emulated/0/DCIM/Screenshots/"+name.picture_name+".jpg");
+
+    let name = {
+        picture_name: "112",
+        canvas_name: "节点"
+    }
+    let picture = images.read("/storage/emulated/0/DCIM/Screenshots/" + name.picture_name + ".jpg");
     // let picture = images.read("/sdcard/Pictures/QQ/存档.jpg");
     //let picture = images.read("/storage/emulated/0/脚本/script-module-warehouse/自定义执行模块/script_file/生息演算速刷/cc.jpg")
-   
+
     let data = binarized_contour({
         canvas: name.canvas_name,
         picture: picture,
         action: 5,
-          area: 0,
-       // area: [Math.floor(height / 1.5), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
+        area: 0,
+        // area: [Math.floor(height / 1.5), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
         //  area:[0,0,2560,1600],
         //   area: [0, 0, height/4, width /4],
         isdilate: false,
@@ -1312,12 +1311,107 @@ try {
         filter_w: 30,
         filter_h: 30,
     })
+    let coordinate = {
+        combat: {},
+    }
+    
+    function groupColumns(columns, shape) {
+        let groups = [];
+        columns.forEach(column => {
+            delete column.left;
+            delete column.right;
+            delete column.bottom;
+            delete column.top
+            let foundGroup = false;
+            groups.forEach(group => {
+                if (!foundGroup && Math.abs(column.y - group[0].y) <= 50) {
+                    if (shape && column.shape != group[0].shape) {
+                        return false
+                    }
+                    group.push(column);
+                    foundGroup = true;
+                }
+            });
+            if (!foundGroup) {
+                groups.push([column]);
+            }
+        });
+        return groups;
+    }
+
+    data = groupColumns(data, true);
+    let key_position = [];
+    for (let id of data) {
+        if (id.length > 1) {
+            id.sort((a, b) => b.x - b.x);
+            key_position.push(id);
+
+        } else {
+            id = id[0];
+            if (id.shape == "长方形" && id.w < id.h) {
+                coordinate.combat["角色1"] = {
+                    "x": id.x + parseInt(id.w / 2),
+                    "y": id.y ,
+                    "w": id.w,
+                    "h": parseInt(id.h / 2),
+                };
+                coordinate.combat["角色2"] = {
+                    "x": id.x + parseInt(id.w / 2),
+                    "y": id.y + parseInt(id.h / 2),
+                    "w": id.w,
+                    "h": parseInt(id.h / 2),
+
+                };
+            } else if (id.shape == "正方形" && id.x + id.w < height / 2 && id.y + id.h > parseInt(width / 1.5)) {
+                coordinate.combat["移动"] = {
+                    "x": id.x + parseInt(id.w / 2),
+                    "y": id.y + parseInt(id.h / 2),
+                    "w": id.w,
+                    "h": id.h,
+                };
+            }
+        }
+    }
+    let key_ = key_position[0][0];
+    if (key_.w > key_position[1][0].w && key_.h > key_position[1][0].h) {
+        key_position.reverse();
+        key_ = key_position[0][0];
+    }
 
 
+    coordinate.combat["辅助机"] = {
+        "x": key_.x + parseInt(key_.w / 2),
+        "y": key_.y + parseInt(key_.h / 2),
+        "w": key_.w,
+        "h": key_.h,
 
+    };
 
+    key_ = key_position[1][0];
+    coordinate.combat["闪避"] = {
+        "x": key_.x + parseInt(key_.w / 2),
+        "y": key_.y + parseInt(key_.h / 2),
+        "w": key_.w,
+        "h": key_.h,
+    };
+    key_ = key_position[1][1];
+    coordinate.combat["攻击"] = {
+        "x": key_.x + parseInt(key_.w / 2),
+        "y": key_.y + parseInt(key_.h / 2),
+        "w": key_.w,
+        "h": key_.h,
+    };
+    key_ = key_position[1][2];
+    coordinate.combat["大招"] = {
+        "x": key_.x + parseInt(key_.w / 2),
+        "y": key_.y + parseInt(key_.h / 2),
+        "w": key_.w,
+        "h": key_.h,
+    };
+
+    log(coordinate.combat)
     picture.recycle();
-    let pngPtah = package_path + "/binarized_contour_"+ name.picture_name +"visualization.jpg";
+    let pngPtah = package_path + "/binarized_contour/" + name.picture_name + "_visualization.jpg";
 
     app.viewFile(pngPtah)
 
