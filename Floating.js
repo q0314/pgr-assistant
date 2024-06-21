@@ -361,6 +361,11 @@ function 执行次数() {
             padding="6 6 6 6"
             textSize="16"
             />
+            <Switch id="auto_use_serum"
+                        checked="{{helper.自动2血清}}"
+                        text="{{language.main['auto_use_serum']}}"
+                        padding="6 6 6 6"  textSize="16" textColor="{{theme.text}}"
+                        />
             <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
                 <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto"  />
                 <spinner id="resources_type" textSize="16" entries="{{language.main['resources_type']}}"
@@ -403,9 +408,17 @@ function 执行次数() {
     rewriteView.depletion_serum.on("click", function(view) {
         checked = view.checked;
         rewriteView.depletion_way.setVisibility(checked ? 0 : 8);
+        rewriteView.auto_use_serum.setVisibility(checked ? 0 : 8);
         //    rewriteView.depletion_manage.setVisibility(checked ? 0 : 8)
-        tool.writeJSON("血清", checked)
+        tool.writeJSON("血清", checked);
     })
+    
+        rewriteView.auto_use_serum.on("click", function(view) {
+        checked = view.checked;
+        tool.writeJSON("自动2血清", checked);
+    })
+    
+    
     rewriteView.depletion_way1.on("check", function(checked) {
         rewriteView.resources_type.setVisibility(checked ? 0 : 8);
         helper.战斗.活动 = !checked;
@@ -534,6 +547,28 @@ function 主页设置() {
                 </horizontal>
             </vertical>
         </card>
+        
+              <card w="*"  h="*" cardCornerRadius="1"
+                    cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+                    <vertical>
+                        <horizontal id="norman_revival_war" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                            <text  gravity="center" textSize="16" text="{{language.main['norman_revival_war']}}" textColor="{{theme.text}}" />
+                            <text layout_weight="1" />
+                            <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{theme.text}}" />
+                        </horizontal>
+                    </vertical>
+                </card>
+                <card w="*"  h="*" cardCornerRadius="1"
+                cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+                <vertical>
+                    <horizontal id="phantom_pain_cage" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                        <text  gravity="center" textSize="16" text="{{language.main['phantom_pain_cage']}}" textColor="{{theme.text}}" />
+                        <text layout_weight="1" />
+                        <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{theme.text}}" />
+                    </horizontal>
+                </vertical>
+            </card>
+            
         <Switch id="disputes"
         checked="{{helper.纷争战区.自动}}"
         text="{{language.main['disputes']}}"
@@ -654,6 +689,85 @@ function 主页设置() {
 
 
     });
+
+
+setupView.norman_revival_war.click(function(view) {
+    let imgview = view.getChildAt(2);
+    let fatherview = view.getParent();
+    if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+
+        for (let k in helper.norman_revival_war) {
+
+            addview = ui.inflate(
+                '\ <Switch checked="' + helper.norman_revival_war[k] + '" hint="' + k + '" text="' + language.main["norman_revival_war_" + k] + '"  textSize="16" textColor="{{theme.text}}" padding="6 6 6 6" />', fatherview)
+            fatherview.addView(addview, fatherview.getChildCount());
+            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                let id_ = view.getHint()
+                helper.norman_revival_war[id_] = view.checked;
+
+                tool.writeJSON("norman_revival_war", helper.norman_revival_war);
+
+            });
+
+        }
+
+        fatherview.getParent().setCardElevation(1);
+        //        log(fatherview.getChildAt(1).getChildAt(0))
+    } else {
+        //删除视图监听、视图对象
+        for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
+            fatherview.getChildAt(i).removeAllListeners()
+            fatherview.removeView(fatherview.getChildAt(i));
+        }
+        fatherview.getParent().setCardElevation(0);
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+    }
+
+
+});
+
+setupView.phantom_pain_cage.click(function(view) {
+    let imgview = view.getChildAt(2);
+    let fatherview = view.getParent();
+    if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+
+        for (let k in helper.phantom_pain_cage) {
+            if (k.indexOf("组") == 1) {
+                continue;
+            }
+            addview = ui.inflate(
+                '\ <Switch checked="' + helper.phantom_pain_cage[k] + '" hint="' + k + '" text="' + language.main["phantom_pain_cage_" + k] + '"  textSize="16" textColor="{{theme.text}}" padding="6 6 6 6" />', fatherview)
+            fatherview.addView(addview, fatherview.getChildCount());
+            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                let id_ = view.getHint();
+                if (id_ == "启用" && view.checked) {
+                    use.Dialog_Tips(language.warm_tips, language.phantom_pain_cage_tips);
+
+                }
+                helper.phantom_pain_cage[id_] = view.checked;
+
+                tool.writeJSON("phantom_pain_cage", helper.phantom_pain_cage);
+
+            });
+
+        }
+
+        fatherview.getParent().setCardElevation(1);
+        //        log(fatherview.getChildAt(1).getChildAt(0))
+    } else {
+        //删除视图监听、视图对象
+        for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
+            fatherview.getChildAt(i).removeAllListeners()
+            fatherview.removeView(fatherview.getChildAt(i));
+        }
+        fatherview.getParent().setCardElevation(0);
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+    }
+
+
+});
 
     setup.show();
 

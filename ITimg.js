@@ -1034,6 +1034,10 @@ function regional_division(region) {
         case 0:
             return [0, 0, height, width]
 
+        case "中间":
+        case 5:
+            return [height / 4, width / 4, height / 2, width / 2];
+
         case '左上半屏':
         case 1:
             return [0, 0, height / 2, width / 2];
@@ -1284,15 +1288,15 @@ try {
     new ITimg.Prepare();
 
 
-    // height = 2560;
-    // width = 1600;
+    // height = 2160;
+    //  width = 1080;
 
     let name = {
-        picture_name: "112",
+        picture_name: "912",
         canvas_name: "节点"
     }
     let picture = images.read("/storage/emulated/0/DCIM/Screenshots/" + name.picture_name + ".jpg");
-    // let picture = images.read("/sdcard/Pictures/QQ/存档.jpg");
+    // let picture = images.read("/sdcard/Pictures/QQ/0012.png");
     //let picture = images.read("/storage/emulated/0/脚本/script-module-warehouse/自定义执行模块/script_file/生息演算速刷/cc.jpg")
 
     let data = binarized_contour({
@@ -1303,18 +1307,19 @@ try {
         // area: [Math.floor(height / 1.5), Math.floor(width / 1.35), height - Math.floor(height / 1.6), width - Math.floor(width / 1.35)],
         //  area:[0,0,2560,1600],
         //   area: [0, 0, height/4, width /4],
-        isdilate: false,
 
-        threshold: 200,
+        isdilate: false,
+        threshold: 230,
         size: 0,
         type: "BINARY",
-        filter_w: 30,
-        filter_h: 30,
-    })
+        filter_w: 100,
+        filter_h: 100,
+    });
+
     let coordinate = {
         combat: {},
     }
-    
+
     function groupColumns(columns, shape) {
         let groups = [];
         columns.forEach(column => {
@@ -1338,78 +1343,13 @@ try {
         });
         return groups;
     }
-
+    console.warn(data)
     data = groupColumns(data, true);
     let key_position = [];
-    for (let id of data) {
-        if (id.length > 1) {
-            id.sort((a, b) => b.x - b.x);
-            key_position.push(id);
-
-        } else {
-            id = id[0];
-            if (id.shape == "长方形" && id.w < id.h) {
-                coordinate.combat["角色1"] = {
-                    "x": id.x + parseInt(id.w / 2),
-                    "y": id.y ,
-                    "w": id.w,
-                    "h": parseInt(id.h / 2),
-                };
-                coordinate.combat["角色2"] = {
-                    "x": id.x + parseInt(id.w / 2),
-                    "y": id.y + parseInt(id.h / 2),
-                    "w": id.w,
-                    "h": parseInt(id.h / 2),
-
-                };
-            } else if (id.shape == "正方形" && id.x + id.w < height / 2 && id.y + id.h > parseInt(width / 1.5)) {
-                coordinate.combat["移动"] = {
-                    "x": id.x + parseInt(id.w / 2),
-                    "y": id.y + parseInt(id.h / 2),
-                    "w": id.w,
-                    "h": id.h,
-                };
-            }
-        }
-    }
-    let key_ = key_position[0][0];
-    if (key_.w > key_position[1][0].w && key_.h > key_position[1][0].h) {
-        key_position.reverse();
-        key_ = key_position[0][0];
-    }
+    // console.warn(data)
 
 
-    coordinate.combat["辅助机"] = {
-        "x": key_.x + parseInt(key_.w / 2),
-        "y": key_.y + parseInt(key_.h / 2),
-        "w": key_.w,
-        "h": key_.h,
-
-    };
-
-    key_ = key_position[1][0];
-    coordinate.combat["闪避"] = {
-        "x": key_.x + parseInt(key_.w / 2),
-        "y": key_.y + parseInt(key_.h / 2),
-        "w": key_.w,
-        "h": key_.h,
-    };
-    key_ = key_position[1][1];
-    coordinate.combat["攻击"] = {
-        "x": key_.x + parseInt(key_.w / 2),
-        "y": key_.y + parseInt(key_.h / 2),
-        "w": key_.w,
-        "h": key_.h,
-    };
-    key_ = key_position[1][2];
-    coordinate.combat["大招"] = {
-        "x": key_.x + parseInt(key_.w / 2),
-        "y": key_.y + parseInt(key_.h / 2),
-        "w": key_.w,
-        "h": key_.h,
-    };
-
-    log(coordinate.combat)
+    //  log(coordinate.combat)
     picture.recycle();
     let pngPtah = package_path + "/binarized_contour/" + name.picture_name + "_visualization.jpg";
 

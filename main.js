@@ -90,6 +90,16 @@ var helper = tool.readJSON("helper", {
             "启用": true,
         }
     },
+    "norman_revival_war": {
+        "启用": true,
+        "领取奖励": true,
+    },
+    "phantom_pain_cage": {
+        "启用": false,
+        "终极区": true,
+        "领取奖励": true,
+        "周六日不执行": false,
+    },
 
     "截图方式": "辅助",
     "包名": "com.kurogame.haru.hero",
@@ -171,6 +181,18 @@ if (!helper.历战映射 || !helper.宿舍系列.touch_role) {
     })
 }
 
+if (!helper.phantom_pain_cage) {
+    helper = tool.writeJSON("phantom_pain_cage", {
+        "启用": false,
+        "终极区": true,
+        "领取奖励": true,
+        "周六日不执行": false,
+    })
+    helper = tool.writeJSON("norman_revival_war", {
+        "启用": true,
+        "领取奖励": true
+    })
+}
 
 
 threads.start(function() {
@@ -398,75 +420,95 @@ ui.layout(
                         </vertical>
                     </card>
                     
-                    
-                    <widget-switch-se7en
-                    id="disputes"
-                    checked="{{helper.纷争战区.自动}}"
-                    text="{{language['disputes']}}"
-                    padding="6 6 6 6"
-                    textSize="16" textColor="{{use.theme.text}}"
-                    />
-                    <widget-switch-se7en
-                    id="lizhan_mapping"
-                    checked="{{helper.历战映射.启用}}"
-                    text="{{language['lizhan_mapping']}}"
-                    padding="6 6 6 6"
-                    textSize="16" textColor="{{use.theme.text}}"
-                    />
-                    <widget-switch-se7en
-                    id="task_award"
-                    checked="{{helper.任务奖励}}"
-                    text="{{language['task_award']}}"
-                    padding="6 6 6 6"
-                    textSize="16" textColor="{{use.theme.text}}"
-                    />
-                    
-                    <widget-switch-se7en
-                    id="handbook"
-                    checked="{{helper.手册经验}}"
-                    text="{{language['handbook']}}"
-                    padding="6 6 6 6"
-                    textSize="16" textColor="{{use.theme.text}}"
-                    />
-                    
-                    
-                    <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+                    <card w="*"  h="*" cardCornerRadius="1"
                     cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
-                    <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
-                        <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-                        <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
+                    <vertical>
+                        <horizontal id="norman_revival_war" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                            <text  gravity="center" textSize="16" text="{{language['norman_revival_war']}}" textColor="{{use.theme.text}}" />
+                            <text layout_weight="1" />
+                            <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
+                        </horizontal>
+                    </vertical>
+                </card>
+                <card w="*"  h="*" cardCornerRadius="1"
+                cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+                <vertical>
+                    <horizontal id="phantom_pain_cage" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                        <text  gravity="center" textSize="16" text="{{language['phantom_pain_cage']}}" textColor="{{use.theme.text}}" />
                         <text layout_weight="1" />
-                        <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-                    </linear>
-                </card>
-                <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
-                    <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
-                    cardElevation="0dp" foreground="?selectableItemBackground">
-                    <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
-                        <vertical padding="5 0" h="auto" w="0" layout_weight="1">
-                            <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
-                            <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
-                        </vertical>
-                        <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
+                        <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
                     </horizontal>
-                    <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
-                </card>
-            </list>
-            <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
+                </vertical>
+            </card>
+            
+            <widget-switch-se7en
+            id="disputes"
+            checked="{{helper.纷争战区.自动}}"
+            text="{{language['disputes']}}"
+            padding="6 6 6 6"
+            textSize="16" textColor="{{use.theme.text}}"
+            />
+            <widget-switch-se7en
+            id="lizhan_mapping"
+            checked="{{helper.历战映射.启用}}"
+            text="{{language['lizhan_mapping']}}"
+            padding="6 6 6 6"
+            textSize="16" textColor="{{use.theme.text}}"
+            />
+            <widget-switch-se7en
+            id="task_award"
+            checked="{{helper.任务奖励}}"
+            text="{{language['task_award']}}"
+            padding="6 6 6 6"
+            textSize="16" textColor="{{use.theme.text}}"
+            />
+            
+            <widget-switch-se7en
+            id="handbook"
+            checked="{{helper.手册经验}}"
+            text="{{language['handbook']}}"
+            padding="6 6 6 6"
+            textSize="16" textColor="{{use.theme.text}}"
+            />
             
             
-            <card
-            w="*"
-            h="1" bg="#00000000"
-            marginTop="150"
-            marginBottom="0"
-            paddingBottom="30"
-            cardElevation="0dp"
-            cardCornerRadius="30dp"
-            >
+            <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+            cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+            <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
+                <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+                <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
+                <text layout_weight="1" />
+                <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+            </linear>
         </card>
-        
-        
+        <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
+            <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
+            cardElevation="0dp" foreground="?selectableItemBackground">
+            <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
+                <vertical padding="5 0" h="auto" w="0" layout_weight="1">
+                    <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
+                    <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
+                </vertical>
+                <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
+            </horizontal>
+            <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
+        </card>
+    </list>
+    <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
+    
+    
+    <card
+    w="*"
+    h="1" bg="#00000000"
+    marginTop="150"
+    marginBottom="0"
+    paddingBottom="30"
+    cardElevation="0dp"
+    cardCornerRadius="30dp"
+    >
+    </card>
+    
+    
     </vertical>
     </ScrollView>
     
@@ -1160,7 +1202,7 @@ ui.dorm_series.click(function(view) {
                 helper.宿舍系列[view.getHint()].启用 = view.checked;
                 if (view.getHint() == "touch_role") {
                     helper.宿舍系列[view.getHint()].lastExecutionTime = false;
-                }else {
+                } else {
                     helper.宿舍系列[view.getHint()].执行状态 = false;
                 }
                 tool.writeJSON("宿舍系列", helper.宿舍系列);
@@ -1181,6 +1223,84 @@ ui.dorm_series.click(function(view) {
 
                 });
             }
+        }
+
+        fatherview.getParent().setCardElevation(1);
+        //        log(fatherview.getChildAt(1).getChildAt(0))
+    } else {
+        //删除视图监听、视图对象
+        for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
+            fatherview.getChildAt(i).removeAllListeners()
+            fatherview.removeView(fatherview.getChildAt(i));
+        }
+        fatherview.getParent().setCardElevation(0);
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+    }
+
+
+});
+
+ui.norman_revival_war.click(function(view) {
+    let imgview = view.getChildAt(2);
+    let fatherview = view.getParent();
+    if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+
+        for (let k in helper.norman_revival_war) {
+
+            addview = ui.inflate(
+                '\ <widget-switch-se7en checked="' + helper.norman_revival_war[k] + '" hint="' + k + '" text="' + language["norman_revival_war_" + k] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
+            fatherview.addView(addview, fatherview.getChildCount());
+            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                let id_ = view.getHint()
+                helper.norman_revival_war[id_] = view.checked;
+
+                tool.writeJSON("norman_revival_war", helper.norman_revival_war);
+
+            });
+
+        }
+
+        fatherview.getParent().setCardElevation(1);
+        //        log(fatherview.getChildAt(1).getChildAt(0))
+    } else {
+        //删除视图监听、视图对象
+        for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
+            fatherview.getChildAt(i).removeAllListeners()
+            fatherview.removeView(fatherview.getChildAt(i));
+        }
+        fatherview.getParent().setCardElevation(0);
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+    }
+
+
+});
+
+ui.phantom_pain_cage.click(function(view) {
+    let imgview = view.getChildAt(2);
+    let fatherview = view.getParent();
+    if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+
+        for (let k in helper.phantom_pain_cage) {
+            if (k.indexOf("组") == 1) {
+                continue;
+            }
+            addview = ui.inflate(
+                '\ <widget-switch-se7en checked="' + helper.phantom_pain_cage[k] + '" hint="' + k + '" text="' + language["phantom_pain_cage_" + k] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
+            fatherview.addView(addview, fatherview.getChildCount());
+            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                let id_ = view.getHint();
+                if (id_ == "启用" && view.checked) {
+                    use.Dialog_Tips(language.warm_tips, language.phantom_pain_cage_tips);
+
+                }
+                helper.phantom_pain_cage[id_] = view.checked;
+
+                tool.writeJSON("phantom_pain_cage", helper.phantom_pain_cage);
+
+            });
+
         }
 
         fatherview.getParent().setCardElevation(1);

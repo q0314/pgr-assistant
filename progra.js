@@ -25,8 +25,8 @@ if (height < width || helper.模拟器) {
     log('坐标兼容', helper.坐标兼容)
     if (helper.坐标兼容) {
         setScreenMetrics(width, height);
-    };
-};
+    }
+}
 
 
 if (helper.图片代理) {
@@ -99,6 +99,47 @@ var fight_thread = false;
 
 var coordinate = JSON.parse(files.read("./library/coordinate.json"));
 
+var buff_list = {
+    "火队": ["易燃", "火焰轮回"],
+    "雷队": ["感电", "镭射合金"],
+    "物理队": ["脆弱", "机械工厂"],
+    "暗队": ["腐蚀", "暗影深林"],
+    "冰队": ["霜结", "猩红冰原"],
+    "空队": ["空域浮台"]
+}
+var axis_list = {
+    recruit_slide_left: [2086, 677, 753, 677],
+    recruit_slide_right: [1193, 542, 2294, 497, 500],
+}
+
+
+for (let i in axis_list) {
+    if (axis_list[i][2] === true && axis_list[i][3] === true) {
+        axis_list[i] = [axis_list[i][0], axis_list[i][1]];
+    } else if (axis_list[i][2] === true) {
+        axis_list[i] = [axis_list[i][0], frcy(axis_list[i][1])];
+
+
+    } else if (axis_list[i][3] === true) {
+        axis_list[i] = [frcx(axis_list[i][0]), axis_list[i][1]];
+
+    } else if (axis_list[i][2]) {
+        if (axis_list[i].length > 3) {
+            for (let k in axis_list[i]) {
+                if (k == 0 || k == 2) {
+                    axis_list[i][k] = frcx(axis_list[i][k]);
+                } else if (k == 1 || k == 3) {
+                    axis_list[i][k] = frcy(axis_list[i][k]);
+                }
+            }
+        } else {
+            axis_list[i] = [frcx(axis_list[i][0]), frcy(axis_list[i][1]), axis_list[i][2]];
+
+        }
+    } else {
+        axis_list[i] = [frcx(axis_list[i][0]), frcy(axis_list[i][1])];
+    }
+}
 
 let refreshTime = new Date();
 refreshTime.setHours(5, 0, 0, 0);
@@ -141,6 +182,7 @@ helper = tool.writeJSON("宿舍系列", helper.宿舍系列);
 主程序();
 
 function 主程序() {
+    //矩阵循生()
     //return
     进入主页();
     helper = tool.readJSON("helper");
@@ -172,8 +214,9 @@ function 主程序() {
         消耗血清();
     }
     helper = tool.readJSON("helper");
-
+    幻痛囚笼();
     纷争战区();
+    诺曼复兴战();
     历战映射();
     便笺(3000);
 
@@ -258,295 +301,56 @@ function 启动(package_) {
 
 }
 
-function 坐标配置(name, x, y) {
-    if (name == "战斗") {
-        tool.Floating_emit("展示文本", "状态", "状态：获取键位布局..");
-        if (!coordinate.combat) {
-            coordinate.combat = {};
-        }
-        let setup_xy = [frcx(2470), frcy(1090)];
-        返回主页();
-        //sleep(1000);
-        //click.apply(click, setup_xy);
-        sleep(1000);
-        tool.Floating_emit("展示文本", "状态", "状态：准备进入设置");
-        let setup_list = ITimg.contour({
-            action: 5,
-            area: 4,
-            canvas: "设置",
-            threshold: 240,
-            isdilate: true,
-            size: 5,
-            type: "BINARY",
-            filter_w: frcx(10),
-            filter_h: frcy(10),
-        });
-        if (!setup_list || !setup_list.length) {
-            return false;
-        }
-        // log(setup_list);
-        setup_list.sort((a, b) => b.y - a.y);
-        click(setup_list[0].x, setup_list[0].y);
-        sleep(1500);
-        setup_list = ITimg.contour({
-            action: 5,
-            area: 4,
-            canvas: "设置",
-            threshold: 240,
-            isdilate: true,
-            size: 5,
-            type: "BINARY",
-            filter_w: frcx(10),
-            filter_h: frcy(10),
-        });
-        if (!setup_list || !setup_list.length) {
-            return false;
-        }
-        // log(setup_list);
-        setup_list.sort((a, b) => b.y - a.y);
-        click(setup_list[0].x, setup_list[0].y);
-        sleep(1000);
-        while (true) {
-            ITimg.ocr("键位", {
-                action: 1,
-                area: 13,
-                similar: 0.75,
-                timing: 1000,
-            });
-
-            if (ITimg.ocr("前往设置", {
-                    action: 1,
-                    area: 2,
-                    similar: 0.75,
-                    timing: 2000,
-                })) {
-                break
-            }
-        }
-
-        let key_list;
-        key_list = ITimg.contour({
-            canvas: "键位",
-            action: 5,
-            area: 0,
-            isdilate: false,
-            threshold: 200,
-            size: 0,
-            type: "BINARY",
-            filter_w: frcx(50),
-            filter_h: frcy(50),
-        });
-        if (!key_list || key_list.length < 9) {
-            sleep(1000);
-            key_list = ITimg.contour({
-                canvas: "键位",
-                action: 5,
-                area: 0,
-                isdilate: false,
-                threshold: 160,
-                size: 0,
-                type: "BINARY",
-                filter_w: frcx(60),
-                filter_h: frcy(90),
-            });
-        }
-
-        key_list = groupColumns(key_list, true);
-        let key_position = [];
-        for (let id of key_list) {
-            if (id.length > 1 && id[0].shape == "正方形") {
-
-                id.sort((a, b) => b.x - b.x);
-                key_position.push(id);
-
-            } else {
-                id = id[0];
-                if (id.shape == "长方形" && id.w < id.h) {
-                    coordinate.combat["角色1"] = {
-                        "x": id.x,
-                        "y": id.y,
-                        "w": id.w,
-                        "h": parseInt(id.h / 2),
-                    };
-                    coordinate.combat["角色2"] = {
-                        "x": id.x,
-                        "y": id.y + parseInt(id.h / 2),
-                        "w": id.w,
-                        "h": parseInt(id.h / 2),
-
-                    };
-                } else if (id.shape == "正方形" && id.x + id.w < height / 2 && id.y + id.h > parseInt(width / 1.5)) {
-                    coordinate.combat["移动"] = {
-                        "x": id.x,
-                        "y": id.y,
-                        "w": id.w,
-                        "h": id.h,
-                    };
-                } else if (id.x < height / 2 && id.x + id.w > parseInt(height / 1.2)) {
-                    coordinate.combat["信号球"] = {
-                        "x": id.x,
-                        "y": id.y,
-                        "w": id.w,
-                        "h": id.h,
-                    };
-                }
-            }
-        }
-        let key_ = key_position[0][0];
-        if (key_.w > key_position[1][0].w && key_.h > key_position[1][0].h) {
-            key_position.reverse();
-            key_ = key_position[0][0];
-        }
 
 
-        coordinate.combat["辅助机"] = {
-            "x": key_.x,
-            "y": key_.y,
-            "w": key_.w,
-            "h": key_.h,
+function 检查获得奖励() {
+    let OBTAINREWARDS = ITimg.ocr("集合文本", {
+        action: 5,
+        area: 5,
 
-        };
-
-        key_ = key_position[1][0];
-        coordinate.combat["闪避"] = {
-            "x": key_.x,
-            "y": key_.y,
-            "w": key_.w,
-            "h": key_.h,
-        };
-        key_ = key_position[1][1];
-        coordinate.combat["攻击"] = {
-            "x": key_.x,
-            "y": key_.y,
-            "w": key_.w,
-            "h": key_.h,
-        };
-        key_ = key_position[1][2];
-        coordinate.combat["大招"] = {
-            "x": key_.x,
-            "y": key_.y,
-            "w": key_.w,
-            "h": key_.h,
-        };
-
-
-        while (!ITimg.ocr("退出", {
-                action: 1,
-                timing: 1000,
-                area: 13,
-                nods: 1000,
-            })) {
-
-        }
-
-        tool.Floating_emit("展示文本", "状态", "状态：保存键位布局成功");
-        toastLog("保存键位布局成功");
+    });
+    let confirm = ITimg.ocr("获得奖励", {
+        action: 1,
+        gather: OBTAINREWARDS,
+        timing: 1000,
+    }) || ITimg.ocr("OBTAIN REWARDs", {
+        action: 1,
+        similar: 0.8,
+        gather: OBTAINREWARDS,
+        log_policy: "简短",
+        timing: 1000,
+    }) || ITimg.ocr("OBTAINREWARDS", {
+        action: 1,
+        similar: 0.8,
+        gather: OBTAINREWARDS,
+        timing: 1000,
+        log_policy: "简短",
+    })
+    if (confirm) {
+        return true;
     } else {
-
-
-        coordinate.coordinate[name] = {
-            "x": x,
-            "y": y
-        };
-        log("保存坐标: " + name + "---" + JSON.stringify({
-            "x": x,
-            "y": y
-        }));
-    }
-
-    log(coordinate.combat)
-    coordinate = {
-        "name": width + "x" + height,
-        "w": width,
-        "h": height,
-        "coordinate": coordinate.coordinate,
-        "宿舍": coordinate.宿舍,
-        "combat": coordinate.combat
-    };
-    files.write(
-        "./library/coordinate.json",
-        JSON.stringify(coordinate),
-        (encoding = "utf-8")
-    )
-
-}
-
-function 矩阵循生() {
-    var collection;
-    var recruiting_energy = 3;
-    /*  new ITimg.Prepare({}, {
-    gather:collection,
-    correction_path: "./utlis/ocr_矫正规则.json"
-});
-*/
-    while (true) {
-        collection = ITimg.ocr("获取屏幕所有文本", {
-            action: 6,
-        });
-        while (true) {
-            if (ITimg.ocr("启程", {
-                    action: 1,
-                    area: 4,
-                    timing: 1500,
-                    nods: 1500,
-                    gather: collection,
-                })) {
-                break
-            }
-        }
-        if (ITimg.ocr("下一步", {
-                action: 1,
-                area: 4,
-                timing: 1000,
-                gather: collection,
-            })) {
-            continue;
-        }
-        staging = ITimg.ocr("开始演算", {
-            area: 4,
-            gather: collection,
-        }) && ITimg.ocr("首发", {
-            area: 1,
+        confirm = ITimg.ocr("获得", {
             action: 5,
-            gather: collection,
-        });
-        if (staging) {
-            click(staging.left, staging.bottom + frcy(50));
-            sleep(500);
-            continue;
-        }
-
-        if (staging = ITimg.ocr("编入", {
-                area: 4,
+            gather: OBTAINREWARDS,
+            similar: 0.8,
+            log_policy: "简短",
+        })
+        if (confirm) {
+            let confirm2 = ITimg.ocr("奖励", {
                 action: 5,
-                gather: collection,
-            })) {
-            if (recruiting_energy == 3) {
-
-                click(staging.left, staging.top);
+                gather: OBTAINREWARDS,
+                similar: 0.8,
+                log_policy: "简短",
+            })
+            if (confirm2.left - confirm.right < frcx(20) && confirm2.bottom - confirm.bottom < frcy(20)) {
+                click(confirm.left, confirm.bottom);
                 sleep(1000);
-                continue;
+                return true;
             }
-
         }
-        if (ITimg.ocr("队伍调整", {
-                action: 5,
-                area: 4,
-                gather: collection,
-            }) && ITimg.ocr("开始演算", {
-                action: 1,
-                area: 4,
-                gather: collection,
-                timing: 1200,
-            })) {
-            click(height / 2, width / 2);
-            sleep(800);
-            continue;
-        }
-        /*
-        贴心
-        */
     }
+    sleep(500);
+    return false;
 }
 
 function 进入主页() {
@@ -577,7 +381,7 @@ function 进入主页() {
         if ((ITimg.ocr("任务", {
                 timing: 1000,
                 area: 2,
-            }) && ITimg.ocr("战斗", {
+            }) && ITimg.ocr("成员", {
                 timing: 2000,
                 area: 2,
             })) || (ITimg.ocr("任务", {
@@ -630,6 +434,244 @@ function 进入主页() {
     }
 }
 
+function 坐标配置(name, x, y) {
+    if (name == "战斗") {
+        tool.Floating_emit("展示文本", "状态", "状态：获取键位布局..");
+        if (!coordinate.combat) {
+            coordinate.combat = {};
+        }
+        let setup_xy = [frcx(2470), frcy(1090)];
+        返回主页();
+        //sleep(1000);
+        //click.apply(click, setup_xy);
+        sleep(1000);
+        tool.Floating_emit("展示文本", "状态", "状态：准备进入设置");
+        let setup_list = ITimg.contour({
+            action: 5,
+            area: 4,
+            canvas: "设置",
+            threshold: 240,
+            isdilate: true,
+            size: 5,
+            type: "BINARY",
+            filter_w: frcx(10),
+            filter_h: frcy(10),
+        });
+        if (!setup_list || !setup_list.length) {
+            return false;
+        }
+        // log(setup_list);
+        setup_list.sort((a, b) => b.y - a.y);
+        click(setup_list[0].x, setup_list[0].y);
+        sleep(1500);
+        setup_list = ITimg.contour({
+            action: 5,
+            area: 4,
+            canvas: "设置",
+            threshold: 240,
+            isdilate: true,
+            size: 5,
+            type: "BINARY",
+            filter_w: frcx(10),
+            filter_h: frcy(10),
+        });
+        if (!setup_list || !setup_list.length) {
+            return false;
+        }
+        // log(setup_list);
+        setup_list.sort((a, b) => b.y - a.y);
+        click(setup_list[0].x, setup_list[0].y);
+        sleep(1000);
+
+        while (true) {
+            ITimg.ocr("键位", {
+                action: 1,
+                area: 13,
+                similar: 0.75,
+                timing: 1000,
+            });
+
+            if (ITimg.ocr("前往设置", {
+                    action: 1,
+                    area: 2,
+                    similar: 0.75,
+                    timing: 2000,
+                })) {
+                break
+            }
+        }
+        tool.Floating_emit("展示文本", "状态", "状态：获取键位布局...");
+        let key_list;
+        key_list = ITimg.contour({
+            canvas: "键位",
+            action: 5,
+            area: 0,
+            isdilate: false,
+            threshold: 200,
+            size: 0,
+            type: "BINARY",
+            filter_w: frcx(50),
+            filter_h: frcy(50),
+        });
+        if (!key_list || key_list.length < 9) {
+            sleep(1000);
+            key_list = ITimg.contour({
+                canvas: "键位",
+                action: 5,
+                area: 0,
+                isdilate: false,
+                threshold: 160,
+                size: 0,
+                type: "BINARY",
+                filter_w: frcx(60),
+                filter_h: frcy(90),
+            });
+        }
+
+        key_list = groupColumns(key_list, true);
+        let key_position = [];
+        for (let id of key_list) {
+
+            if (id.length > 1 && id[0].shape == "正方形") {
+
+                id.sort((a, b) => b.x - b.x);
+                key_position.push(id);
+
+            } else {
+                id = id[0];
+                if (id.shape == "长方形" && id.w < id.h) {
+                    coordinate.combat["角色1"] = {
+                        "x": id.x,
+                        "y": id.y,
+                        "w": id.w,
+                        "h": parseInt(id.h / 2),
+                    };
+                    coordinate.combat["角色2"] = {
+                        "x": id.x,
+                        "y": id.y + parseInt(id.h / 2),
+                        "w": id.w,
+                        "h": parseInt(id.h / 2),
+
+                    };
+                } else if (id.shape == "正方形" && id.x + id.w < height / 2 && id.y + id.h > parseInt(width / 1.5)) {
+                    coordinate.combat["移动"] = {
+                        "x": id.x,
+                        "y": id.y,
+                        "w": id.w,
+                        "h": id.h,
+                    };
+                } else if (id.x < height / 2 && id.x + id.w > parseInt(height / 1.2)) {
+                    coordinate.combat["信号球"] = {
+                        "x": id.x,
+                        "y": id.y,
+                        "w": id.w,
+                        "h": id.h,
+                    };
+                } else if (id.shape == "长方形" && id.w > id.h && id.y > width / 2) {
+                    key_position.push([{
+                        shape: '正方形',
+                        x: id.x + parseInt(id.w / 1.5),
+                        y: id.y,
+                        w: parseInt(id.w / 3),
+                        h: id.h,
+                        vertices: 4
+                    }, {
+                        shape: '正方形',
+                        x: id.x + parseInt(id.w / 3),
+                        y: id.y,
+                        w: parseInt(id.w / 3),
+                        h: id.h,
+                        vertices: 4
+                    }, {
+                        shape: '正方形',
+                        x: id.x,
+                        y: id.y,
+                        w: parseInt(id.w / 3),
+                        h: id.h,
+                        vertices: 4
+                    }])
+                }
+            }
+        }
+        console.warn(key_position)
+        let key_ = key_position[0][0];
+        if (key_.w > key_position[1][0].w && key_.h > key_position[1][0].h) {
+            key_position.reverse();
+            key_ = key_position[0][0];
+        }
+
+
+        coordinate.combat["辅助机"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+
+        };
+
+        key_ = key_position[1][0];
+        coordinate.combat["闪避"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+        };
+        key_ = key_position[1][1];
+        coordinate.combat["攻击"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+        };
+        key_ = key_position[1][2];
+        coordinate.combat["大招"] = {
+            "x": key_.x,
+            "y": key_.y,
+            "w": key_.w,
+            "h": key_.h,
+        };
+
+        tool.Floating_emit("展示文本", "状态", "状态：退出键位布局.");
+        while (!ITimg.ocr("退出", {
+                action: 1,
+                timing: 1000,
+                area: 13,
+                nods: 1000,
+            })) {
+
+        }
+
+        tool.Floating_emit("展示文本", "状态", "状态：保存键位布局成功");
+        toastLog("保存键位布局成功");
+    } else {
+
+
+        coordinate.coordinate[name] = {
+            "x": x,
+            "y": y
+        };
+        log("保存坐标: " + name + "---" + JSON.stringify({
+            "x": x,
+            "y": y
+        }));
+    }
+
+    log(coordinate.combat)
+    coordinate = {
+        "name": width + "x" + height,
+        "w": width,
+        "h": height,
+        "coordinate": coordinate.coordinate,
+        "宿舍": coordinate.宿舍,
+        "combat": coordinate.combat
+    };
+    files.write(
+        "./library/coordinate.json",
+        JSON.stringify(coordinate),
+        (encoding = "utf-8")
+    )
+
+}
 
 
 function 采购() {
@@ -1015,6 +1057,7 @@ function 宿舍() {
     if (!helper.宿舍系列 || !helper.宿舍任务) {
         return false;
     }
+    tool.Floating_emit("面板", "id", "宿舍系列");
     tool.Floating_emit("展示文本", "状态", "状态：准备执行宿舍系列任务")
     if (!ITimg.ocr("任务", {
             area: "右半屏",
@@ -1213,7 +1256,8 @@ function 宿舍_委托() {
     }
     tool.Floating_emit("展示文本", "状态", "状态：执行委托任务")
     //本来是想用ocr的,试了效果不好,只用找图了
-    if (ITimg.ocr("委托", {
+    while (true) {
+        ITimg.ocr("委托", {
             action: 0,
             timing: 2000,
             nods: 1500,
@@ -1223,11 +1267,24 @@ function 宿舍_委托() {
             timing: 2000,
             area: 34,
 
-        })) {
+        })
+
+        if (ITimg.ocr("归队", {
+                nods: 1500,
+                area: [0, parseInt(width / 1.2), height / 2, parseInt(width - width / 1.2)],
+                action: 5,
+            }) || ITimg.ocr("领取奖励", {
+                action: 5,
+                refresh: false,
+            })) {
+            break
+        }
+    }
+    while (true) {
         if (ITimg.ocr("归队", {
                 timing: 1500,
-                area: [0, parseInt(width / 1.2), height / 2, parseInt(width - width / 1.2)],
                 action: 1,
+                area: [0, parseInt(width / 1.2), height / 2, parseInt(width - width / 1.2)],
             }) || ITimg.ocr("领取奖励", {
                 action: 5,
                 refresh: false,
@@ -1267,8 +1324,10 @@ function 宿舍_委托() {
             })) {
             helper.宿舍系列.委托任务.执行状态 = true;
             tool.writeJSON("宿舍系列", helper.宿舍系列);
+            break
         }
-        /*
+    }
+    /*
         //红,橙,紫,蓝,绿级别的委托
         let entrusted_color = ["#d3333b", "#e55c35", "#dd6b49", "#bc45ab", "#3f78ce", "#469646"];
         let second = 0
@@ -1339,27 +1398,25 @@ function 宿舍_委托() {
         }
 
 */
-        //返回
-        let staging = (ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            similar: 0.72,
-        }) || ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            part: true,
-        }));
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("返回", staging.left, staging.bottom)
-            sleep(1000)
-        } else if (coordinate.coordinate.返回) {
-            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-            sleep(1000);
-        };
-    } else {
-        toastLog("无法执行委托任务");
+    //返回
+    let staging = (ITimg.ocr("返回", {
+        area: 1,
+        action: 5,
+        similar: 0.72,
+    }) || ITimg.ocr("返回", {
+        area: 1,
+        action: 5,
+        part: true,
+    }));
+    if (staging) {
+        click(staging.left, staging.bottom);
+        坐标配置("返回", staging.left, staging.bottom)
+        sleep(1000)
+    } else if (coordinate.coordinate.返回) {
+        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
+        sleep(1000);
     }
+
 }
 
 function 宿舍_执勤() {
@@ -1437,7 +1494,8 @@ function 宿舍_执勤() {
         click(height / 2, parseInt(width / 1.7));
         sleep(1000);
     }
-
+    click(height / 2, width - frcy(80));
+    sleep(500);
     let duty = {
         //已选择执勤的小伙伴
         chosen: 0,
@@ -1620,6 +1678,7 @@ function 宿舍_抚摸() {
         };
     }
     if (coordinate.宿舍.宿舍房间位置.length == 0) {
+        coordinate.宿舍.宿舍房间位置 = []
         tool.Floating_emit("展示文本", "状态", "状态：初始化房间位置...")
         //集合所有含有'宿舍'文本的信息
         let dorm = ITimg.ocr("宿舍", {
@@ -1645,8 +1704,11 @@ function 宿舍_抚摸() {
             }
             if (dorm_re) {
                 //矫正位置信息
-                if ((dorm[i].right - dorm[i].left) > 200) {
-                    dorm[i].right = dorm[i].right - 120;
+                if ((dorm[i].right - dorm[i].left) > frcx(200)) {
+                    dorm[i].right = dorm[i].right - frcx(120);
+                }
+                if (!dorm[i].right || !dorm[i].bottom) {
+                    continue;
                 }
                 //储存宿舍位置
                 coordinate.宿舍.宿舍房间位置.push({
@@ -1681,11 +1743,18 @@ function 宿舍_抚摸() {
     tool.Floating_emit("面板", "隐藏");
     //逐个点进宿舍
     i = 0;
-    log(coordinate.宿舍.宿舍房间位置)
+    try {
+        console.info(JSON.stringify(coordinate.宿舍.宿舍房间位置))
+    } catch (e) {
+        console.error(e)
+    }
     for (i in coordinate.宿舍.宿舍房间位置) {
 
-        sleep(500)
-        log("x:" + coordinate.宿舍.宿舍房间位置[i].x + "y:" + coordinate.宿舍.宿舍房间位置[i].y)
+        sleep(500);
+        log("点击： x:" + coordinate.宿舍.宿舍房间位置[i].x + "，y:" + coordinate.宿舍.宿舍房间位置[i].y);
+        if (!coordinate.宿舍.宿舍房间位置[i].x || !coordinate.宿舍.宿舍房间位置[i].y) {
+            continue;
+        }
         toastLog("进入" + coordinate.宿舍.宿舍房间位置[i].name);
 
         click(coordinate.宿舍.宿舍房间位置[i].x, coordinate.宿舍.宿舍房间位置[i].y);
@@ -1846,7 +1915,7 @@ function 宿舍_抚摸() {
                 } else if (coordinate.coordinate.返回) {
                     click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
                     sleep(1000);
-                };
+                }
 
                 continue;
             }
@@ -1936,14 +2005,14 @@ function 宿舍_抚摸() {
             } else if (coordinate.coordinate.返回) {
                 click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
                 sleep(1500);
-            };
+            }
             continue;
         }
         //点击返回
         if (coordinate.coordinate.返回) {
             click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
             sleep(1500);
-        };
+        }
     }
     helper.宿舍系列.touch_role.执行状态 = true;
     helper.宿舍系列.touch_role.lastExecutionTime = now.toString();
@@ -2105,8 +2174,10 @@ function 宿舍_家具制造() {
 
 
 function 消耗血清() {
+
     helper = tool.readJSON("helper");
-    tool.Floating_emit("展示文本", "状态", "状态：准备作战中")
+    tool.Floating_emit("面板", "id", "消耗血清");
+    tool.Floating_emit("展示文本", "状态", "状态：准备作战中");
     if (!ITimg.ocr("任务", {
             area: "右半屏",
         }) && !ITimg.ocr("战斗", {
@@ -2118,11 +2189,11 @@ function 消耗血清() {
     this.serum = 便笺(1000, true);
 
     if (this.serum) {
-        if (this.serum < 30 && helper.注射血清 == 0) {
+        if (this.serum < 30 && helper.注射血清 == 0 && (!helper.自动2血清 || helper.任务状态.自动2血清)) {
             toastLog("血清不足30\n可注射血清为" + helper.注射血清 + "次");
-            return
+            return false
         } else {
-            toastLog("当前血清: " + this.serum)
+            toastLog("当前血清: " + this.serum + (!helper.任务状态.自动2血清 && helper.自动2血清 ? "，自动注射血清2:true" : ""))
 
         }
     }
@@ -2209,11 +2280,11 @@ function 消耗血清() {
                 click.apply(click, point);
                 sleep(2000);
                 if (!ITimg.ocr("自动作战", {
-                        action: 1,
+                        action: 5,
                         timing: 1000,
                         area: 4,
                     }) && !ITimg.ocr("自动作战", {
-                        action: 1,
+                        action: 5,
                         timing: 1000,
                         area: 34,
                         part: true,
@@ -2228,7 +2299,8 @@ function 消耗血清() {
 
 
     } else {
-
+        //限时活动
+        log("限时活动")
         if (ITimg.ocr("战斗", {
                 action: 2,
                 timing: 2000,
@@ -2369,7 +2441,131 @@ function 消耗血清() {
 
     if (!helper.任务状态.自动2血清 && helper.自动2血清) {
         helper.注射血清 = 2;
+        log("自动注射血清2");
     }
+    sleep(150);
+    if (helper.注射血清 > 0) {
+        (ITimg.ocr("/240", {
+            action: 1,
+            area: 2,
+            part: true,
+    timing:1500,
+        }) || ITimg.ocr("/240", {
+            action: 1,
+            area: 12,
+            part: true,
+            timing:1500,
+        }))
+
+    }
+
+    /*
+    // ITimg.ocr("MAX", { action: 4, timing: 500, area: "下半屏", part: true })
+    if (!ITimg.ocr("确认出战", {
+            action: 0,
+            timing: 2000,
+            part: true,
+        })) {
+        if (!ITimg.ocr("自动作战", {
+                action: 1,
+                timing: 1000,
+                area: 34,
+                part: true,
+            }) && !ITimg.ocr("自动作战", {
+                action: 1,
+                timing: 1000,
+                area: 4,
+            })) {
+            if (!helper.战斗.作战) {
+                helper.战斗.作战 = (ITimg.ocr("多重挑战", {
+                    action: 4,
+                    timing: 1000,
+                    area: 4,
+                }) || ITimg.ocr("已开启", {
+                    action: 0,
+                    timing: 1000,
+                    area: 4,
+                    refresh: false,
+                }));
+            }
+        }
+
+    }
+ */
+    sleep(500);
+    //确定消耗血清
+    staging = (ITimg.ocr("确定", {
+        timing: 100,
+        action: 5,
+        area: 4,
+        nods: 1500,
+    }) || ITimg.ocr("确定", {
+        timing: 100,
+        action: 5,
+        refresh: false,
+    }));
+
+    if (staging && staging.left < Math.floor(height / 1.4)) {
+        tool.Floating_emit("展示文本", "状态", "状态：血清管理中...")
+        if (helper.注射血清 > 0) {
+            helper.已注射血清 = 0;
+            for (let i = 0; i < helper.注射血清; i++) {
+                click(staging.right, staging.top);
+                sleep(1500);
+                if (检查获得奖励()) {
+                    helper.已注射血清++;
+                    tool.Floating_emit("展示文本", "血清", "血清：可使用:" + helper.注射血清 + "&已使用:" + helper.已注射血清);
+                    if (helper.已注射血清 >= helper.注射血清) {
+                        tool.writeJSON("注射血清", 0)
+                    }
+                }
+            }
+            while (true) {
+                sleep(500)
+                if (ITimg.picture("宿舍-家具-关闭", {
+                        action: 0,
+                        timing: 2000,
+                        area: "右上半屏"
+                    }) || ITimg.picture("宿舍-家具-关闭", {
+                        action: 0,
+                        timing: 2000,
+                        area: "右上半屏",
+                        threshold: 0.7
+                    })) {
+                    break
+                }
+            };
+        } else {
+            while (true) {
+                sleep(500)
+                if (ITimg.picture("宿舍-家具-关闭", {
+                        action: 0,
+                        timing: 2000,
+                        area: "右上半屏"
+                    }) || ITimg.picture("宿舍-家具-关闭", {
+                        action: 0,
+                        timing: 2000,
+                        area: "右上半屏",
+                        threshold: 0.7
+                    })) {
+                    break
+                }
+            }
+            if (!helper.挑战次数) {
+                sleep(1000);
+                返回主页();
+
+                return
+            }
+        }
+    }
+
+    if (!helper.任务状态.自动2血清 && helper.自动2血清 && helper.已注射血清 >= 2) {
+        helper.任务状态.自动2血清 = true;
+        tool.writeJSON("任务状态", helper.任务状态);
+
+    }
+
     //你可以直接用固定坐标点击
     if (helper.挑战次数 > 0) {
 
@@ -2407,136 +2603,6 @@ function 消耗血清() {
         toastLog("没有可挑战次数")
         return
     }
-    // ITimg.ocr("MAX", { action: 4, timing: 500, area: "下半屏", part: true })
-    if (!ITimg.ocr("确认出战", {
-            action: 0,
-            timing: 2000,
-            part: true,
-        })) {
-        if (!ITimg.ocr("自动作战", {
-                action: 1,
-                timing: 1000,
-                area: 34,
-                part: true,
-            }) && !ITimg.ocr("自动作战", {
-                action: 1,
-                timing: 1000,
-                area: 4,
-            })) {
-            if (!helper.战斗.作战) {
-                helper.战斗.作战 = (ITimg.ocr("多重挑战", {
-                    action: 4,
-                    timing: 1000,
-                    area: 4,
-                }) || ITimg.ocr("已开启", {
-                    action: 0,
-                    timing: 1000,
-                    area: 4,
-                    refresh: false,
-                }));
-            }
-        }
-
-    }
-    sleep(150);
-    if (helper.注射血清 > 0) {
-        (ITimg.ocr("/240", {
-            action: 1,
-            area: "右上半屏",
-            part: true,
-
-        }) || ITimg.ocr("/240", {
-            action: 1,
-            area: "上半屏",
-            part: true,
-        }))
-
-    }
-
-    sleep(500);
-    //确定消耗血清
-    staging = (ITimg.ocr("确定", {
-        timing: 100,
-        action: 5,
-        area: 4,
-        nods: 1500,
-    }) || ITimg.ocr("确定", {
-        timing: 100,
-        action: 5,
-        refresh: false,
-    }));
-
-    if (staging && staging.left < Math.floor(height / 1.4)) {
-        tool.Floating_emit("展示文本", "状态", "状态：血清管理中...")
-        if (helper.注射血清 > 0) {
-            helper.已注射血清 = 0;
-            for (let i = 0; i < helper.注射血清; i++) {
-                click(staging.right, staging.top);
-                sleep(1000);
-                if (ITimg.picture("获得奖励", {
-                        action: 0,
-                        timing: 1000,
-                        nods: 1500,
-                        area: "上半屏"
-                    }) || ITimg.picture("获得奖励", {
-                        action: 0,
-                        timing: 1000,
-                        area: "上半屏"
-                    }) || ITimg.ocr("获得奖励", {
-                        action: 0,
-                        timing: 1000,
-                        area: 12,
-                    })) {
-                    helper.已注射血清++;
-                    tool.Floating_emit("展示文本", "血清", "血清：可使用:" + helper.注射血清 + "&已使用:" + helper.已注射血清);
-                    if (helper.已注射血清 >= helper.注射血清) {
-                        tool.writeJSON("注射血清", 0)
-                    }
-                };
-            }
-            while (true) {
-                sleep(500)
-                if (ITimg.picture("宿舍-家具-关闭", {
-                        action: 0,
-                        timing: 2000,
-                        area: "右上半屏"
-                    }) || ITimg.picture("宿舍-家具-关闭", {
-                        action: 0,
-                        timing: 2000,
-                        area: "右上半屏",
-                        threshold: 0.7
-                    })) {
-                    break
-                }
-            };
-        } else {
-            while (true) {
-                sleep(500)
-                if (ITimg.picture("宿舍-家具-关闭", {
-                        action: 0,
-                        timing: 2000,
-                        area: "右上半屏"
-                    }) || ITimg.picture("宿舍-家具-关闭", {
-                        action: 0,
-                        timing: 2000,
-                        area: "右上半屏",
-                        threshold: 0.7
-                    })) {
-                    break
-                }
-            }
-            sleep(1000);
-            返回主页()
-            return
-        }
-    }
-
-    if (!helper.任务状态.自动2血清 && helper.自动2血清 && helper.已注射血清 >= 2) {
-        helper.任务状态.自动2血清 = true;
-        tool.writeJSON("任务状态", helper.任务状态);
-
-    }
-
 
     helper.战斗.作战 = false;
     if (!ITimg.ocr("确认出战", {
@@ -2715,6 +2781,851 @@ function 返回主页() {
     }
 }
 
+function 矩阵循生() {
+    var collection;
+    var recruiting_energy = 3;
+    /*  new ITimg.Prepare({}, {
+    gather:collection,
+    correction_path: "./utlis/ocr_矫正规则.json"
+});
+*/
+    this.eat = function() {
+        while (true) {
+            collection = ITimg.ocr("获取屏幕所有文本", {
+                action: 6,
+            });
+            while (true) {
+                if (ITimg.ocr("启程", {
+                        action: 1,
+                        area: 4,
+                        timing: 1500,
+                        nods: 1500,
+                        gather: collection,
+                    })) {
+                    break
+                }
+            }
+            if (ITimg.ocr("下一步", {
+                    action: 1,
+                    area: 4,
+                    timing: 1000,
+                    gather: collection,
+                })) {
+                continue;
+            }
+            staging = ITimg.ocr("开始演算", {
+                area: 4,
+                gather: collection,
+            }) && ITimg.ocr("首发", {
+                area: 1,
+                action: 5,
+                gather: collection,
+            });
+            if (staging) {
+                click(staging.left, staging.bottom + frcy(50));
+                sleep(500);
+                continue;
+            }
+
+            if (staging = ITimg.ocr("编入", {
+                    area: 4,
+                    action: 5,
+                    gather: collection,
+                })) {
+                if (recruiting_energy == 3) {
+
+                    click(staging.left, staging.top);
+                    sleep(1000);
+                    continue;
+                }
+
+            }
+            if (ITimg.ocr("队伍调整", {
+                    action: 5,
+                    area: 4,
+                    gather: collection,
+                }) && ITimg.ocr("开始演算", {
+                    action: 1,
+                    area: 4,
+                    gather: collection,
+                    timing: 1200,
+                })) {
+                click(height / 2, width / 2);
+                sleep(800);
+                continue;
+            }
+            /**
+             * 进入ch.1
+            贴心搭档
+            */
+            if (ITimg.ocr("队伍调整", {
+                    action: 5,
+                    area: 34,
+                    gather: collection,
+                }) && ITimg.ocr("出击", {
+                    action: 1,
+                    area: 4,
+                    gather: collection,
+                    timing: 1200,
+                })) {
+                log(this)
+                this.出击();
+                this.领取奖励();
+
+            }
+        }
+    }
+
+    this.出击 = function() {
+        tool.pointerPositionDisplay(true);
+        fight_thread = threads.start(作战);
+        sleep(5000);
+        while (true) {
+            if (fight_thread && !fight_thread.isAlive()) {
+                toastLog("重启作战线程");
+                fight_thread = threads.start(作战);
+            };
+            if (ITimg.ocr("领取奖励", {
+                    action: 5,
+                    area: 1,
+                    gather: collection,
+                }) && ITimg.ocr("离开", {
+                    action: 1,
+                    area: 4,
+                    gather: collection,
+                    timing: 1200,
+                })) {
+                break
+
+            }
+        }
+        tool.pointerPositionDisplay(false);
+    }
+    this.领取奖励 = function() {
+        let reward_list = ITimg.contour({
+            action: 5,
+            canvas: "装备",
+            threshold: 230,
+            size: 0,
+            type: "BINARY",
+            filter_w: frcx(250),
+            filter_h: frcy(300),
+        });
+        for (let reward of reward_list) {
+
+
+        }
+    }
+
+    this.选择装备 = function() {
+        let equipment_list = ITimg.contour({
+            action: 5,
+            canvas: "装备",
+            threshold: 230,
+            size: 0,
+            type: "BINARY",
+            filter_w: frcx(250),
+            filter_h: frcy(300),
+        });
+        while (true) {
+            click(equipment_list[0].x + equipment_list[0].w / 2, equipment_list[0].y + equipment_list[0].h / 2);
+            sleep(500);
+            ITimg.ocr("确定", {
+                action: 1,
+                area: 4,
+                timing: 1000,
+            })
+            if (ITimg.ocr("编队", {
+                    action: 5,
+                    area: 4,
+                }) && ITimg.ocr("藏品", {
+                    action: 5,
+                    area: 4,
+                    refresh: false,
+                })) {
+                break;
+            }
+        }
+    }
+}
+
+function 诺曼复兴战() {
+    if (!helper.norman_revival_war || !helper.norman_revival_war.启用) {
+        return
+    }
+
+    tool.Floating_emit("面板", "id", "诺曼复兴");
+    tool.Floating_emit("展示文本", "状态", "状态：准备扫荡诺曼复兴战中");
+    if (ITimg.ocr("任务", {
+            area: "右半屏",
+        }) == false && ITimg.ocr("战斗", {
+            area: "右半屏",
+            refresh: false,
+        }) == false) {
+        返回主页()
+    }
+    while (true) {
+        if (!ITimg.ocr("战斗", {
+                action: 2,
+                timing: 3000,
+                area: "右半屏",
+            }) && !ITimg.ocr("战斗", {
+                action: 2,
+                timing: 3000,
+                area: "右半屏",
+                refresh: false,
+                part: true,
+            })) {
+            //都识别不到，改用固定坐标进入活动
+            click(frcx(1950), frcy(500))
+            sleep(3000)
+        }
+        if (ITimg.ocr("挑战", {
+                action: 4,
+                timing: 2000,
+                similar: 0.85,
+                area: 4,
+            }) || ITimg.ocr("挑战", {
+                action: 4,
+                timing: 2000,
+                similar: 0.8,
+                area: 34,
+            })) {
+            break
+        }
+    }
+    while (true) {
+        ITimg.ocr("挑战", {
+            action: 4,
+            timing: 2000,
+            similar: 0.8,
+            area: 34,
+        })
+        if (ITimg.ocr("/18", {
+                area: 34,
+                action: 5,
+                part: true,
+            }) || ITimg.ocr("常规挑战", {
+                action: 5,
+                similar: 0.8,
+                refresh: false,
+            }) || ITimg.ocr("特殊挑战", {
+                action: 5,
+                refresh: false,
+                similar: 0.8,
+            }) || ITimg.ocr("纷争战区", {
+                action: 5,
+                refresh: false,
+                similar: 0.8,
+            })) {
+            break;
+        }
+
+    }
+    //检验
+    let operator = ITimg.ocr("/18", {
+        area: 34,
+        action: 5,
+        part: true,
+    });
+
+    if (operator) {
+        // 使用正则表达式提取数字
+        let match = operator.text.match(/(\d+)\/(\d+)/);
+        let obtained = parseInt(match[1]);
+        let target = parseInt(match[2]);
+
+        // 计算还需多少次作战可达12/18
+        settlement_frequency = Math.ceil((target - obtained) / 3);
+        if (!settlement_frequency) {
+            settlement_frequency = 0;
+        } else {
+            settlement_frequency = settlement_frequency - 2;
+        }
+        toastLog('进度： ' + obtained + '/18，还可扫荡：' + settlement_frequency + "次");
+        if (!settlement_frequency) {
+            返回主页();
+            return false;
+        }
+        click(operator.left, operator.top);
+        sleep(1500);
+
+    }
+    while (true) {
+        if (ITimg.ocr("商店", {
+                action: 5,
+                area: 3,
+            }) && ITimg.ocr("奖励", {
+                action: 5,
+                refresh: false,
+                log_policy: "简短",
+                nods: 1000,
+            })) {
+            break
+        } else {
+            click(operator.left, operator.top);
+            sleep(1500);
+        }
+    }
+
+    while (settlement_frequency) {
+        while (true) {
+            (ITimg.ocr("进度：0/3", {
+                action: 4,
+                area: 1,
+                timing: 1000,
+                similar: 0.85,
+            }) || ITimg.ocr("进度:0/3", {
+                action: 4,
+                area: 1,
+                timing: 1000,
+                similar: 0.85,
+            }));
+
+            (ITimg.ocr("直达深巢", {
+                action: 4,
+                area: 4,
+                timing: 1000,
+            }) || ITimg.ocr("直达深巢", {
+                action: 4,
+                area: 4,
+                timing: 1000,
+                part: true,
+                refresh: false,
+            }))
+            if (ITimg.ocr("扫荡作战", {
+                    action: 5,
+                    area: 4,
+                    nods: 1000,
+                })) {
+                break
+            }
+        }
+        while (true) {
+            ITimg.ocr("扫荡作战", {
+                action: 4,
+                area: 4,
+                timing: 1000,
+            })
+            let return_text = ITimg.ocr("返回", {
+                action: 5,
+                refresh: false,
+                log_policy: "简短",
+                timing: 1000,
+                nods: 1000
+            });
+            if (return_text) {
+                click(return_text.right, return_text.bottom);
+                sleep(500);
+                click(return_text.right, return_text.bottom);
+                while (ITimg.ocr("返回", {
+                        action: 5,
+                        timing: 500,
+                        log_policy: "简短",
+                    })) {
+                    click(return_text.right, return_text.bottom);
+                    sleep(500);
+                }
+
+            }
+        }
+        while (true) {
+            ITimg.ocr("返回", {
+                action: 4,
+                area: 1,
+                timing: 1000,
+                nods: 1000
+            });
+            if (ITimg.ocr("商店", {
+                    action: 5,
+                    area: 3,
+                }) && ITimg.ocr("奖励", {
+                    action: 5,
+                    refresh: false,
+                    log_policy: "简短",
+                })) {
+                settlement_frequency--;
+                break
+            }
+        }
+    }
+    if (helper.norman_revival_war.领取奖励) {
+        tool.Floating_emit("展示文本", "状态", "状态：领取诺曼复兴战奖励");
+        while (true) {
+            ITimg.ocr("奖励", {
+                action: 5,
+                area: 3,
+                timing: 1000,
+                nods: 1000,
+            })
+            ITimg.ocr("一键领取", {
+                action: 1,
+                area: 2,
+                timing: 1000,
+            })
+
+
+            if (检查获得奖励()) {
+                break;
+            }
+        }
+    }
+}
+
+
+function 幻痛囚笼() {
+    if (!helper.phantom_pain_cage || !helper.phantom_pain_cage.启用) {
+        return
+    }
+
+    // 获取当前时间
+    let today = new Date();
+    let dayOfWeek = today.getDay(); // 获取当前日期的星期几
+    if (helper.phantom_pain_cage.周六日不执行 && (dayOfWeek == 6 || dayOfWeek == 0)) {
+        return
+    }
+    tool.Floating_emit("面板", "id", "幻痛囚笼");
+    tool.Floating_emit("展示文本", "状态", "状态：准备处理幻痛囚笼中")
+    if (ITimg.ocr("任务", {
+            area: "右半屏",
+        }) == false && ITimg.ocr("战斗", {
+            area: "右半屏",
+            refresh: false,
+        }) == false) {
+        返回主页()
+    }
+    while (true) {
+        if (!ITimg.ocr("战斗", {
+                action: 2,
+                timing: 3000,
+                area: "右半屏",
+            }) && !ITimg.ocr("战斗", {
+                action: 2,
+                timing: 3000,
+                area: "右半屏",
+                refresh: false,
+                part: true,
+            })) {
+            //都识别不到，改用固定坐标进入活动
+            click(frcx(1950), frcy(500))
+            sleep(3000)
+        }
+        if (ITimg.ocr("挑战", {
+                action: 4,
+                timing: 2000,
+                similar: 0.85,
+                area: 4,
+            }) || ITimg.ocr("挑战", {
+                action: 4,
+                timing: 2000,
+                similar: 0.8,
+                area: 34,
+            })) {
+            break
+        }
+    }
+    while (true) {
+        ITimg.ocr("挑战", {
+            action: 4,
+            timing: 2000,
+            similar: 0.8,
+            area: 34,
+        })
+
+        if (ITimg.ocr("常规挑战", {
+                area: 34,
+                action: 5,
+                similar: 0.8,
+            }) || ITimg.ocr("特殊挑战", {
+                action: 5,
+                refresh: false,
+                similar: 0.8,
+            }) || ITimg.ocr("幻痛囚笼", {
+                action: 5,
+                refresh: false,
+                similar: 0.8,
+            })) {
+            break;
+        }
+
+    }
+    //检验
+    let operator = ITimg.ocr("/9", {
+        area: 34,
+        action: 5,
+        part: true,
+    });
+
+    if (operator) {
+        // 使用正则表达式提取数字
+        let match = operator.text.match(/(\d+)\/(\d+)/);
+        let obtained = parseInt(match[1]);
+        let target = parseInt(match[2]);
+
+        // 计算还需多少次作战可达/9
+        settlement_frequency = Math.ceil((target - obtained) / 3);
+
+        toastLog('幻痛进度： ' + obtained + '/9');
+        if (!settlement_frequency) {
+            返回主页();
+            return false;
+        }
+        click(operator.left, operator.top);
+        sleep(1500);
+    }
+
+    /* sleep(100);
+     ITimg.ocr("幻痛囚笼", {
+         action: 1,
+         refresh: false,
+         similar: 0.8,
+         timing: 1000,
+     })
+     */
+    tool.Floating_emit("展示文本", "状态", "状态：准备讨伐囚笼boos");
+    while (true) {
+        ITimg.ocr("幻痛囚笼", {
+            action: 1,
+            similar: 0.8,
+            timing: 1000,
+        })
+        let difficulty;
+        if (helper.phantom_pain_cage.终极区) {
+            difficulty = ITimg.ocr("终极区", {
+                action: 5,
+                area: 12,
+            })
+        } else {
+            difficulty = ITimg.ocr("高级区", {
+                action: 5,
+                area: 12,
+            })
+        }
+        if (difficulty) {
+            click(difficulty.left, difficulty.bottom + frcy(100));
+            sleep(1000);
+        }
+        ITimg.ocr("确定", {
+            action: 1,
+            area: 4,
+            timing: 1000,
+        })
+
+        if (ITimg.ocr("商店", {
+                action: 5,
+                area: 3,
+            }) || ITimg.ocr("讨伐", {
+                action: 5,
+                refresh: false,
+            })) {
+            break
+        }
+    }
+    sleep(1000)
+    let conquest_list = ITimg.ocr("集合", {
+        action: 6,
+        area: [height / 4, width / 4, height - height / 4, width / 2],
+
+    })
+    if (!conquest_list || !conquest_list.length) {
+        toastLog("无可讨伐列表");
+        return false;
+    }
+    console.warn("讨伐列表:", conquest_list);
+    for (let conquest of conquest_list) {
+        if (conquest.text.indexOf("讨伐值") != -1) {
+            while (true) {
+                click(conquest.left, conquest.top - frcy(80));
+                sleep(1000);
+                if (ITimg.ocr("作战准备", {
+                        action: 5,
+                        area: 34,
+                    }) || ITimg.ocr("难度提示", {
+                        action: 5,
+                        area: 34,
+                        refresh: false,
+                    })) {
+                    conquest.confirm = true;
+                    if (conquest.left < height / 2) {
+                        helper.phantom_pain_cage.A组 = true;
+                    } else if (conquest.left < parseInt(height / 1.5)) {
+                        helper.phantom_pain_cage.B组 = true;
+                    } else {
+                        helper.phantom_pain_cage.Y组 = true;
+                    }
+                    break
+                }
+            }
+            if (conquest.confirm) {
+                break;
+            }
+        }
+
+    }
+
+    if (ITimg.ocr("0/3", {
+            action: 5,
+            area: 3,
+            refresh: false,
+        })) {
+        toastLog("今日已无挑战次数");
+        return false
+    }
+    sleep(500);
+    conquest_list = ITimg.ocr("集合", {
+        action: 6,
+        area: 4,
+    });
+
+    console.warn("buff检测");
+    console.warn("buff信息", conquest_list);
+    let buff;
+    for (let key in buff_list) {
+        for (let key_text of buff_list[key]) {
+            buff = ITimg.ocr(key_text, {
+                area: 4,
+                action: 5,
+                gather: conquest_list,
+                similar: 0.8,
+                log_policy: "简短",
+            })
+            if (buff) {
+                buff = key;
+                break
+            }
+        }
+        if (buff) {
+            break;
+        }
+    }
+    tool.Floating_emit("展示文本", "状态", "状态：囚笼自动战斗");
+    let combat_frequency = 3;
+    while (combat_frequency) {
+        if (!ITimg.ocr("自动作战", {
+                action: 4,
+                area: 4,
+                refresh: false,
+                timing: 500,
+            }) || ITimg.ocr("无记录保存", {
+                area: 5,
+                action: 5,
+            })) {
+            while (true) {
+                ITimg.ocr("作战准备", {
+                    action: 1,
+                    area: 4,
+                    similar: 0.8,
+                    timing: 1000,
+                })
+                if (ITimg.ocr("作战开始", {
+                        action: 5,
+                        area: 4,
+                        refresh: false,
+                    }) || ITimg.ocr("黄色", {
+                        action: 5,
+                        area: 4,
+                        refresh: false
+                    })) {
+                    break;
+                }
+
+            }
+
+            // if(helper.phantom_pain_cage.自适应队伍){
+            if (!buff) {
+                buff = "默认";
+            }
+            let ranks, frequency = 0;
+            tool.Floating_emit("展示文本", "状态", "状态：优选预设队伍");
+            while (true) {
+
+                ITimg.ocr("队伍", {
+                    action: 1,
+                    area: 2,
+                    timing: 1000,
+                }) || ITimg.ocr("预设", {
+                    action: 1,
+                    area: 2,
+                    timing: 1000,
+                })
+                if (frequency > 3 && buff != "默认") {
+                    buff = "默认";
+                    frequency = 0;
+                    log("回滚界面，选择默认队伍")
+                    swipe.apply(swipe, axis_list.recruit_slide_right);
+                    sleep(500);
+                    swipe.apply(swipe, axis_list.recruit_slide_right);
+
+                }
+
+                ranks = ITimg.ocr(buff, {
+                    action: 5,
+                    area: 12,
+                })
+                if (ranks) {
+                    ranks = ITimg.ocr("集合_选择", {
+                        action: 6,
+                        area: [ranks.left, parseInt(width / 1.5), parseInt(height / 4), width - parseInt(width / 1.5)],
+
+                    });
+                    if (ranks && ranks.length) {
+                        ranks.sort((a, b) => a.left - b.left);
+                        if (ITimg.ocr("选择", {
+                                action: 1,
+                                similar: 0.70,
+                                gather: ranks,
+                                timing: 500,
+                            }) && ITimg.ocr("选择", {
+                                action: 1,
+                                similar: 0.70,
+                                gather: ranks,
+                                timing: 1000,
+                            })) {
+                            break;
+                        }
+                    }
+                }
+                滑动手势.apply(滑动手势, axis_list.recruit_slide_left);
+                sleep(1000);
+
+                if (frequency > 4) {
+                    console.warn("无可选属性队伍，随机选择队伍1~2");
+                    log("滑动")
+                    swipe.apply(swipe, axis_list.recruit_slide_right);
+                    sleep(500);
+                    swipe.apply(swipe, axis_list.recruit_slide_right);
+
+                    if (ITimg.ocr("选择", {
+                            area: 3,
+                            action: 1,
+                            timing: 500,
+                        }) && ITimg.ocr("选择", {
+                            action: 1,
+                            timing: 1000,
+                            refresh: false,
+                        })) {
+                        break;
+                    }
+                }
+                frequency++;
+            }
+
+            ITimg.ocr("作战开始", {
+                action: 1,
+                area: 4,
+                timing: 1000,
+            })
+            ITimg.ocr("作战开始", {
+                action: 1,
+                area: 4,
+                timing: 1000,
+            })
+
+            //在新线程中运行作战方案,解决冲突
+            tool.pointerPositionDisplay(true);
+            fight_thread = threads.start(作战);
+            sleep(5000);
+            while (true) {
+                if (fight_thread && !fight_thread.isAlive()) {
+                    toastLog("重启作战线程");
+                    fight_thread = threads.start(作战);
+                }
+                staging = ITimg.ocr("保存分数", {
+                    area: 4,
+                    action: 6,
+                });
+                if (ITimg.ocr("保存分数", {
+                        area: 4,
+                        action: 5,
+                        gather: staging,
+                    }) || ITimg.ocr("取消保存", {
+                        nods: 1500,
+                        area: 4,
+                        refresh: false,
+                        log_policy: "简短",
+                        gather: staging,
+                    }) || ITimg.ocr("作战准备", {
+                        nods: 1500,
+                        area: 4,
+                        refresh: false,
+                        log_policy: "简短",
+                        gather: staging,
+                    })) {
+                    fight_thread && fight_thread.isAlive() && fight_thread.interrupt();
+
+                    fight_thread = false;
+
+                    // if (i >= 2) {
+                    tool.writeJSON("phantom_pain_cage", helper.phantom_pain_cage);
+                    tool.writeJSON("周常任务", true);
+                    // }
+
+                    sleep(2000);
+                    if (ITimg.ocr("保存分数", {
+                            action: 1,
+                            timing: 1500,
+                            refresh: false
+                        }) || ITimg.ocr("作战准备", {
+                            area: 4,
+                            refresh: false,
+                            log_policy: "简短",
+                        })) {
+
+                        break;
+                    }
+                }
+            }
+
+
+            tool.pointerPositionDisplay(false);
+
+
+
+            //  }
+        }
+        combat_frequency--;
+        if (combat_frequency == 2) {
+
+            (!ITimg.ocr("混沌", {
+                action: 1,
+                area: [0, 0, parseInt(height / 4), width],
+                timing: 1000,
+                nods: 1000,
+            }) && ITimg.ocr("混沌", {
+                action: 1,
+                area: [0, 0, parseInt(height / 4), width],
+                timing: 1000,
+            }))
+        } else if (combat_frequency == 1) {
+            (!ITimg.ocr("地狱", {
+                action: 1,
+                area: [0, 0, parseInt(height / 4), width],
+                timing: 1000,
+                nods: 1000,
+            }) && ITimg.ocr("地狱", {
+                action: 1,
+                area: [0, 0, parseInt(height / 4), width],
+                timing: 1000,
+            }))
+        }
+
+    }
+
+    staging = ITimg.ocr("返回", {
+        area: 1,
+        action: 5,
+    });
+    if (staging) {
+        click(staging.left, staging.bottom);
+        坐标配置("返回", staging.left, staging.bottom)
+        sleep(2000)
+    } else if (coordinate.coordinate.返回) {
+        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
+        sleep(2000);
+    }
+
+}
+
 function 纷争战区() {
     if (!helper.纷争战区.自动) {
         return
@@ -2733,50 +3644,78 @@ function 纷争战区() {
         toastLog("纷争战区 战斗期未开放");
         return false;
     }
-    if (helper.纷争战区.lastExecutionTime1 && (today.getTime() - new Date(helper.纷争战区.lastExecutionTime).getTime()) <= 6 * 24 * 60 * 60 * 1000) {
+    if (helper.纷争战区.lastExecutionTime && (today.getTime() - new Date(helper.纷争战区.lastExecutionTime).getTime()) <= 6 * 24 * 60 * 60 * 1000) {
 
-        if (helper.纷争战区.执行状态1) {
-            log("纷争战区 此周期已完成")
+        if (helper.纷争战区.执行状态) {
+            console.warn("纷争战区 此周期已完成")
             return false;
 
         }
     }
 
     tool.Floating_emit("展示文本", "状态", "状态：准备纷争战区中")
-    if (ITimg.ocr("任务", {
-            area: "右半屏",
-        }) == false && ITimg.ocr("战斗", {
-            area: "右半屏",
-            refresh: false,
-        }) == false) {
-        返回主页()
-    }
-    if (!ITimg.ocr("战斗", {
-            action: 2,
-            timing: 3000,
+    if (!ITimg.ocr("任务", {
             area: "右半屏",
         }) && !ITimg.ocr("战斗", {
-            action: 2,
-            timing: 3000,
             area: "右半屏",
             refresh: false,
-            part: true,
         })) {
-        //都识别不到，改用固定坐标进入活动
-        click(frcx(1950), frcy(500))
-        sleep(3000)
+        返回主页();
     }
-    (ITimg.ocr("挑战", {
-        action: 4,
-        timing: 1000,
-        similar: 0.85,
-        area: 4,
-    }) || ITimg.ocr("挑战", {
-        action: 4,
-        timing: 1000,
-        similar: 0.8,
-        area: 34,
-    }));
+    while (true) {
+        if (!ITimg.ocr("战斗", {
+                action: 2,
+                timing: 3000,
+                area: "右半屏",
+            }) && !ITimg.ocr("战斗", {
+                action: 2,
+                timing: 3000,
+                area: "右半屏",
+                refresh: false,
+                part: true,
+            })) {
+            //都识别不到，改用固定坐标进入活动
+            click(frcx(1950), frcy(500))
+            sleep(3000)
+        }
+        if (ITimg.ocr("挑战", {
+                action: 4,
+                timing: 1000,
+                similar: 0.85,
+                area: 4,
+            }) || ITimg.ocr("挑战", {
+                action: 4,
+                timing: 1000,
+                similar: 0.8,
+                area: 34,
+            })) {
+            break
+        }
+    }
+    while (true) {
+        ITimg.ocr("挑战", {
+            action: 4,
+            timing: 1000,
+            similar: 0.85,
+            area: 34,
+        })
+
+        if (ITimg.ocr("常规挑战", {
+                action: 5,
+                similar: 0.8,
+                refresh: false,
+            }) || ITimg.ocr("特殊挑战", {
+                action: 5,
+                refresh: false,
+                similar: 0.8,
+            }) || ITimg.ocr("纷争战区", {
+                action: 5,
+                refresh: false,
+                similar: 0.8,
+            })) {
+            break
+        }
+    }
     (ITimg.ocr("纷争战区", {
         action: 1,
         timing: 1500,
@@ -2787,23 +3726,37 @@ function 纷争战区() {
         area: 34,
     }))
     sleep(1500);
-    let place = ["猩红冰原", "暗影深林", "镭射合金", "火焰轮回", "机械工厂", "空域浮台"]
+    // let place = ["猩红冰原", "暗影深林", "镭射合金", "火焰轮回", "机械工厂", "空域浮台"]
 
     let place_collection = ITimg.ocr("集合文本", {
         action: 6,
         area: 24,
     });
     let place_agg = [];
+    let place;
+
     console.warn("战区列表信息:", place_collection);
     if (place_collection && place_collection.length) {
-        for (let place_text of place) {
-            if (place_text = ITimg.ocr(place_text, {
-                    action: 5,
-                    gather: place_collection,
-                })) {
-                place_agg.push(place_text);
+
+        console.warn("buff检测");
+        for (let key in buff_list) {
+            for (let key_text of buff_list[key]) {
+                if (key_text.length != 4) {
+                    continue;
+                }
+                if (place = ITimg.ocr(key_text, {
+                        action: 5,
+                        gather: place_collection,
+
+                        similar: 0.8,
+                        log_policy: "简短",
+                    })) {
+                    place_agg.push([place, key]);
+                    break
+                }
             }
         }
+
     }
     console.warn("可挑战的战区列表:", place_agg)
 
@@ -2812,9 +3765,10 @@ function 纷争战区() {
               continue;
           }
           */
-        console.info("点击" + f.text + " , x:" + f.left + ",y:" + f.top);
-        click(f.left, f.bottom);
+        console.info("点击" + f[0].text + " , x:" + f[0].left + ",y:" + f[0].top);
+        click(f[0].left, f[0].bottom);
         sleep(1500);
+
         if (!ITimg.ocr("战斗准备", {
                 action: 1,
                 timing: 1500,
@@ -2829,47 +3783,92 @@ function 纷争战区() {
         }
 
 
-        (ITimg.ocr("队伍", {
-            action: 1,
-            timing: 2000,
-            area: 2,
-        }) || ITimg.ocr("预设", {
-            action: 1,
-            timing: 2000,
-            area: "右半屏",
-            refresh: false,
-        }));
+        let ranks, frequency = 0;
+        tool.Floating_emit("展示文本", "状态", "状态：优选预设队伍中..");
         while (true) {
-            (ITimg.ocr("选择", {
+            ITimg.ocr("队伍", {
                 action: 1,
+                area: 2,
                 timing: 1000,
-                area: 3,
-            }) || ITimg.ocr("选择", {
+            }) || ITimg.ocr("预设", {
                 action: 1,
+                area: 2,
                 timing: 1000,
-                part: true,
-                area: 34,
-            }) || ITimg.ocr("选择", {
-                action: 1,
-                timing: 1000,
-                part: true,
-                refresh: false,
-            }))
-            if (ITimg.ocr("作战开始", {
-                    action: 1,
-                    timing: 6000,
-                    nods: 500,
-                    area: 4,
-                }) || ITimg.ocr("作战开始", {
-                    action: 1,
-                    timing: 6000,
-                    area: "右半屏",
-                    part: true,
-                    refresh: false,
-                    log_policy: true,
-                })) {
-                break;
+            })
+            if (frequency > 3 && f[1] != "默认") {
+                f[1] = "默认";
+                frequency = 0;
+                log("回滚界面，选择默认队伍")
+                swipe.apply(swipe, axis_list.recruit_slide_right);
+                sleep(500);
+                swipe.apply(swipe, axis_list.recruit_slide_right);
+
             }
+            ranks = ITimg.ocr(f[1], {
+                action: 5,
+                area: 12,
+            })
+            if (ranks) {
+                ranks = ITimg.ocr("集合_选择", {
+                    action: 6,
+                    area: [ranks.left, parseInt(width / 1.5), parseInt(height / 4), width - parseInt(width / 1.5)],
+
+                });
+                if (ranks && ranks.length) {
+                    ranks.sort((a, b) => a.left - b.left);
+                    if (ITimg.ocr("选择", {
+                            action: 1,
+                            similar: 0.70,
+                            gather: ranks,
+                            timing: 500,
+                        }) && ITimg.ocr("选择", {
+                            action: 1,
+                            similar: 0.70,
+                            gather: ranks,
+                            timing: 1000,
+                        })) {
+                        break;
+                    }
+                }
+            }
+            滑动手势.apply(滑动手势, axis_list.recruit_slide_left);
+            sleep(1000);
+
+            if (frequency > 4) {
+                console.warn("无可选属性队伍，随机选择队伍1~2");
+                log("滑动")
+                swipe.apply(swipe, axis_list.recruit_slide_right);
+                sleep(500);
+                swipe.apply(swipe, axis_list.recruit_slide_right);
+
+                (ITimg.ocr("选择", {
+                    area: 3,
+                    action: 1,
+                    timing: 200,
+                }) && ITimg.ocr("选择", {
+                    action: 1,
+                    timing: 1000,
+                    refresh: false,
+                }));
+                if (ITimg.ocr("作战开始", {
+                        action: 1,
+                        timing: 6000,
+                        nods: 500,
+                        area: 4,
+                    }) || ITimg.ocr("作战开始", {
+                        action: 1,
+                        timing: 6000,
+                        area: "右半屏",
+                        part: true,
+                        refresh: false,
+                        log_policy: true,
+                    })) {
+                    break;
+
+                }
+            }
+            frequency++;
+
         }
         //在新线程中运行作战方案,解决冲突
         tool.pointerPositionDisplay(true);
@@ -3063,6 +4062,7 @@ function 历战映射() {
         if (ITimg.ocr("开始挑战", {
                 action: 5,
                 area: 4,
+                part: true,
             }) || ITimg.ocr("/14", {
                 action: 5,
                 nods: 1500,
@@ -3077,6 +4077,7 @@ function 历战映射() {
         if (!ITimg.ocr("开始挑战", {
                 action: 5,
                 area: 4,
+                similar: 0.70,
             }) && !ITimg.ocr("/14", {
                 action: 5,
                 nods: 1500,
@@ -3293,16 +4294,7 @@ function 历战映射() {
                 area: 4,
             })) {
             while (true) {
-                if (ITimg.picture("获得奖励", {
-                        action: 0,
-                        timing: 1000,
-                        nods: 1000,
-                        area: "上半屏"
-                    }) || ITimg.ocr("获得奖励", {
-                        action: 0,
-                        timing: 1000,
-                        area: 12,
-                    })) {
+                if (检查获得奖励()) {
                     click(height / 2, width - frcy(80));
                     sleep(1000);
                     break
@@ -3330,7 +4322,7 @@ function 历战映射() {
 }
 
 function 作战() {
-    tool.Floating_emit("展示文本", "状态", "状态：战斗中..");
+    tool.Floating_emit("展示文本", "状态", "状态：人工智障操作中..");
     释放信号球 = function() {
         //   try{
 
@@ -3697,16 +4689,7 @@ function 领取任务奖励(value) {
             area: "上半屏",
         })) {
         while (true) {
-            if (ITimg.picture("获得奖励", {
-                    action: 0,
-                    timing: 1000,
-                    nods: 1000,
-                    area: "上半屏"
-                }) || ITimg.ocr("获得奖励", {
-                    action: 0,
-                    timing: 1000,
-                    area: 12,
-                })) {
+            if (检查获得奖励()) {
                 click(height / 2, width - frcy(80));
                 sleep(1000);
                 helper.任务状态.每日登录 = true;
@@ -3806,15 +4789,7 @@ function 领取任务奖励(value) {
                     area: "上半屏",
                 })) {
                 while (true) {
-                    if (ITimg.picture("获得奖励", {
-                            action: 0,
-                            timing: 1000,
-                            area: "上半屏"
-                        }) || ITimg.ocr("获得奖励", {
-                            action: 0,
-                            timing: 1000,
-                            area: 12,
-                        })) {
+                    if (检查获得奖励()) {
                         break
                     }
                 }
@@ -3977,6 +4952,26 @@ function 便笺(sleep_, value) {
 
 }
 
+function 滑动手势(x1, y1, x2, y2, duration) {
+    duration = duration || 1200;
+    console.verbose(x1, y1, x2, y2, duration)
+    //从x1,y1滑动到x2,y2 持续1000毫秒,y2-50继续滑动10毫秒
+    gestures_Ary = [
+        [
+            [1, duration, [x1, y1],
+                [x2, y2]
+            ]
+        ],
+        [
+            [25, 200, [x2, y2],
+                [x2, y2 - 100]
+            ]
+        ],
+    ];
+    for (let i = 0; i < gestures_Ary.length; i++) {
+        gestures.apply(null, gestures_Ary[i]);
+    }
+}
 //相似轮廓分组函数
 function groupColumns(columns, shape) {
     let groups = [];
