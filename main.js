@@ -96,6 +96,7 @@ var helper = tool.readJSON("helper", {
     },
     "phantom_pain_cage": {
         "启用": false,
+        "老队伍":false,
         "终极区": true,
         "领取奖励": true,
         "周六日不执行": false,
@@ -185,6 +186,7 @@ if (!helper.phantom_pain_cage) {
     helper = tool.writeJSON("phantom_pain_cage", {
         "启用": false,
         "终极区": true,
+        "老队伍":true,
         "领取奖励": true,
         "周六日不执行": false,
     })
@@ -192,6 +194,10 @@ if (!helper.phantom_pain_cage) {
         "启用": true,
         "领取奖励": true
     })
+}else if (!helper.phantom_pain_cage.老队伍) {
+    helper.phantom_pain_cage.老队伍 = false;
+    helper = tool.writeJSON("phantom_pain_cage", helper.phantom_pain_cage);
+
 }
 
 
@@ -467,6 +473,14 @@ ui.layout(
             id="handbook"
             checked="{{helper.手册经验}}"
             text="{{language['handbook']}}"
+            padding="6 6 6 6"
+            textSize="16" textColor="{{use.theme.text}}"
+            />
+            
+            <widget-switch-se7en
+            id="matrix_recurrence"
+            checked="{{helper.matrix_recurrence}}"
+            text="{{language['matrix_recurrence']}}"
             padding="6 6 6 6"
             textSize="16" textColor="{{use.theme.text}}"
             />
@@ -1291,8 +1305,9 @@ ui.phantom_pain_cage.click(function(view) {
             fatherview.addView(addview, fatherview.getChildCount());
             fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
                 let id_ = view.getHint();
-                if (id_ == "启用" && view.checked) {
-                    use.Dialog_Tips(language.warm_tips, language.phantom_pain_cage_tips);
+                
+                if (language["phantom_pain_cage_"+id_+"_tips"] && view.checked) {
+                    use.Dialog_Tips(language.phantom_pain_cage, language["phantom_pain_cage_"+id_+"_tips"]);
 
                 }
                 helper.phantom_pain_cage[id_] = view.checked;
@@ -1327,6 +1342,15 @@ ui.handbook.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("手册经验", checked)
 });
+
+ui.matrix_recurrence.on("click", function(view) {
+    checked = view.checked;
+    if (checked) {
+        use.Dialog_Tips(language.warm_tips, language.matrix_recurrence_tips);
+    }
+    helper.matrix_recurrence = checked;
+    tool.writeJSON("matrix_recurrence", helper.matrix_recurrence);
+})
 
 ui.auto_use_serum.on("click", function(view) {
     checked = view.checked;
