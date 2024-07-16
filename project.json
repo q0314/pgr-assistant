@@ -5,9 +5,9 @@
   ],
   "assets": [],
   "build": {
-    "build_id": "9840062C-1220",
-    "build_number": 1220,
-    "build_time": 1720428067897,
+    "build_id": "F230C8B0-1229",
+    "build_number": 1229,
+    "build_time": 1720959973774,
     "release": false
   },
   "encryptLevel": 0,
@@ -19,7 +19,6 @@
   "launchConfig": {
     "displaySplash": true,
     "hideLogs": false,
-    "splashLayoutXml": "res/splash.xml",
     "splashText": "",
     "stableMode": false
   },
@@ -86,6 +85,6 @@
     "uuid": "30e8349e-b7be-4217-a506-6072dedc75df"
   },
   "useFeatures": [],
-  "versionCode": 33,
-  "versionName": "1.2.1"
+  "versionCode": 37,
+  "versionName": "1.3.1"
 }

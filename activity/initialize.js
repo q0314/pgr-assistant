@@ -49,7 +49,7 @@ try {
                                 <input id="y" layout_weight="3" inputType="number" hint="y" />
                                 
                             </horizontal>
-                            
+                            {/*
                             <horizontal id="主页展开">
                                 <text text="{{language['unfold']}}" margin="10 0" textColor="{{theme.text}}" />
                                 <text text="x:" />
@@ -58,6 +58,7 @@ try {
                                 <input id="y" layout_weight="3" inputType="number" hint="y" />
                                 
                             </horizontal>
+                            */}
                             
                             <horizontal id="手册图标位置">
                                 <text text="{{language['manualicon']}}" margin="10 0" textColor="{{theme.text}}" />
@@ -203,8 +204,8 @@ try {
                 ui.主页面.getChildAt(4).setText(coord.coordinate.主页面.y.toString());
             }
 
-            ui.主页展开.getChildAt(2).setText(coord.coordinate.主页展开.x.toString());
-            ui.主页展开.getChildAt(4).setText(coord.coordinate.主页展开.y.toString());
+//            ui.主页展开.getChildAt(2).setText(coord.coordinate.主页展开.x.toString());
+          //  ui.主页展开.getChildAt(4).setText(coord.coordinate.主页展开.y.toString());
             ui.手册图标位置.getChildAt(2).setText(coord.coordinate.手册图标位置.x.toString());
             ui.手册图标位置.getChildAt(4).setText(coord.coordinate.手册图标位置.y.toString());
             if (coord.宿舍.宿舍房间位置.length != 0) {
@@ -444,7 +445,7 @@ try {
         let message = [];
         var 返回 = [Number(ui.返回.getChildAt(2).getText()), Number(ui.返回.getChildAt(4).getText())];
         var 主页面 = [Number(ui.主页面.getChildAt(2).getText()), Number(ui.主页面.getChildAt(4).getText())];
-        var 主页展开 = [Number(ui.主页展开.getChildAt(2).getText()), Number(ui.主页展开.getChildAt(4).getText())];
+      //  var 主页展开 = [Number(ui.主页展开.getChildAt(2).getText()), Number(ui.主页展开.getChildAt(4).getText())];
 
         var 手册图标位置 = [Number(ui.手册图标位置.getChildAt(2).getText()), Number(ui.手册图标位置.getChildAt(4).getText())];
 
@@ -455,9 +456,9 @@ try {
         if (主页面[0] == '' || 主页面[1] == '') {
             // message.push(language.mainpage)
         }
-        if (主页展开[0] == '' || 主页展开[1] == '') {
-            message.push(language.unfold)
-        }
+     //   if (主页展开[0] == '' || 主页展开[1] == '') {
+           // message.push(language.unfold)
+      //  }
         if (手册图标位置[0] == '' || 手册图标位置[1] == '') {
           //  message.push(language.manualicon)
         }
@@ -480,7 +481,7 @@ try {
             }
         }
 
-        for (let i = 0; i < ui.快捷头像位置.getChildCount(); i++) {
+       /* for (let i = 0; i < ui.快捷头像位置.getChildCount(); i++) {
 
             if (ui.快捷头像位置.getChildAt(i).getChildAt(1).getText() != '') {
                 快捷头像位置[i]['name'] = ui.快捷头像位置.getChildAt(i).getChildAt(1).getText().toString();
@@ -494,6 +495,7 @@ try {
             };
 
         }
+        */
 
 /*
         var 攻击键 = [Number(ui.攻击键.getChildAt(2).getText()), Number(ui.攻击键.getChildAt(4).getText())];
@@ -545,10 +547,10 @@ try {
                     "x": 主页面[0],
                     "y": 主页面[1]
                 },
-                "主页展开": {
+               /* "主页展开": {
                     "x": 主页展开[0],
                     "y": 主页展开[1]
-                },
+                },*/
                 "手册图标位置": {
                     "x": 手册图标位置[0],
                     "y": 手册图标位置[1]

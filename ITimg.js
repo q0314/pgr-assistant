@@ -18,6 +18,9 @@ importClass(org.opencv.core.Size);
 importClass(org.opencv.features2d.DescriptorMatcher);
 importClass(org.opencv.features2d.Features2d);
 importClass(org.opencv.features2d.SIFT);
+importClass(org.opencv.features2d.ORB);
+importClass(org.opencv.features2d.BRISK);
+importClass(org.opencv.features2d.AKAZE);
 importClass(org.opencv.features2d.BFMatcher);
 // importClass(org.opencv.core.MatOfPoint);
 importClass(org.opencv.core.MatOfPoint2f);
@@ -37,7 +40,17 @@ ITimg.elements = {
     "number": 0
 };
 ITimg.results = false;
-ITimg.gallery_info = JSON.parse(files.read("./library/gallery/gallery_message.json"), (encoding = "utf-8"));
+try {
+    ITimg.gallery_info = JSON.parse(files.read("./library/gallery/gallery_message.json"), (encoding = "utf-8"));
+} catch (e) {
+    ITimg.gallery_info = {
+        "分辨率": {
+            "w": width,
+            "h": height
+        },
+        "服务器": "简中服"
+    }
+}
 //ITimg.language = ITimg.gallery_info.服务器;
 //整数原子变量,确保计时准确
 ITimg.timer_lock = threads.atomic(0);
@@ -48,26 +61,26 @@ ITimg.timer_lock = threads.atomic(0);
  * @param {object} picture_default - 设置picture函数的参数默认值
  * @param {object} ocr_default - 设置OCR文字识别函数的参数默认值
  */
-function Prepare(picture_default, ocr_default, outline_default,siftFeatures_default) {
+function Prepare(picture_default, ocr_default, outline_default, matchFeatures_default) {
     let context;
     (function() {
         context = this;
     }());
     if (this === context) {
-        return new Prepare(picture_default, ocr_default, outline_default,siftFeatures_default);
-    };
+        return new Prepare(picture_default, ocr_default, outline_default, matchFeatures_default);
+    }
 
     if (!picture_default) {
         picture_default = {};
-    };
+    }
     if (!ocr_default) {
         ocr_default = {}
-    };
+    }
     if (!outline_default) {
         outline_default = {}
-    };
-    if(!siftFeatures_default){
-        siftFeatures_default = {}
+    }
+    if (!matchFeatures_default) {
+        matchFeatures_default = {}
     }
     //属性为undefined时不会在日志中显示
     this.picture = {
@@ -85,6 +98,7 @@ function Prepare(picture_default, ocr_default, outline_default,siftFeatures_defa
         area: ocr_default.area || "全屏",
         nods: ocr_default.nods || 0,
         part: ocr_default.part || false,
+        saveSmallImg: ocr_default.saveSmallImg,
         similar: ocr_default.similar || 0.75,
         resolution: ocr_default.resolution || undefined,
         ocr_type: ocr_default.ocr_type || helper.defaultOcr,
@@ -99,10 +113,22 @@ function Prepare(picture_default, ocr_default, outline_default,siftFeatures_defa
         area: outline_default.area || "全屏",
         nods: outline_default.nods || 0,
     }
-    this.siftFeatures = {
-        small_image_catalog:siftFeatures_default.siftFeatures ||"./library/gallery_template/"
+    this.matchFeatures = {
+        timing: matchFeatures_default.timing || 0,
+        nods: matchFeatures_default.nods || 0,
+        area: matchFeatures_default.area || "全屏",
+        threshold: matchFeatures_default.threshold || 0.8,
+        filter_w: matchFeatures_default.filter_w || 10,
+        filter_h: matchFeatures_default.filter_h || 10,
+        method: matchFeatures_default.method || "SIFT",
+        matchesPointCount: matchFeatures_default.matchesPointCount || 4,
+        visualization: matchFeatures_default.visualization || true,
+        saveSmallImg: matchFeatures_default.saveSmallImg,
+        imageFeatures: matchFeatures_default.imageFeatures,
+        small_image_catalog: matchFeatures_default.small_image_catalog || "./library/gallery/template/"
     }
-
+    files.ensureDir(package_path + "/matchFeatures/");
+    files.create(package_path + "/matchFeatures/.nomedia")
     ITimg.default_list = this;
 
     $debug.setMemoryLeakDetectionEnabled(true);
@@ -141,12 +167,12 @@ function Prepare(picture_default, ocr_default, outline_default,siftFeatures_defa
                         toast("程序在" + (is / 2) + "分钟内未能判断当前界面，状态异常，将暂停并返回桌面")
                         console.error("程序在" + (is / 2) + "分钟内未能判断当前界面，状态异常，将暂停并返回桌面")
 
-                        tool.Floaty_emit("暂停", "状态异常");
+                        tool.Floating_emit("暂停", "状态异常");
                     } else if (ITimg.elements.number > 50) {
                         toast("程序在当前界面连续识别到同一内容" + ITimg.elements.number + "次，状态异常，将暂停并返回桌面")
                         console.error("程序在当前界面连续识别到同一内容" + ITimg.elements.number + "次，状态异常，将暂停并返回桌面")
 
-                        tool.Floaty_emit("暂停", "状态异常");
+                        tool.Floating_emit("暂停", "状态异常");
                     }
                     if (ITimg.timer_lock == "暂停") {
                         return
@@ -230,8 +256,8 @@ function 申请截图() {
                 toast("申请录屏(横屏辅助截图)权限被拒绝！");
                 console.error("申请录屏(横屏辅助截图)权限被拒绝！");
                 tool.dialog_tips("温馨提示", "PGRAssistant的PRTS辅助是图像识别脚本程序，在工作前必须先获取录屏(横屏辅助截图)权限！！！\n如需程序自动允许录屏(横屏辅助截图)权限，请前往侧边栏-设置，打开自动允许辅助截图。如果在悬浮窗面板运行时无法申请辅助截图权限，请授权PGRAssistant后台弹出界面权限", "@drawable/ic_report_problem_black_48dp");
-                tool.Floaty_emit("展示文本", "状态", "状态：申请录屏权限被拒绝");
-                tool.Floaty_emit("暂停", "结束程序");
+                tool.Floating_emit("展示文本", "状态", "状态：申请录屏权限被拒绝");
+                tool.Floating_emit("暂停", "结束程序");
                 ITimg.exit = true;
                 break
 
@@ -254,9 +280,9 @@ function 申请截图() {
                 toast(tips)
                 console.error(tips)
 
-                tool.Floaty_emit("展示文本", "状态", "状态：申请录屏权限被拒绝");
+                tool.Floating_emit("展示文本", "状态", "状态：申请录屏权限被拒绝");
 
-                tool.Floaty_emit("暂停", "结束程序");
+                tool.Floating_emit("暂停", "结束程序");
                 sleep(500);
                 break
             }
@@ -274,8 +300,8 @@ function 申请截图() {
                 toast(tips)
                 console.error(tips);
 
-                tool.Floaty_emit("展示文本", "状态", "状态：请求截图权限出错");
-                tool.Floaty_emit("暂停", "结束程序");
+                tool.Floating_emit("展示文本", "状态", "状态：请求截图权限出错");
+                tool.Floating_emit("暂停", "结束程序");
                 exit();
                 break
             case 3:
@@ -288,28 +314,8 @@ function 申请截图() {
 
         ITimg.results--;
     }
-};
+}
 
-/*
-function click_s(x, y) {
-    //强制停止微信
-    if (helper.ADB) {
-        log("6668")
-      let shhh = shell("input tap " + 450 + " " + 100);
-        toastLog(shhh+"@@@")
-    } else {
-        click(x, y)
-    }
-}*/
-/*
-function rootgetScreen() {
-console.time('rootScreenCapture');
-let img = rootScreenCapture();
-console.timeEnd('rootScreenCapture');
-console.log(img);
-img.saveTo(files.cwd() + '/test.png');
-img.recycle();
-*/
 
 /**
  * 使用root截图
@@ -351,7 +357,7 @@ function adbSgetScreen() {
         console.error("adb异常，请确认已在Shizuku应用中授权" + err);
         toast("adb异常，请确认已在Shizuku应用中授权" + err);
 
-        //  tool.Floaty_emit("暂停", "结束程序");
+        //  tool.Floating_emit("暂停", "结束程序");
         sleep(500);
         exit();
     }
@@ -452,7 +458,7 @@ function 图像匹配(picture, list) {
         }
         try {
             img.recycle()
-        } catch (e) {};
+        } catch (e) {}
     } else {
         img_small = images.read(small_image_catalog);
     }
@@ -467,7 +473,7 @@ function 图像匹配(picture, list) {
             imgList = images.cvtColor(gray, "GRAY2BGRA");
         } else {
             img_small = images.cvtColor(gray, "GRAY2BGRA");
-        };
+        }
 
         if (helper.调试) {
             let pngPtah = package_path + "/captureScreen/灰度化-" + list.grayscale + "-" + picture + ".png";
@@ -561,21 +567,425 @@ function 图像匹配(picture, list) {
             case 6:
                 return ITimg.results;
 
-        };
+        }
         (list.log_policy || ITimg.default_list.picture.log_policy) ? "" : console.info(picture + " 匹配成功 " + ITimg.results);
 
         sleep(list.timing);
         return true;
     } else {
+        if (list.picture) {
+            !list.picture.isRecycled() && list.picture.recycle()
+            list.picture = "隐藏"
+        }
         img_small.recycle();
         sleep(list.nods);
         (list.log_policy || ITimg.default_list.picture.log_policy) ? "" : console.error("" + picture + " 匹配失败\n--找图配置：" + JSON.stringify(list));
 
         return false;
 
-    };
+    }
 }
 
+function matchFeatures(picture, list) {
+    if (!list) {
+        list = {};
+    }
+
+    list = {
+        action: list.action,
+        timing: list.timing || ITimg.default_list.matchFeatures.timing,
+        area: list.area || ITimg.default_list.matchFeatures.area,
+        nods: list.nods || ITimg.default_list.matchFeatures.nods,
+        picture: list.picture,
+        method: list.method || ITimg.default_list.matchFeatures.method,
+        threshold: list.threshold || ITimg.default_list.matchFeatures.threshold,
+        matchesPointCount: list.matchesPointCount || ITimg.default_list.matchFeatures.matchesPointCount,
+        imageFeatures: list.imageFeatures || ITimg.default_list.matchFeatures.imageFeatures,
+        visualization: list.visualization || ITimg.default_list.matchFeatures.visualization,
+        log_policy: list.log_policy,
+        filter_w: list.filter_w || ITimg.default_list.matchFeatures.filter_w,
+        filter_h: list.filter_h || ITimg.default_list.matchFeatures.filter_h,
+        small_image_catalog: list.small_image_catalog || ITimg.default_list.matchFeatures.small_image_catalog,
+    }
+    if (list.saveSmallImg == undefined) {
+        list.saveSmallImg = ITimg.default_list.matchFeatures.saveSmallImg;
+    }
+    let small_image_catalog = files.path(list.small_image_catalog + picture + ".png");
+    if (list.saveSmallImg) {
+
+        let parts = small_image_catalog.split(/[\/\\]/);
+        // 去掉数组的最后第二个元素，即最后的目录名
+        parts.splice(parts.length - 2, 1);
+        parts.pop();
+        let picture_name = (list.saveSmallImg === true ? picture : list.saveSmallImg);
+        // 重新组合剩余的部分成为路径
+        //获得上一级目录
+        small_image_save_catalog = files.path(parts.join('/') + "/"); // 使用 '/' 作为路径分隔符
+
+        if (files.exists(small_image_save_catalog + picture_name + ".png")) {
+            console.verbose(picture_name + " 小图已缓存，转到更快的图像匹配");
+            if (list.threshold == 0.7) {
+                list.threshold = ITimg.default_list.picture.threshold;
+            }
+            parts = list.small_image_catalog;
+            list.small_image_catalog = small_image_save_catalog;
+            return 图像匹配(picture_name, list);
+            /* let results = 图像匹配(picture_name, list);
+             if (results) {
+                 return results;
+             } else {
+                 console.verbose("常规图像匹配失败，继续特征匹配");
+                 small_image_save_catalog += picture_name + ".png";
+                 list.small_image_save_catalog = parts;
+                 parts = null;
+                 results = null;
+                 picture_name=null;
+             }
+             */
+        } else {
+            small_image_save_catalog += picture_name + ".png";
+        }
+    }
+    console.time("特征找图总时长");
+
+    list.area = regional_division(list.area);
+
+
+    let img = list.picture || captureScreen_();
+
+    let img_small = Imgcodecs.imread(small_image_catalog);
+    if (!img_small.isContinuous()) {
+        tips = "无效的Mat小图，请检查小图路径是否正确" + small_image_catalog;
+        toast(tips);
+        console.error(tips)
+        return false
+    }
+
+
+    // var bigTrainImage = Imgcodecs.imdecode(new MatOfByte(images.toBytes(img)), Imgcodecs.IMREAD_UNCHANGED);
+
+    let bigTrainImage = new Mat();
+
+    img.mat.copyTo(bigTrainImage);
+    //还原色彩空间
+    Imgproc.cvtColor(bigTrainImage, bigTrainImage, Imgproc.COLOR_BGRA2RGBA);
+    //区域化
+    if (list.area[2] != height || list.area[3] != width) {
+
+        bigTrainImage = bigTrainImage.submat(list.area[1], list.area[3] + list.area[1], list.area[0], list.area[2] + list.area[0]);
+    }
+
+    !img.isRecycled() && img.recycle();
+    if (list.picture) {
+        !list.picture.isRecycled() && list.picture.recycle()
+        list.picture = "隐藏"
+    }
+
+    // 转灰度图
+    let big_trainImage_gray = new Mat(bigTrainImage.rows(), bigTrainImage.cols(), CvType.CV_8UC1);
+    let small_trainImage_gray = new Mat(img_small.rows(), img_small.cols(), CvType.CV_8UC1);
+    Imgproc.cvtColor(bigTrainImage, big_trainImage_gray, Imgproc.COLOR_BGR2GRAY);
+    Imgproc.cvtColor(img_small, small_trainImage_gray, Imgproc.COLOR_BGR2GRAY);
+
+
+
+    // 指定特征点算法SIFT
+    let match_alg = null;
+    list.method = list.method ? list.method.toUpperCase() : undefined;
+    if (list.method == 'SIFT') {
+        match_alg = SIFT.create();
+    } else if (list.method == 'ORB') {
+        match_alg = ORB.create();
+    } else if (list.method == 'BRISK') {
+        match_alg = BRISK.create();
+    } else {
+        match_alg = AKAZE.create();
+    }
+    // 获取图片的特征点
+    if (!list.log_policy) console.time("detect~compute");
+    let big_keyPoints = new MatOfKeyPoint();
+    let small_keyPoints = new MatOfKeyPoint();
+    match_alg.detect(bigTrainImage, big_keyPoints);
+    match_alg.detect(img_small, small_keyPoints);
+    //  console.timeEnd("detect");
+
+    // 提取图片的特征点
+    //   console.time("compute");
+    let big_trainDescription = new Mat(big_keyPoints.rows(), 128, CvType.CV_32FC1);
+    let small_trainDescription = new Mat(small_keyPoints.rows(), 128, CvType.CV_32FC1);
+    match_alg.compute(big_trainImage_gray, big_keyPoints, big_trainDescription);
+    match_alg.compute(small_trainImage_gray, small_keyPoints, small_trainDescription);
+    // console.timeEnd("compute");
+    if (!list.log_policy) console.timeEnd("detect~compute");
+    // 画特征点
+    //  console.time("画特征点");
+    let outputImage1 = new Mat();
+    let outputImage2 = new Mat();
+    Features2d.drawKeypoints(bigTrainImage, big_keyPoints, outputImage1, new Scalar(255, 0, 0), 0);
+    Features2d.drawKeypoints(img_small, small_keyPoints, outputImage2, new Scalar(255, 0, 0), 0);
+    if (list.imageFeatures) {
+
+        tempImgPath = package_path + "/matchFeatures/" + picture + "_特征点大图.jpg";
+        Imgcodecs.imwrite(tempImgPath, outputImage1);
+        tempImgPath = package_path + "/matchFeatures/" + picture + "_特征点小图.jpg";
+        Imgcodecs.imwrite(tempImgPath, outputImage2);
+    }
+    outputImage1.release();
+    outputImage2.release();
+    //console.timeEnd("画特征点");
+    // app.viewFile(tempImgPath);
+    // exit();
+
+    let matcher = new BFMatcher();
+    matcher.clear();
+    let train_desc_collection = new ArrayList();
+    train_desc_collection.add(big_trainDescription);
+    // vector<Mat>train_desc_collection(1, trainDescription);
+    matcher.add(train_desc_collection);
+    matcher.train();
+
+    let matches = new ArrayList();
+    matcher.knnMatch(small_trainDescription, matches, 2);
+
+    //对匹配结果进行筛选，依据distance进行筛选
+    // console.time("对匹配结果进行筛选");
+    var goodMatches = new ArrayList();
+
+    var len = matches.size();
+
+    for (var i = 0; i < len; i++) {
+        let matchObj = matches.get(i);
+        let dmatcharray = matchObj.toArray();
+        let m1 = dmatcharray[0];
+        let m2 = dmatcharray[1];
+        if (m1 && m2 && m1.distance <= m2.distance * list.threshold) {
+            goodMatches.add(m1);
+        }
+    }
+    //  console.timeEnd("对匹配结果进行筛选");
+
+    let matchesPointCount = goodMatches.size();
+    //当匹配后的特征点大于等于 4 个，则认为模板图在原图中，该值可以自行调整
+    if (matchesPointCount >= list.matchesPointCount) {
+        log("模板图在原图匹配成功！..");
+        let templateKeyPoints = small_keyPoints;
+        let originalKeyPoints = big_keyPoints;
+
+        let templateKeyPointList = templateKeyPoints.toList();
+        let originalKeyPointList = originalKeyPoints.toList();
+        let objectPoints = new LinkedList();
+        let scenePoints = new LinkedList();
+        let goodMatchesList = goodMatches;
+
+        var len = goodMatches.size();
+        for (var i = 0; i < len; i++) {
+            let goodMatch = goodMatches.get(i);
+            objectPoints.addLast(templateKeyPointList.get(goodMatch.queryIdx).pt);
+            scenePoints.addLast(originalKeyPointList.get(goodMatch.trainIdx).pt);
+        }
+
+        let objMatOfPoint2f = new MatOfPoint2f();
+        objMatOfPoint2f.fromList(objectPoints);
+        let scnMatOfPoint2f = new MatOfPoint2f();
+        scnMatOfPoint2f.fromList(scenePoints);
+        //使用 findHomography 寻找匹配上的关键点的变换
+        let homography = Calib3d.findHomography(objMatOfPoint2f, scnMatOfPoint2f, Calib3d.RANSAC, 3);
+
+        /**
+         * 透视变换(Perspective Transformation)是将图片投影到一个新的视平面(Viewing Plane)，也称作投影映射(Projective Mapping)。
+         */
+        let templateCorners = new Mat(4, 1, CvType.CV_32FC2);
+        let templateTransformResult = new Mat(4, 1, CvType.CV_32FC2);
+        // templateCorners.put(0, 0, new double[]{0, 0});
+        // templateCorners.put(1, 0, new double[]{templateImage.cols(), 0});
+        // templateCorners.put(2, 0, new double[]{templateImage.cols(), templateImage.rows()});
+        // templateCorners.put(3, 0, new double[]{0, templateImage.rows()});
+
+        let templateImage = img_small;
+        let doubleArr = util.java.array("double", 2);
+        doubleArr[0] = 0;
+        doubleArr[1] = 0;
+
+        templateCorners.put(0, 0, doubleArr);
+        doubleArr[0] = templateImage.cols();
+        doubleArr[1] = 0;
+        templateCorners.put(1, 0, doubleArr);
+        doubleArr[0] = templateImage.cols();
+        doubleArr[1] = templateImage.rows();
+        templateCorners.put(2, 0, doubleArr);
+        doubleArr[0] = 0;
+        doubleArr[1] = templateImage.rows();
+        templateCorners.put(3, 0, doubleArr);
+
+        if (!homography.isContinuous()) {
+            console.error("Mat对象的数据不是连续的..无效结果");
+            homography.release();
+            sleep(list.nods);
+            list.matchesPointCount = matchesPointCount;
+            (list.log_policy || ITimg.default_list.picture.log_policy) ? "" : console.error("" + picture + " 匹配失败\n--特征找图配置：" + JSON.stringify(list));
+
+            return false
+        }
+
+        //使用 perspectiveTransform 将模板图进行透视变以矫正图象得到标准图片
+        Core.perspectiveTransform(templateCorners, templateTransformResult, homography);
+
+        homography.release();
+        //矩形四个顶点
+        let pointA = templateTransformResult.get(0, 0);
+        let pointB = templateTransformResult.get(1, 0);
+        let pointC = templateTransformResult.get(2, 0);
+        let pointD = templateTransformResult.get(3, 0);
+        ITimg.results = {};
+
+        if (pointA[1] < pointC[1]) {
+
+            ITimg.results.top = parseInt(pointA[1]) + list.area[1];
+            ITimg.results.bottom = parseInt(pointC[1]) + list.area[1];
+        } else {
+            ITimg.results.bottom = parseInt(pointA[1]) + list.area[1];
+            ITimg.results.top = parseInt(pointC[1]) + list.area[1];
+
+        }
+        if (pointD[0] < pointB[0]) {
+            ITimg.results.left = parseInt(pointD[0]) + list.area[0];
+            ITimg.results.right = parseInt(pointB[0]) + list.area[0];
+        } else {
+            ITimg.results.right = parseInt(pointD[0]) + list.area[0];
+            ITimg.results.left = parseInt(pointB[0]) + list.area[0];
+
+        }
+        ITimg.results.x = ITimg.results.left;
+        ITimg.results.y = ITimg.results.top;
+        ITimg.results.h = ITimg.results.bottom - ITimg.results.top;
+        ITimg.results.w = ITimg.results.right - ITimg.results.left;
+        if (ITimg.results.w <= list.filter_w || ITimg.results.h <= list.filter_h) {
+            console.error("wh小于滤值 "+list.filter_w+","+list.filter_h+" 无效结果:", JSON.stringify(ITimg.results));
+            return false;
+        }
+        //log(rowStart,rowEnd,colStart,colEnd)
+        let originalImage = bigTrainImage;
+        log(ITimg.results.top - list.area[1], ITimg.results.bottom - list.area[1], ITimg.results.left - list.area[0], ITimg.results.right - list.area[0])
+
+        templateImage = bigTrainImage.submat(ITimg.results.top - list.area[1], ITimg.results.bottom - list.area[1], ITimg.results.left - list.area[0], ITimg.results.right - list.area[0]);
+
+        if (list.saveSmallImg) {
+
+            console.verbose("缓存小图到：" + small_image_save_catalog);
+
+            Imgcodecs.imwrite(small_image_save_catalog, templateImage);
+            // templateImage = subMat;
+        }
+        // subMat.release();
+
+        // app.viewFile(tempImgPath);
+        //将匹配的图像用用四条线框出来
+        Imgproc.line(originalImage, new Point(pointA), new Point(pointB), new Scalar(0, 255, 0), 4); //上 A->B
+        Imgproc.line(originalImage, new Point(pointB), new Point(pointC), new Scalar(0, 255, 0), 4); //右 B->C
+        Imgproc.line(originalImage, new Point(pointC), new Point(pointD), new Scalar(0, 255, 0), 4); //下 C->D
+        Imgproc.line(originalImage, new Point(pointD), new Point(pointA), new Scalar(0, 255, 0), 4); //左 D->A
+
+        goodMatches = new MatOfDMatch();
+        goodMatches.fromList(goodMatchesList);
+        // let matchOutput = new Mat(originalImage.rows() * 2, originalImage.cols() * 2, Imgproc.CV_LOAD_IMAGE_COLOR);
+        let matchOutput = new Mat();
+        // Features2d.drawMatches(
+        //   templateImage,
+        //   templateKeyPoints,
+        //   originalImage,
+        //   originalKeyPoints,
+        //   goodMatches,
+        //   matchOutput,
+        //   Scalar.all(-1),
+        //   new Scalar(255, 0, 0),
+        //   new MatOfByte(),
+        //   2
+        // );
+        Features2d.drawMatches(
+            templateImage,
+            templateKeyPoints,
+            originalImage,
+            originalKeyPoints,
+            goodMatches,
+            matchOutput,
+            Scalar.all(-1),
+            Scalar.all(-1),
+            new MatOfByte(),
+            2
+        );
+        templateImage.release();
+        originalImage.release();
+        if (list.visualization) {
+            tempImgPath = package_path + "/matchFeatures/" + picture + "_特征匹配结果.jpg";
+            // 设置JPEG保存参数（质量设置为90，范围0-100）
+            //  let params = new ArrayList();
+            //    params.add(Imgcodecs.IMWRITE_JPEG_QUALITY);
+            //   params.add(90);
+            Imgcodecs.imwrite(tempImgPath, matchOutput);
+        }
+        img_small.release();
+        bigTrainImage.release();
+        matchOutput.release();
+
+
+        console.timeEnd("特征找图总时长");
+        //            log(rowStart, rowEnd, colStart, colEnd)
+
+
+        // app.viewFile(tempImgPath);
+
+    } else {
+        //  toastLog("模板图不在原图中！");
+        img_small.release();
+        bigTrainImage.release();
+        sleep(list.nods);
+        (list.log_policy || ITimg.default_list.picture.log_policy) ? "" : console.error("" + picture + " 匹配失败\n--特征找图配置：" + JSON.stringify(list));
+        return false;
+    }
+
+    if (ITimg.results) {
+
+        ITimg.timer_lock = threads.atomic(0);
+        if (ITimg.elements.content == picture) {
+            ITimg.elements.number = ITimg.elements.number + 1;
+        } else {
+            ITimg.elements = {
+                "content": picture,
+                "number": 0
+            };
+        }
+        ITimg.results.x = ITimg.results.x + random((ITimg.results.x > 10) ? -5 : 0, 10);
+        ITimg.results.y = ITimg.results.y + random((ITimg.results.y > 10) ? -5 : 0, 10);
+        switch (list.action) {
+
+            case 0:
+                sleep(50);
+                click(ITimg.results.x + ITimg.results.w / 2, ITimg.results.y + ITimg.results.h / 2);
+                break;
+            case 1:
+                click(ITimg.results.x + 10, ITimg.results.y + 10);
+                break
+            case 2:
+                click(ITimg.results.right, ITimg.results.y);
+                break
+            case 3:
+                click(ITimg.results.x, ITimg.results.bottom);
+                break
+            case 4:
+                click(ITimg.results.right, ITimg.results.bottom);
+                break
+
+            case 5:
+                return ITimg.results;
+
+        }
+
+        (list.log_policy || ITimg.default_list.picture.log_policy) ? "" : console.info(picture + " 匹配成功 " + ITimg.results.x + ", " + ITimg.results.y);
+
+        sleep(list.timing);
+        return true;
+    }
+}
 
 /**
  * 对图片 进行文字识别,并匹配words文字
@@ -613,6 +1023,8 @@ function ocr文字识别(words, list) {
         refresh: list.refresh,
         resolution: list.resolution || ITimg.default_list.ocr.resolution,
         gather: list.gather,
+        threshold: list.threshold,
+        saveSmallImg: list.saveSmallImg,
         log_policy: list.log_policy,
         ocr_type: list.ocr_type || ITimg.default_list.ocr.ocr_type,
         correction_path: list.correction_path || ITimg.default_list.ocr.correction_path
@@ -620,9 +1032,67 @@ function ocr文字识别(words, list) {
     if (!ITimg.MlkitOCR_module && !ITimg.XiaoYueOCR_module) {
         if (!initocr(list.ocr_type)) {
             return false;
-        };
+        }
     }
+
+    if (list.saveSmallImg === undefined) {
+        list.saveSmallImg = ITimg.default_list.ocr.saveSmallImg;
+    }
+    let small_image_save_catalog = files.path(ITimg.default_list.picture.small_image_catalog); // 使用 '/' 作为路径分隔符
+
+    if (list.saveSmallImg && !list.gather) {
+
+        let picture_name = (list.saveSmallImg === true ? words : list.saveSmallImg);
+
+        if (files.exists(small_image_save_catalog + picture_name + ".png")) {
+            console.verbose(picture_name + " 小图已缓存，转到更快的图像匹配");
+            let last_time_results = ITimg.results;
+            let results = 图像匹配(picture_name, {
+                action: list.action,
+                timing: list.timing,
+                picture: list.picture,
+                area: list.area,
+                nods: list.nods,
+                threshold: list.threshold,
+                small_image_catalog: small_image_save_catalog,
+            });
+
+            if (results) {
+                if (list.action > 4) {
+                    console.info(picture_name + " 匹配成功 " + ITimg.results);
+                }
+                return results;
+            } else {
+                console.verbose(picture_name + " - 常规图像匹配失败，继续OCR识别");
+                results = null;
+                if (last_time_results && last_time_results.length && last_time_results[0] && last_time_results[0].text) {
+                    //console.verbose(last_time_results)
+                    ITimg.results = last_time_results;
+                } else {
+                    ITimg.results = null;
+                    list.refresh = undefined;
+                }
+                small_image_save_catalog += picture_name + ".png";
+                last_time_results = null;
+                picture_name = null;
+            }
+
+        } else {
+            if (ITimg.results && (!ITimg.results.length || !ITimg.results[0] || !ITimg.results[0].text)) {
+                ITimg.results = null;
+                list.refresh = undefined;
+            }
+            small_image_save_catalog += picture_name + ".png";
+        }
+    } else if (ITimg.results && (!ITimg.results.length || !ITimg.results[0] || !ITimg.results[0].text)) {
+        ITimg.results = null;
+        list.refresh = undefined;
+
+    }
+    list.threshold = undefined;
     list.area = regional_division(list.area);
+    let primaryimg;
+
     if (!list.gather) {
         if (list.refresh === undefined || list.refresh == true) {
             //多分辨率兼容
@@ -639,11 +1109,17 @@ function ocr文字识别(words, list) {
                 }
 
             }
+            img = list.picture || captureScreen_();
+            if (list.saveSmallImg) {
+                primaryimg = images.copy(img, true);
+            }
 
-            ITimg.results = ITimg[list.ocr_type + "_module"].detect((list.picture || captureScreen_()), {
+            ITimg.results = ITimg[list.ocr_type + "_module"].detect(img, {
                 "region": list.area,
                 "rectify_json_path": list.correction_path,
             });
+
+            !img.isRecycled() && img.recycle();
         }
         if (list.action == 6) {
             return ITimg.results;
@@ -695,10 +1171,13 @@ function ocr文字识别(words, list) {
             } else {
                 list.similar = similar;
                 return false;
-            };
-        });
-    };
-
+            }
+        })
+    }
+    if (list.picture) {
+        !list.picture.isRecycled() && list.picture.recycle();
+        list.picture = "隐藏"
+    }
     if (query_ != undefined) {
 
         if (ITimg.elements.content == words) {
@@ -723,6 +1202,21 @@ function ocr文字识别(words, list) {
                 console.info("-" + words + " 匹配成功");
 
                 break
+        }
+        if (list.saveSmallImg && primaryimg && primaryimg.isRecycled && !primaryimg.isRecycled()) {
+
+            console.verbose("缓存小图到：" + small_image_save_catalog);
+
+            let img_small;
+            try {
+                img_small = images.clip(primaryimg, query_.left - 10, query_.top - 10, query_.right - query_.left + 15, query_.bottom - query_.top + 15);
+            } catch (e) {
+                img_small = images.clip(primaryimg, query_.left, query_.top, query_.right - query_.left, query_.bottom - query_.top);
+            }
+
+            images.save(img_small, small_image_save_catalog);
+            img_small.recycle();
+            primaryimg.recycle();
         }
         switch (list.action) {
             case undefined:
@@ -753,6 +1247,9 @@ function ocr文字识别(words, list) {
         sleep(list.timing)
         return true;
     } else {
+        if (list.saveSmallImg && primaryimg && primaryimg.isRecycled && !primaryimg.isRecycled()) {
+            primaryimg.recycle();
+        }
         sleep(list.nods);
         switch (list.log_policy) {
             case undefined:
@@ -987,7 +1484,7 @@ function binarized_contour(list) {
 
     list.canvas ? list.canvas = list.canvas.name : undefined;
     if (list.picture) {
-        !list.picture.isRecycled() && list.picture.recycle()
+        !list.picture.isRecycled() && list.picture.recycle();
         list.picture = "隐藏"
     }
 
@@ -1198,30 +1695,31 @@ function initocr(value) {
     if (!value && (ITimg.XiaoYueOCR_module || ITimg.MlkitOCR_module)) return true;
     // helper.defaultOcr = 'MlkitOCR';
     let ocr;
-
-    switch (value || helper.defaultOcr) {
-        case 'XiaoYueOCR':
+    let ocr_type = value || helper.defaultOcr
+    ocr_type = ocr_type.toUpperCase();
+    switch (ocr_type) {
+        case 'XIAOYUEOCR':
             ocr = require("./modules/xiaoyueocr.js");
             if (!ocr.isInstalled()) {
                 toastLog("未安装OCR扩展，无法使用对应功能\n请打开侧边栏-设置,获取OCR扩展下载安装");
-                tool.Floaty_emit("展示文本", "状态", "状态：未安装OCR扩展，无法使用对应功能");
+                tool.Floating_emit("展示文本", "状态", "状态：未安装OCR扩展，无法使用");
                 return false;
             }
 
             ITimg.XiaoYueOCR_module = ocr.prepare();
             if (ITimg.XiaoYueOCR_module.hasOwnProperty('initResult') && !ITimg.XiaoYueOCR_module.initResult) {
 
-                tool.Floaty_emit("展示文本", "状态", "状态：已安装的OCR无法使用");
+                tool.Floating_emit("展示文本", "状态", "状态：已安装的OCR无法使用");
                 toastLog("已安装OCR扩展，但初始化失败,无法使用\n请打开侧边栏-运行日志查看详细报错,尝试解决. 或更换其他OCR扩展");
                 return false;
             }
 
             return ITimg.XiaoYueOCR_module;
-        case 'MlkitOCR':
+        case 'MLKITOCR':
             ocr = require("./modules/mlkitocr.js");
             if (!ocr.isInstalled()) {
                 toastLog("未安装OCR扩展，无法使用对应功能\n请打开侧边栏-设置,获取OCR扩展下载安装");
-                tool.Floaty_emit("展示文本", "状态", "状态：未安装OCR扩展，无法使用对应功能");
+                tool.Floating_emit("展示文本", "状态", "状态：未安装OCR扩展，无法使用");
                 return false;
             }
 
@@ -1232,11 +1730,12 @@ function initocr(value) {
             tips = "未符合的ocr类型:" + value;
             toast(tips);
             console.error(tips);
-            tool.Floaty_emit("展示文本", "状态", "状态：" + tips);
+            tool.Floating_emit("展示文本", "状态", "状态：" + tips);
+
             return false
 
     }
-    // tool.Floaty_emit("展示文本", "状态", "状态：校验OCR插件是否可用...");
+    // tool.Floating_emit("展示文本", "状态", "状态：校验OCR插件是否可用...");
 
 
 
@@ -1278,6 +1777,7 @@ ITimg.XiaoYueOCR = function(words, list) {
 ITimg.Prepare = Prepare;
 ITimg.initocr = initocr;
 ITimg.picture = 图像匹配;
+ITimg.matchFeatures = matchFeatures;
 ITimg.contour = binarized_contour;
 ITimg.scaleSet = scaleSet;
 ITimg.申请截图 = 申请截图;
@@ -1290,6 +1790,8 @@ try {
     // 用于代理图片资源，请勿移除 否则需要手动添加recycle代码
     log("加载图片代理程序")
     require('./utlis/ResourceMonitor.js')(runtime, this)
+    runtime.unloadDex('./utlis/java/nlp-hanzi-similar-1.3.0.dex');
+    runtime.loadDex('./utlis/java/nlp-hanzi-similar-1.3.0.dex');
 
     var package_path = context.getExternalFilesDir(null).getAbsolutePath();
 
@@ -1316,306 +1818,23 @@ try {
     //  width = 1080;
 
     let name = {
-        picture_name: "1",
+        picture_name: "12",
         canvas_name: "节点"
     }
     let picture = images.read("/storage/emulated/0/DCIM/Screenshots/" + name.picture_name + ".jpg");
-    let smallImgPath = files.path("./library/gallery/宿舍-家具-关闭.png");
+    // let smallImgPath = files.path("./library/gallery_template/");
 
-    function sift(picture, list) {
-                    console.time("总时长");
-        if (!list) {
-            list = {};
-        };
-
-        list = {
-            action: list.action,
-            timing: list.timing || ITimg.default_list.picture.timing,
-            area: list.area || ITimg.default_list.picture.area,
-            nods: list.nods || ITimg.default_list.picture.nods,
-            picture: list.picture,
-            threshold: list.threshold || ITimg.default_list.picture.threshold,
-            matchesPointCount: list.matchesPointCount || 4,
-            imageFeatures: list.imageFeatures,
-            visualization: list.visualization,
-            log_policy: list.log_policy,
-            saveSmallImg: list.saveSmallImg,
-            small_image_catalog: list.small_image_catalog,
-            matchTemplate_max: list.matchTemplate_max,
-        }
-        list.area = regional_division(list.area);
-
-        let img;
-
-        let imgList = list.picture || captureScreen_();
-
-        let img_small;
-        let small_image_catalog = (list.small_image_catalog || ITimg.default_list.siftFeatures.small_image_catalog) + picture + ".png";
-        //多分辨率兼容
-
-        let smallTrainImage = Imgcodecs.imread(smallImgPath);
-        //长时间持有图片
-        img = images.copy(imgList, true);
-        !imgList.isRecycled() && imgList.recycle();
-        let roiBitmap;
-
-        try {
-            roiBitmap = Bitmap.createBitmap(img.bitmap, list.area[0], list.area[1], list.area[2], list.area[3]);
-        } catch (e) {
-            console.error(e)
-            img = ITimg.captureScreen_();
-            roiBitmap = Bitmap.createBitmap(img.bitmap, list.area[0], list.area[1], list.area[2], list.area[3]);
-        }
-        if (roiBitmap.width == height && roiBitmap.height == width) {
-            console.verbose("全屏查找矩形")
-            roiBitmap = Bitmap.createBitmap(list.area[2], list.area[3], Bitmap.Config.ARGB_8888);
-            let canvas = new Canvas(roiBitmap);
-            canvas.drawBitmap(img.bitmap, list.area[0], list.area[1], null);
-        }
-        let bigTrainImage = new Mat();
-        Utils.bitmapToMat(roiBitmap, bigTrainImage)
-
-        // 转灰度图
-        let big_trainImage_gray = new Mat(bigTrainImage.rows(), bigTrainImage.cols(), CvType.CV_8UC1);
-        let small_trainImage_gray = new Mat(smallTrainImage.rows(), smallTrainImage.cols(), CvType.CV_8UC1);
-        Imgproc.cvtColor(bigTrainImage, big_trainImage_gray, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.cvtColor(smallTrainImage, small_trainImage_gray, Imgproc.COLOR_BGR2GRAY);
-
-        // 指定特征点算法SIFT
-        sift = SIFT.create();
-
-        // 获取图片的特征点
-        console.time("detect");
-        let big_keyPoints = new MatOfKeyPoint();
-        let small_keyPoints = new MatOfKeyPoint();
-        sift.detect(bigTrainImage, big_keyPoints);
-        sift.detect(smallTrainImage, small_keyPoints);
-        console.timeEnd("detect");
-
-        // 提取图片的特征点
-        console.time("compute");
-        let big_trainDescription = new Mat(big_keyPoints.rows(), 128, CvType.CV_32FC1);
-        let small_trainDescription = new Mat(small_keyPoints.rows(), 128, CvType.CV_32FC1);
-        sift.compute(big_trainImage_gray, big_keyPoints, big_trainDescription);
-        sift.compute(small_trainImage_gray, small_keyPoints, small_trainDescription);
-        console.timeEnd("compute");
-
-        // 画特征点
-        console.time("画特征点");
-        let outputImage1 = new Mat();
-        let outputImage2 = new Mat();
-        Features2d.drawKeypoints(bigTrainImage, big_keyPoints, outputImage1, new Scalar(255, 0, 0), 0);
-        Features2d.drawKeypoints(smallTrainImage, small_keyPoints, outputImage2, new Scalar(255, 0, 0), 0);
-        if (list.imageFeatures) {
-
-            tempImgPath = package_path + "/siftFeatures/" + picture + "_特征点大图.jpg";
-            Imgcodecs.imwrite(tempImgPath, outputImage1);
-            tempImgPath = package_path + "/siftFeatures/" + picture + "_特征点小图.jpg";
-            Imgcodecs.imwrite(tempImgPath, outputImage2);
-        }
-        console.timeEnd("画特征点");
-        // app.viewFile(tempImgPath);
-        // exit();
-
-        console.time("matcher.train");
-        let matcher = new BFMatcher();
-        matcher.clear();
-        let train_desc_collection = new ArrayList();
-        train_desc_collection.add(big_trainDescription);
-        // vector<Mat>train_desc_collection(1, trainDescription);
-        matcher.add(train_desc_collection);
-        matcher.train();
-        console.timeEnd("matcher.train");
-
-        console.time("knnMatch");
-        let matches = new ArrayList();
-        matcher.knnMatch(small_trainDescription, matches, 2);
-        console.timeEnd("knnMatch");
-
-        //对匹配结果进行筛选，依据distance进行筛选
-        console.time("对匹配结果进行筛选");
-        var goodMatches = new ArrayList();
-
-        var len = matches.size();
-
-        for (var i = 0; i < len; i++) {
-            let matchObj = matches.get(i);
-            let dmatcharray = matchObj.toArray();
-            let m1 = dmatcharray[0];
-            let m2 = dmatcharray[1];
-            if (m1.distance <= m2.distance * list.threshold) {
-                goodMatches.add(m1);
-            }
-        }
-        console.timeEnd("对匹配结果进行筛选");
-
-        let matchesPointCount = goodMatches.size();
-        //当匹配后的特征点大于等于 4 个，则认为模板图在原图中，该值可以自行调整
-        if (matchesPointCount >= list.matchesPointCount) {
-            log("模板图在原图匹配成功！..");
-            console.time("模板图在原图匹配成功！");
-            let templateKeyPoints = small_keyPoints;
-            let originalKeyPoints = big_keyPoints;
-
-            let templateKeyPointList = templateKeyPoints.toList();
-            let originalKeyPointList = originalKeyPoints.toList();
-            let objectPoints = new LinkedList();
-            let scenePoints = new LinkedList();
-            let goodMatchesList = goodMatches;
-
-            var len = goodMatches.size();
-            for (var i = 0; i < len; i++) {
-                let goodMatch = goodMatches.get(i);
-                objectPoints.addLast(templateKeyPointList.get(goodMatch.queryIdx).pt);
-                scenePoints.addLast(originalKeyPointList.get(goodMatch.trainIdx).pt);
-            }
-
-            let objMatOfPoint2f = new MatOfPoint2f();
-            objMatOfPoint2f.fromList(objectPoints);
-            let scnMatOfPoint2f = new MatOfPoint2f();
-            scnMatOfPoint2f.fromList(scenePoints);
-            //使用 findHomography 寻找匹配上的关键点的变换
-            let homography = Calib3d.findHomography(objMatOfPoint2f, scnMatOfPoint2f, Calib3d.RANSAC, 3);
-
-            /**
-             * 透视变换(Perspective Transformation)是将图片投影到一个新的视平面(Viewing Plane)，也称作投影映射(Projective Mapping)。
-             */
-            let templateCorners = new Mat(4, 1, CvType.CV_32FC2);
-            let templateTransformResult = new Mat(4, 1, CvType.CV_32FC2);
-            // templateCorners.put(0, 0, new double[]{0, 0});
-            // templateCorners.put(1, 0, new double[]{templateImage.cols(), 0});
-            // templateCorners.put(2, 0, new double[]{templateImage.cols(), templateImage.rows()});
-            // templateCorners.put(3, 0, new double[]{0, templateImage.rows()});
-
-            let templateImage = smallTrainImage;
-            let doubleArr = util.java.array("double", 2);
-            doubleArr[0] = 0;
-            doubleArr[1] = 0;
-            templateCorners.put(0, 0, doubleArr);
-            doubleArr[0] = templateImage.cols();
-            doubleArr[1] = 0;
-            templateCorners.put(1, 0, doubleArr);
-            doubleArr[0] = templateImage.cols();
-            doubleArr[1] = templateImage.rows();
-            templateCorners.put(2, 0, doubleArr);
-            doubleArr[0] = 0;
-            doubleArr[1] = templateImage.rows();
-            templateCorners.put(3, 0, doubleArr);
-            if (!homography.isContinuous()) {
-                console.error("Mat对象的数据不是连续的..无效结果")
-                return false
-            }
-            //使用 perspectiveTransform 将模板图进行透视变以矫正图象得到标准图片
-            Core.perspectiveTransform(templateCorners, templateTransformResult, homography);
-            //矩形四个顶点
-            let pointA = templateTransformResult.get(0, 0);
-            let pointB = templateTransformResult.get(1, 0);
-            let pointC = templateTransformResult.get(2, 0);
-            let pointD = templateTransformResult.get(3, 0);
-
-            let rowStart = parseInt(pointA[1]);
-            let rowEnd = parseInt(pointC[1]);
-            let colStart = parseInt(pointD[0]);
-            let colEnd = parseInt(pointB[0]);
-
-            let originalImage = bigTrainImage;
-            if (rowStart > rowEnd) {
-                rowStart = rowEnd;
-                rowEnd = parseInt(pointA[1]);
-            }
-            if (colStart > colEnd) {
-                colStart = colEnd;
-                colEnd = parseInt(pointD[0]);
-
-            }
-
-            //log(rowStart,rowEnd,colStart,colEnd)
-
-            if (list.saveSmallImg) {
-
-                 small_image_catalog = small_image_catalog.replace("_template","")
-                if(list.saveSmallImg!==true){
-                    small_image_catalog = small_image_catalog.replace(picture,list.saveSmallImg);
-                
-                }
-                console.verbose("保存小图到：" + small_image_catalog);
-                let subMat = originalImage.submat(rowStart, rowEnd, colStart, colEnd);
-                Imgcodecs.imwrite(small_image_catalog, subMat);
-            }
-            // app.viewFile(tempImgPath);
-            //将匹配的图像用用四条线框出来
-            Imgproc.line(originalImage, new Point(pointA), new Point(pointB), new Scalar(0, 255, 0), 4); //上 A->B
-            Imgproc.line(originalImage, new Point(pointB), new Point(pointC), new Scalar(0, 255, 0), 4); //右 B->C
-            Imgproc.line(originalImage, new Point(pointC), new Point(pointD), new Scalar(0, 255, 0), 4); //下 C->D
-            Imgproc.line(originalImage, new Point(pointD), new Point(pointA), new Scalar(0, 255, 0), 4); //左 D->A
-
-            goodMatches = new MatOfDMatch();
-            goodMatches.fromList(goodMatchesList);
-            // let matchOutput = new Mat(originalImage.rows() * 2, originalImage.cols() * 2, Imgproc.CV_LOAD_IMAGE_COLOR);
-            let matchOutput = new Mat();
-            // Features2d.drawMatches(
-            //   templateImage,
-            //   templateKeyPoints,
-            //   originalImage,
-            //   originalKeyPoints,
-            //   goodMatches,
-            //   matchOutput,
-            //   Scalar.all(-1),
-            //   new Scalar(255, 0, 0),
-            //   new MatOfByte(),
-            //   2
-            // );
-            Features2d.drawMatches(
-                templateImage,
-                templateKeyPoints,
-                originalImage,
-                originalKeyPoints,
-                goodMatches,
-                matchOutput,
-                Scalar.all(-1),
-                Scalar.all(-1),
-                new MatOfByte(),
-                2
-            );
-            if (list.visualization) {
-                tempImgPath = package_path + "/siftFeatures/" + picture + "_特征匹配结果.jpg";
-                // 设置JPEG保存参数（质量设置为90，范围0-100）
-                //  let params = new ArrayList();
-                //    params.add(Imgcodecs.IMWRITE_JPEG_QUALITY);
-                //   params.add(90);
-
-                Imgcodecs.imwrite(tempImgPath, matchOutput);
-            }
-            console.timeEnd("模板图在原图匹配成功！");
-
-            console.timeEnd("总时长");
-            log(rowStart, rowEnd, colStart, colEnd)
-
-            log(rowStart + list.area[1], rowEnd + list.area[1], colStart + list.area[0], colEnd + list.area[0])
-
-            app.viewFile(tempImgPath);
-
-            // Imgcodecs.imwrite("/Users/niwei/Desktop/opencv/模板图在原图中的位置.jpg", originalImage);
-
-            //tempImgPath = "/storage/emulated/0/6.png";
-            // Imgcodecs.imwrite(tempImgPath, originalImage);
-            // app.viewFile(tempImgPath);
-
-            // Imgcodecs.imwrite("/Users/niwei/Desktop/opencv/特征点匹配过程.jpg", matchOutput);
-            // Imgcodecs.imwrite("/Users/niwei/Desktop/opencv/模板图在原图中的位置.jpg", originalImage);
-        } else {
-            toastLog("模板图不在原图中！");
-        }
-    }
-    files.ensureDir(package_path + "/siftFeatures/");
-    sift("宿舍-家具-关闭", {
-        area: 2,
-        threshold: 0.9,
-        matchesPointCount: 4,
+    log(ITimg.matchFeatures("主页-展开", {
+        area: 4,
+        action: 5,
+        threshold: 0.85,
         imageFeatures: true,
         visualization: true,
         saveSmallImg: true,
-        picture: picture
-    })
+        picture: picture,
+        //  small_image_catalog: smallImgPath
+    }))
+
+
     exit();
 }

@@ -457,12 +457,13 @@ function nlpSimilarity(s1, s2) {
     if (!hanZiSimilarBridge) {
         // @ts-expect-error dex包
         hanZiSimilarBridge = new Packages.cn.zzliux.HanZiSimilarBridge();
+        
         hanZiSimilarBridge.init(
-            files.read(files.cwd() + '/utlis/java/nlp/bihuashu.txt'),
-            files.read(files.cwd() + '/utlis/java/nlp/bushou.txt'),
-            files.read(files.cwd() + '/utlis/java/nlp/jiegou.txt'),
-            files.read(files.cwd() + '/utlis/java/nlp/sijiao.txt'),
-            files.read(files.cwd() + '/utlis/java/nlp/userdefine.txt')
+            files.read('./utlis/java/nlp/bihuashu.txt'),
+            files.read('./utlis/java/nlp/bushou.txt'),
+            files.read( './utlis/java/nlp/jiegou.txt'),
+            files.read( './utlis/java/nlp/sijiao.txt'),
+            files.read( './utlis/java/nlp/userdefine.txt')
         );
         //  log(files.cwd())
         log("初始化字形计算\n字符串1：" + s1 + "\n字符串2：" + s2 + "\n相似度：" + hanZiSimilarBridge.similarity(s1, s2));
@@ -512,7 +513,19 @@ tool.nlpSimilarity = nlpSimilarity;
 try {
     module.exports = tool;
 } catch (e) {
-    console.verbose(autoService(false));
-    sleep(500)
-    console.info(autoService(true))
+    let li = "暗";
+let ranks_attribute = [
+    ["物", "冰", "暗"],
+    ["火", "雷", "空"]
+];
+
+// 查找 li 在 ranks_attribute 中的位置
+let rowIndex = ranks_attribute.findIndex(row => row.includes(li));
+let colIndex = ranks_attribute[rowIndex].indexOf(li);
+
+console.log(`"${li}" 的行索引为 ${rowIndex}，列索引为 ${colIndex}`);
+
+    log(rowIndex%2)
+    let v= "物理队|火队|冰队|雷队|暗队|空队";
+    log(v.split("|"))
 }

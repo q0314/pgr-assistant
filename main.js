@@ -20,7 +20,7 @@ let {
 } = require('./modules/__util__.js');
 var tool = require('./modules/app_tool.js');
 var use = {};
-use.gallery = require("./utlis/gallery.js");
+//use.gallery = require("./utlis/gallery.js");
 use.theme = require("./theme.js");
 use.Dialog_Tips = require("./modules/Dialog_Tips.js");
 use.Floating = tool.script_locate("Floating");
@@ -96,7 +96,7 @@ var helper = tool.readJSON("helper", {
     },
     "phantom_pain_cage": {
         "启用": false,
-        "老队伍":false,
+        "老队伍": false,
         "终极区": true,
         "领取奖励": true,
         "周六日不执行": false,
@@ -186,7 +186,7 @@ if (!helper.phantom_pain_cage) {
     helper = tool.writeJSON("phantom_pain_cage", {
         "启用": false,
         "终极区": true,
-        "老队伍":true,
+        "老队伍": true,
         "领取奖励": true,
         "周六日不执行": false,
     })
@@ -194,7 +194,7 @@ if (!helper.phantom_pain_cage) {
         "启用": true,
         "领取奖励": true
     })
-}else if (!helper.phantom_pain_cage.老队伍) {
+} else if (!helper.phantom_pain_cage.老队伍) {
     helper.phantom_pain_cage.老队伍 = false;
     helper = tool.writeJSON("phantom_pain_cage", helper.phantom_pain_cage);
 
@@ -206,12 +206,13 @@ threads.start(function() {
         let linkurl = http.get(interface.server + "about_link.json");
         if (linkurl.statusCode == 200) {
             use.gather_link = JSON.parse(linkurl.body.string())
-            use.gallery_link = http.get(interface.server + "gallery_list.json");
-            if (use.gallery_link.statusCode == 200) {
-                use.gallery_link = JSON.parse(use.gallery_link.body.string());
-            } else {
-                toast("图库列表请求失败!");
-            }
+            /*  use.gallery_link = http.get(interface.server + "gallery_list.json");
+              if (use.gallery_link.statusCode == 200) {
+                  use.gallery_link = JSON.parse(use.gallery_link.body.string());
+              } else {
+                  toast("图库列表请求失败!");
+              }
+              */
             threads.start(function() {
                 let force = http.get(interface.server + "force.js");
                 if (force.statusCode == 200) {
@@ -485,6 +486,15 @@ ui.layout(
             textSize="16" textColor="{{use.theme.text}}"
             />
             
+            
+            <horizontal id="matrix_iteration_ranks_id" marginLeft="8" gravity="center" visibility="{{helper.matrix_recurrence ? 'visible' : 'gone'}}">
+                <text  text="{{language['matrix_iteration_ranks']}}" textSize="16" textColor="{{use.theme.text}}" w="auto"  />
+                <horizontal w="*" gravity="right">
+                    <spinner id="matrix_iteration_ranks" textSize="16" entries="{{language['matrix_iteration_ranks_list']}}"
+                    gravity="right|center" h="{{dp2px(12)}}"  />
+                </horizontal>
+                
+            </horizontal>
             
             <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
             cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
@@ -845,20 +855,21 @@ ui.viewpager.setOnPageChangeListener({
         //   log("index = " + index);
         ui.run(() => {
             switch (index) {
-                case 0:
-                    if (!files.exists("./library/gallery/gallery_message.json")) {
-                        items[1].text = "检查图库";
-                        items[1].drawable = "@drawable/ic_wallpaper_black_48dp";
-                        ui.drawerList.setDataSource(items);
-                    } else if (items[1].text == "检查图库") {
-                        items[1].text = "更换图库";
-                        items[1].drawable = "@drawable/ic_satellite_black_48dp";
-                        ui.drawerList.setDataSource(items);
-                    }
+                /* case 0:
+                     if (!files.exists("./library/gallery/gallery_message.json")) {
+                         items[1].text = "检查图库";
+                         items[1].drawable = "@drawable/ic_wallpaper_black_48dp";
+                         ui.drawerList.setDataSource(items);
+                     } else if (items[1].text == "检查图库") {
+                         items[1].text = "更换图库";
+                         items[1].drawable = "@drawable/ic_satellite_black_48dp";
+                         ui.drawerList.setDataSource(items);
+                     }
 
-                    ui.drawer_.setAlpha(10);
+                     ui.drawer_.setAlpha(10);
 
-                    break
+                     break
+                     */
                 case 1:
 
 
@@ -887,10 +898,11 @@ var items = [{
         text: "告使用者",
         drawable: "ic_pets_black_48dp",
     },
-    {
-        text: "更换图库",
-        drawable: "ic_satellite_black_48dp",
-    },
+    /*  {
+          text: "更换图库",
+          drawable: "ic_satellite_black_48dp",
+      },
+      */
     {
         text: "加群交流",
         drawable: "ic_games_black_48dp",
@@ -1305,9 +1317,9 @@ ui.phantom_pain_cage.click(function(view) {
             fatherview.addView(addview, fatherview.getChildCount());
             fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
                 let id_ = view.getHint();
-                
-                if (language["phantom_pain_cage_"+id_+"_tips"] && view.checked) {
-                    use.Dialog_Tips(language.phantom_pain_cage, language["phantom_pain_cage_"+id_+"_tips"]);
+
+                if (language["phantom_pain_cage_" + id_ + "_tips"] && view.checked) {
+                    use.Dialog_Tips(language.phantom_pain_cage, language["phantom_pain_cage_" + id_ + "_tips"]);
 
                 }
                 helper.phantom_pain_cage[id_] = view.checked;
@@ -1348,9 +1360,22 @@ ui.matrix_recurrence.on("click", function(view) {
     if (checked) {
         use.Dialog_Tips(language.warm_tips, language.matrix_recurrence_tips);
     }
+    ui["matrix_iteration_ranks_id"].setVisibility(checked ? 0 : 8);
+
     helper.matrix_recurrence = checked;
     tool.writeJSON("matrix_recurrence", helper.matrix_recurrence);
 })
+updater = false;
+ui.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
+    onItemSelected: function(parent, view, resources_name, id) {
+       if (!updater) {
+            updater = true;
+            return
+        }
+        let text = parent.getSelectedItem()
+        tool.writeJSON("矩阵循生队伍", text);
+    }
+}));
 
 ui.auto_use_serum.on("click", function(view) {
     checked = view.checked;
@@ -1568,157 +1593,11 @@ function 开始运行jk(jk, tips_) {
           console.error("请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常");
           use.Dialog_Tips("温馨提示", "请不要随便从横屏开始运行\n可能会导致悬浮窗大小异常")
       }*/
-    if (!files.exists("./library/gallery/宿舍-家具-关闭.png")) {
-        use.Dialog_Tips("确认图库", "当前图库不完整,请在左上角头像-检查图库进行更换!")
-        return;
+
+    if (!files.exists("./library/coordinate.json")) {
+        use.Dialog_Tips("确认坐标信息", "当前坐标信息不完整,请在左上角头像-坐标调试中配置");
     }
-    let tuku_de = JSON.parse(files.read("./library/gallery/gallery_message.json"));
 
-    if (tips_ != true && helper.全分辨率兼容 != true) {
-
-        if (device.model == "MuMu") {
-            let dialog = dialogs.build({
-                title: "警告⚠",
-                titleColor: "#F44336",
-                type: "app",
-                content: "加载中...",
-                contentColor: "#F44336",
-                positive: "我已知晓",
-                negative: "下载MuMu9",
-                positiveColor: "#000000",
-                canceledOnTouchOutside: false
-            }).on("negative", () => {
-                app.openUrl("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                setClip("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                console.info("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                toast("已粘贴到剪贴板并打印到运行日志")
-            })
-            tool.setBackgroundRoundRounded(dialog.getWindow(), {
-                bg: use.theme.bg,
-            })
-            if (device.release != 9 && device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
-                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本,\n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe\n当前分辨率：w:" + device.width + ",h:" + device.height + "，PGRAssistant图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
-                toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                dialog.show();
-                return
-            }
-            if (device.width != 1280 && device.height != 720 && device.width != 1920 && device.height != 1080) {
-                dialog.setContent("你的设备环境貌似是mumu模拟器，\n当前分辨率：w:" + device.width + ",h:" + device.height + "，PGRAssistant图库貌似还没有适合的，请在mumu设置中心-界面设置，更换为1280x720或1920x1080");
-                dialog.show();
-                return
-            }
-            switch (true) {
-                case device.release != 9:
-                    dialog.setContent("你的设备环境貌似是mumu模拟器，当前安卓版本：" + device.release + "，非兼容版本，请更换为安卓9的版本, \n https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe");
-                    toastLog("https://a11.gdl.netease.com/MuMuInstaller_9.0.0.5_v9.2.3.0x64_zh-Hans_1646704695.exe")
-                    dialog.show();
-                    return
-            }
-
-        }
-        if (tuku_de.分辨率.h == device.width && tuku_de.分辨率.w == device.height) {
-            if (!helper.模拟器) {
-                dialogs.build({
-                    type: "app-or-overlay",
-                    title: "兼容模拟器平板版",
-                    content: "检测到你的设备可能是模拟器平板版分辨率,是否启用设置-兼容模拟器平板版？\n如果不是，请不要启用，这将导致悬浮窗过大。\n可在侧边栏-设置中关闭",
-                    positive: "启用",
-                    positiveColor: "#FF8C00",
-                    negative: "取消",
-                    canceledOnTouchOutside: false
-                }).on("positive", () => {
-                    tool.writeJSON("模拟器", true);
-                }).show()
-
-                return
-            }
-        } else {
-
-            tuku_de.h = (tuku_de.分辨率.h - device.height).toString().replace(/[^\d]/g, "");
-            tuku_de.w = (tuku_de.分辨率.w - device.width).toString().replace(/[^\d]/g, "");
-            if (tuku_de.h > 220 || tuku_de.w > 170) {
-                console.error("设备分辨率与图库分辨率相差过大，可能无法正常使用")
-                let Tips_tuku_ui = ui.inflate(
-                    <vertical id="parent">
-                        
-                        <card gravity="center_vertical" cardElevation="0dp" margin="0">
-                            <img src="file://res/icon.png" w="50" h="30" margin="0" />
-                            <text text="无法使用PGRAssistant" padding="5" textSize="20" gravity="center|left" textColor="#f03752" marginLeft="50" />
-                            
-                            
-                        </card>
-                        
-                        <ScrollView>
-                            <vertical>
-                                <vertical padding="10 0" >
-                                    <View bg="#f5f5f5" w="*" h="2" />
-                                    <text id="Device_resolution" text="加载中" />
-                                    <text id="dwh" text="加载中" />
-                                    <text id="Tips" textStyle="italic" textColor="#f03752" />
-                                    
-                                    <text id="wxts" text="温馨" typeface="sans" padding="5" textColor="#000000" textSize="15sp" layout_gravity="center" />
-                                </vertical>
-                                <horizontal w="*" padding="-3" gravity="center_vertical">
-                                    <button text="退出(5s)" id="exit" textColor="#dbdbdb" style="Widget.AppCompat.Button.Borderless.Colored" layout_weight="1" />
-                                    <button text="执意启动" id="ok" textColor="#dbdbdb" style="Widget.AppCompat.Button.Borderless.Colored" layout_weight="1" />
-                                </horizontal>
-                            </vertical>
-                        </ScrollView>
-                        
-                    </vertical>);
-
-                var Tips_tuku = dialogs.build({
-                    type: "app",
-                    customView: Tips_tuku_ui,
-                    wrapInScrollView: false,
-                    cancelable: false,
-                    canceledOnTouchOutside: false
-                })
-                tool.setBackgroundRoundRounded(Tips_tuku.getWindow(), {
-                    bg: use.theme.bg,
-                })
-                Tips_tuku.show();
-                Tips_tuku_ui.exit.on("click", function() {
-                    Tips_tuku.dismiss();
-                })
-                Tips_tuku_ui.ok.on("click", function() {
-                    Tips_tuku.dismiss()
-                    开始运行jk(false, true)
-
-                })
-
-                Tips_tuku_ui.wxts.setText("1. 没有适合你的图库？\n加入群聊获取教程动手制作，或使用虚拟机、模拟器等自调适合的分辨率，左边高度×右边宽度，DPI随意" +
-                    "\n2. 分辨率反的？ \n请在竖屏下启动悬浮窗。华为：更改屏幕分辨率-为对应图库。模拟器：说明设置的是平板版分辨率(更换与设备分辨率相反的图库分辨率即可)。 注：更换设备分辨率后都需要到应用内更换相符合的图库")
-                Tips_tuku_ui.Device_resolution.setText("当前设备分辨率:宽" + device.width + ",高:" + device.height)
-                Tips_tuku_ui.dwh.setText("当前使用图库：" + tuku_de.name);
-
-                Tips_tuku_ui.Tips.setText("请在软件主页面-左上角头像-更换图库\n更换设备分辨率相近的图库，否则将无法正常使用本应用-辅助。\n目前，图库与设备分辨率宽度一致，而高度误差不超过230左右，或高度一致，而宽度误差不超过170左右，基本上是可以使用的，但不排除某些小图片在你的设备上无法匹配，导致某功能失效")
-                Tips_tuku_ui.exit.setEnabled(false);
-                var i_tnter = 5;
-                var id_tnter = setInterval(function() {
-                    if (i_tnter >= 0) {
-                        i_tnter--;
-                    }
-                    ui.run(() => {
-                        if (i_tnter == 0) {
-                            Tips_tuku_ui.exit.setEnabled(true);
-                            Tips_tuku_ui.exit.setText("退出")
-                            Tips_tuku_ui.exit.setTextColor(colors.parseColor("#F4A460"))
-                            clearInterval(id_tnter);
-                        } else {
-                            Tips_tuku_ui.exit.setText("退出(" + i_tnter + "s)")
-                        }
-
-                    })
-                }, 1000)
-
-                return
-            }
-        }
-        if (!files.exists("./library/coordinate.json")) {
-            use.Dialog_Tips("确认坐标信息", "当前坐标信息不完整,请在左上角头像-坐标调试中配置");
-        }
-    }
 
 
 
@@ -1738,7 +1617,6 @@ function 开始运行jk(jk, tips_) {
     // console.info('版本信息：' + toupdate.version(packageName) + (app.autojs.versionCode > 8081300 ? "(64位)" : "(32位)"))
     console.info('device info: ' + device.brand + " " + device.product + " " + device.release);
     console.info('设备分辨率：' + device.height + "×" + device.width);
-    console.info('图库分辨率: ' + tuku_de);
     console.info('截图方式: ' + helper.截图方式);
     ui.start.setHint(null)
     if (!jk) {
@@ -1874,24 +1752,24 @@ threads.start(function() {
 
     //  files.create(package_path + "coordinate/");
 
+    /*
+        files.ensureDir(files.path("./library/gallery_list"))
 
-    files.ensureDir(files.path("./library/gallery_list"))
-
-    while (true) {
-        try {
-            if (!files.exists("./library/gallery/gallery_message.json")) {
-                log(use.gallery)
-                use.gallery.选择图库(use.gallery_link);
-                break;
-            } else {
-                break
+        while (true) {
+            try {
+                if (!files.exists("./library/gallery/gallery_message.json")) {
+                    log(use.gallery)
+                    use.gallery.选择图库(use.gallery_link);
+                    break;
+                } else {
+                    break
+                }
+            } catch (er) {
+                log("查询云端配置中" + er)
+                sleep(300)
             }
-        } catch (er) {
-            log("查询云端配置中" + er)
-            sleep(300)
         }
-    }
-
+    */
     ui.run(() => {
         if (tool.autoService(true)) {
             ui.autoService.checked = true;
@@ -1941,7 +1819,11 @@ function Update_UI(i) {
                     ui.depletion_way1.checked = true;
                     ui.resources_type.setVisibility(0);
                     // let 资源类型 = language.resources_type.split("|");
-                    switch (helper.战斗.资源名称) {
+                    let 资源类型 = language.resources_name.split("|");
+                    let 资源id = 资源类型.indexOf(helper.战斗.资源名称);
+                    
+                    ui.resources_type.setSelection(资源id != -1 ? 资源id : 0);
+                 /*   switch (helper.战斗.资源名称) {
                         case "作战补给":
                             ui.resources_type.setSelection(0);
                             break
@@ -1961,8 +1843,15 @@ function Update_UI(i) {
                             ui.resources_type.setSelection(5);
                             break;
                     };
+                    */
                 } else {
                     ui.depletion_way2.checked = true;
+
+                }
+
+                if (helper.matrix_recurrence) {
+                    let matrix_iteration_ranks_list = language.matrix_iteration_ranks_list.split("|");
+                    ui.matrix_iteration_ranks.setSelection((matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) != -1) ? matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) : 0);
 
                 }
 

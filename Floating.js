@@ -597,7 +597,14 @@ function 主页设置() {
         padding="6 6 6 6"
         textSize="16" textColor="{{theme.text}}"
         />
-        
+                    <horizontal id="matrix_iteration_ranks_id" marginLeft="8" gravity="center" visibility="{{helper.matrix_recurrence ? 'visible' : 'gone'}}">
+                <text  text="{{language.main['matrix_iteration_ranks']}}" textSize="16" textColor="{{theme.text}}" w="auto"  />
+                <horizontal w="*" gravity="right">
+                    <spinner id="matrix_iteration_ranks" textSize="16" entries="{{language.main['matrix_iteration_ranks_list']}}"
+                    gravity="right|center" h="{{dp2px(12)}}"  />
+                </horizontal>
+                
+            </horizontal>
         </vertical>);
     var setup = dialogs.build({
         customView: setupView,
@@ -613,6 +620,17 @@ function 主页设置() {
     });
 */
     //    checked ? setupView.gmcs.attr("visibility", "visible") : setupView.gmcs.attr("visibility", "gone");
+   updater = false;
+setupView.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
+    onItemSelected: function(parent, view, resources_name, id) {
+       if (!updater) {
+            updater = true;
+            return
+        }
+        let text = parent.getSelectedItem()
+        tool.writeJSON("矩阵循生队伍", text);
+    }
+}));
     setupView.disputes.on("click", function(view) {
         checked = view.checked;
 
@@ -784,7 +802,11 @@ function 主页设置() {
 
 
     });
+               if (helper.matrix_recurrence) {
+                    let matrix_iteration_ranks_list = language.main.matrix_iteration_ranks_list.split("|");
+                    setupView.matrix_iteration_ranks.setSelection((matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) != -1) ? matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) : 0);
 
+                }
     setup.show();
 
 }
@@ -820,17 +842,17 @@ function 暂停(form) {
     if (use.progra) {
         use.progra.emit("暂停", "结束程序");
         eliminate = false;
+        ui.run(function() {
+            if (window.tos) {
+                window.tos.setText("状态：主程序暂停中");
+            }
+        });
         setTimeout(function() {
             use.progra = tool.script_locate("progra");
             if (use.progra) {
                 console.verbose("强行终止progra")
                 use.progra.forceStop();
             }
-            ui.run(function() {
-                if (window.tos) {
-                    window.tos.setText("状态：主程序暂停中");
-                }
-            });
 
         }, 1000)
     }

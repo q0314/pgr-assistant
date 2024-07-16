@@ -3,10 +3,12 @@
 /plugins/com.tony.mlkit.ocr.apk
 /README.md
 /SECURITY.md
-/library/gallery
+/library/gallery/*
+!/library/gallery/*.nomedia
+!/library/gallery/*template
+
 /library/gallery_list
 /library/coordinate.json
 /library/图片路径.txt
 /library/Byte.txt
 /library/screencap.sh
-/history_update_info.txt

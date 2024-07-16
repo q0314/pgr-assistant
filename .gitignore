@@ -1,3 +1,7 @@
 /.vscode
 /build
 /images
+/library/coordinate.json
+/library/gallery/*
+!/library/gallery/*.nomedia
+!/library/gallery/*template
