@@ -5,9 +5,9 @@
   ],
   "assets": [],
   "build": {
-    "build_id": "F230C8B0-1229",
-    "build_number": 1229,
-    "build_time": 1720959973774,
+    "build_id": "55FA553A-1231",
+    "build_number": 1231,
+    "build_time": 1721814561603,
     "release": false
   },
   "encryptLevel": 0,
@@ -85,6 +85,6 @@
     "uuid": "30e8349e-b7be-4217-a506-6072dedc75df"
   },
   "useFeatures": [],
-  "versionCode": 37,
-  "versionName": "1.3.1"
+  "versionCode": 39,
+  "versionName": "1.3.3"
 }

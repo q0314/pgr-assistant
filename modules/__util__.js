@@ -15,7 +15,7 @@ const scale = _resources_.getDisplayMetrics().density;
 
 
 
-module.exports = {
+let util = {
     dp2px:
         /**
          * dp转px , 密度比例
@@ -31,72 +31,74 @@ module.exports = {
          * @returns 
          */
         px => Math.floor(px / scale + 0.5),
-    isHorizontalScreen:
-        /**
-         * 是否横屏
-         * @returns 
-         */
-        function() {
-            let ori;
+    /**
+     * 是否横屏
+     * @returns 
+     */
+    isHorizontalScreen() {
+        let ori;
 
-            try {
-                ori = context.getSystemService(context.WINDOW_SERVICE).getDefaultDisplay().getRotation();
-                //0竖屏 1横屏
-                return ori
-            } catch (e) {
-                let config = _resources_.getConfiguration();
-                ori = config.orientation;
-                if (ori == config.ORIENTATION_LANDSCAPE) {
-                    //横屏2
-                    return true;
-                } else if (ori == config.ORIENTATION_PORTRAIT) {
-                    //竖屏1
-                    return false;
-                }
+        try {
+            ori = util.getRotation();
+            //0竖屏 1横屏
+            return ori
+        } catch (e) {
+            let config = _resources_.getConfiguration();
+            ori = config.orientation;
+            if (ori == config.ORIENTATION_LANDSCAPE) {
+                //横屏2
+                return true;
+            } else if (ori == config.ORIENTATION_PORTRAIT) {
+                //竖屏1
+                return false;
             }
+        }
 
 
-        },
-    getWidthHeight:
-        /**
-         * 返回分辨率宽，高
-         * 跟随屏幕方向变化
-         * 不好用，在某些系统上获取到的分辨率与测试机获取到的完全相反
-         * 其次，也有些系统获取到的状态栏高度好像是0，
-         */
-        function() {
-            //方法1
-            let wPixel = _resources_.getDisplayMetrics().widthPixels;
-            let hPixel = _resources_.getDisplayMetrics().heightPixels;
-            
-            if (wPixel > hPixel) {
-                wPixel += this.iStatusBarHeight;
-            } else {
-                hPixel += this.iStatusBarHeight;
-            };
-            
-            return [wPixel, hPixel];
+    },
+    getRotation() {
+        return context.getSystemService(context.WINDOW_SERVICE).getDefaultDisplay().getRotation();
+    },
+    /**
+     * 返回分辨率宽，高
+     * 跟随屏幕方向变化
+     * 不好用，在某些系统上获取到的分辨率与测试机获取到的完全相反
+     * 有时候获取到的高度是减掉状态栏高度之后的高度，但有时候不是
+     * 其次，也有些系统获取到的状态栏高度好像是0，
+     */
+    getWidthHeight() {
+        
+        //方法1
+        let wPixel = util.getWidthPixels();
+        let hPixel = util.getHeightPixels();
 
-        },
-    createShape:
-        /**
-         * 创建样式
-         * @param {px} roundRadius 圆角
-         * @param {Number} shape  设置样式形状类型:包括默认RECTANGLE（矩形）, OVAL（椭圆）, LINE（线条）, RING（环形）；
-         * @param {ColorString} fillColor 背景颜色 null:透明 
-         * @param {Array} strokes 边框线样式 [宽度:px ,颜色:ColorStr ,间隔:px ,长度:px]
-         */
-        function(roundRadius, shape, fillColor, strokes) {
-            strokes = strokes || null;
-            if (strokes != null && strokes[1] != "") strokes[1] = colors.parseColor(strokes[1]);
-            fillColor = colors.parseColor((fillColor && fillColor != "") ? fillColor : "#00000000");
-            var gd = new GradientDrawable();
-            gd.setColor(fillColor);
-            gd.setShape(shape ? GradientDrawable[shape] : GradientDrawable.RECTANGLE);
-            if (roundRadius != -1) gd.setCornerRadius(roundRadius);
-            if (strokes != null && strokes[0] != -1) gd.setStroke.apply(gd, strokes);
-            return gd;
-        },
+        /* if (wPixel > hPixel) {
+            wPixel += _resources_.getDimensionPixelSize(_resources_.getIdentifier("status_bar_height", "dimen", "android"));
+        } else {
+            hPixel += _resources_.getDimensionPixelSize(_resources_.getIdentifier("status_bar_height", "dimen", "android"));
+        };
+*/
+        return [wPixel, hPixel];
+
+    },
+    /**
+     * 创建样式
+     * @param {px} roundRadius 圆角
+     * @param {Number} shape  设置样式形状类型:包括默认RECTANGLE（矩形）, OVAL（椭圆）, LINE（线条）, RING（环形）；
+     * @param {ColorString} fillColor 背景颜色 null:透明 
+     * @param {Array} strokes 边框线样式 [宽度:px ,颜色:ColorStr ,间隔:px ,长度:px]
+     */
+    createShape(roundRadius, shape, fillColor, strokes) {
+        strokes = strokes || null;
+        if (strokes != null && strokes[1] != "") strokes[1] = colors.parseColor(strokes[1]);
+        fillColor = colors.parseColor((fillColor && fillColor != "") ? fillColor : "#00000000");
+        var gd = new GradientDrawable();
+        gd.setColor(fillColor);
+        gd.setShape(shape ? GradientDrawable[shape] : GradientDrawable.RECTANGLE);
+        if (roundRadius != -1) gd.setCornerRadius(roundRadius);
+        if (strokes != null && strokes[0] != -1) gd.setStroke.apply(gd, strokes);
+        return gd;
+    },
     ObjectDefinePro: function(obj, key, action) {
         var mValue = obj[key];
         Object.defineProperty(obj, key, {
@@ -113,10 +115,17 @@ module.exports = {
     resources: _resources_,
     // log(context.getDisplay)
     //context.getSystemService(context.WINDOW_SERVICE).getDefaultDisplay().getHeight();
+    // getRotation:activity.getWindowManager().getDefaultDisplay().getRotation(),
 
-    getWidthPixels: _resources_.getDisplayMetrics().widthPixels,
-    getHeightPixels: _resources_.getDisplayMetrics().heightPixels,
-    iStatusBarHeight: _resources_.getDimensionPixelSize(_resources_.getIdentifier("status_bar_height", "dimen", "android")),
+    getWidthPixels() {
+        return _resources_.getDisplayMetrics().widthPixels;
+    },
+    getHeightPixels() {
+        return _resources_.getDisplayMetrics().heightPixels;
+    },
+    iStatusBarHeight() {
+        return _resources_.getDimensionPixelSize(_resources_.getIdentifier("status_bar_height", "dimen", "android"));
+    },
 };
 
 /**
@@ -140,7 +149,7 @@ function ColorEvaluator(value, action) {
         [mCurrentRed, mCurrentGreen, mCurrentBlue] = [startRed, startGreen, startBlue];
         // 计算初始颜色和结束颜色之间的差值
         // 该差值决定着颜色变化的快慢:初始颜色值和结束颜色值很相近，那么颜色变化就会比较缓慢;否则,变化则很快
-        // 具体如何根据差值来决定颜色变化快慢的逻辑写在getCurrentColor()里.
+        // 具体如何根据差值来决定颜色变化快慢的\逻辑写在getCurrentColor()里.
         var redDiff = Math.abs(startRed - endRed);
         var greenDiff = Math.abs(startGreen - endGreen);
         var blueDiff = Math.abs(startBlue - endBlue);
@@ -174,3 +183,4 @@ function ColorEvaluator(value, action) {
         return currentColor;
     }
 }
+module.exports = util;
