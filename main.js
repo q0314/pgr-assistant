@@ -56,6 +56,7 @@ $settings.setEnabled('stop_all_on_volume_up', false);
 var helper = tool.readJSON("helper", {
     "注射血清": 0,
     "已注射血清": 0,
+    "IU24HES":false,
     "挑战次数": 99,
     "战斗": {
         "活动": false,
@@ -67,6 +68,10 @@ var helper = tool.readJSON("helper", {
     },
     "历战映射": {
         "启用": true
+    },
+    "brilliant_calculations": {
+        "启用": false,
+        "领取贡献": true,
     },
     "宿舍系列": {
         "touch_role": {
@@ -198,6 +203,12 @@ if (!helper.phantom_pain_cage) {
     helper.phantom_pain_cage.老队伍 = false;
     helper = tool.writeJSON("phantom_pain_cage", helper.phantom_pain_cage);
 
+}
+if (!helper.brilliant_calculations) {
+    helper = tool.writeJSON("brilliant_calculations", {
+        "启用": false,
+        "领取贡献": true
+    })
 }
 
 
@@ -399,7 +410,13 @@ ui.layout(
                         padding="6 6 6 6"
                         textSize="16" textColor="{{use.theme.text}}"
                         />
-                        
+                                                <widget-switch-se7en
+                        id="IU24HES"
+                        checked="{{helper.IU24HES}}"
+                        text="{{language['IU24HES']}}"
+                        padding="6 6 6 6"
+                        textSize="16" textColor="{{use.theme.text}}"
+                        />
                         <widget-switch-se7en
                         id="aide_ac"
                         checked="{{helper.助理交流}}"
@@ -407,116 +424,126 @@ ui.layout(
                         padding="6 6 6 6"
                         textSize="16" textColor="{{use.theme.text}}"
                         />
-                        <widget-switch-se7en
-                        id="brilliant_calculations"
-                        checked="{{helper.妙算神机}}"
-                        text="{{language['brilliant_calculations']}}"
-                        padding="6 6 6 6"
-                        textSize="16" textColor="{{use.theme.text}}"
-                        />
-                        
-                        
                         <card w="*"  h="*" cardCornerRadius="1"
                         cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
                         <vertical>
-                            <horizontal id="dorm_series" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
-                                <text  gravity="center" textSize="16" text="{{language['dorm_series']}}" textColor="{{use.theme.text}}" />
+                            <horizontal id="brilliant_calculations" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                                <text  gravity="center" textSize="16" text="{{language['brilliant_calculations']}}" textColor="{{use.theme.text}}" />
                                 <text layout_weight="1" />
-                                <img id="claim_rewards_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
+                                <widget-switch-se7en id="_brilliant_calculations"  checked="{{helper.brilliant_calculations.启用}}" />
+                                
+                                <img id="brilliant_calculations_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
                             </horizontal>
                         </vertical>
                     </card>
                     
+                    
                     <card w="*"  h="*" cardCornerRadius="1"
                     cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
                     <vertical>
-                        <horizontal id="norman_revival_war" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
-                            <text  gravity="center" textSize="16" text="{{language['norman_revival_war']}}" textColor="{{use.theme.text}}" />
+                        <horizontal id="dorm_series" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                            <text  gravity="center" textSize="16" text="{{language['dorm_series']}}" textColor="{{use.theme.text}}" />
                             <text layout_weight="1" />
-                            <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
+                              {/* <widget-switch-se7en id="_dorm_series"  checked="{{helper.妙算神机}}" /> */}
+                             
+                            <img id="claim_rewards_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
                         </horizontal>
                     </vertical>
                 </card>
+                
                 <card w="*"  h="*" cardCornerRadius="1"
                 cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
                 <vertical>
-                    <horizontal id="phantom_pain_cage" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
-                        <text  gravity="center" textSize="16" text="{{language['phantom_pain_cage']}}" textColor="{{use.theme.text}}" />
+                    <horizontal id="norman_revival_war" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                        <text  gravity="center" textSize="16" text="{{language['norman_revival_war']}}" textColor="{{use.theme.text}}" />
                         <text layout_weight="1" />
                         <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
                     </horizontal>
                 </vertical>
             </card>
             
-            <widget-switch-se7en
-            id="disputes"
-            checked="{{helper.纷争战区.自动}}"
-            text="{{language['disputes']}}"
-            padding="6 6 6 6"
-            textSize="16" textColor="{{use.theme.text}}"
-            />
-            <widget-switch-se7en
-            id="lizhan_mapping"
-            checked="{{helper.历战映射.启用}}"
-            text="{{language['lizhan_mapping']}}"
-            padding="6 6 6 6"
-            textSize="16" textColor="{{use.theme.text}}"
-            />
-            <widget-switch-se7en
-            id="task_award"
-            checked="{{helper.任务奖励}}"
-            text="{{language['task_award']}}"
-            padding="6 6 6 6"
-            textSize="16" textColor="{{use.theme.text}}"
-            />
-            
-            <widget-switch-se7en
-            id="handbook"
-            checked="{{helper.手册经验}}"
-            text="{{language['handbook']}}"
-            padding="6 6 6 6"
-            textSize="16" textColor="{{use.theme.text}}"
-            />
-            
-            <widget-switch-se7en
-            id="matrix_recurrence"
-            checked="{{helper.matrix_recurrence}}"
-            text="{{language['matrix_recurrence']}}"
-            padding="6 6 6 6"
-            textSize="16" textColor="{{use.theme.text}}"
-            />
-            
-            
-            <horizontal id="matrix_iteration_ranks_id" marginLeft="8" gravity="center" visibility="{{helper.matrix_recurrence ? 'visible' : 'gone'}}">
-                <text  text="{{language['matrix_iteration_ranks']}}" textSize="16" textColor="{{use.theme.text}}" w="auto"  />
-                <horizontal w="*" gravity="right">
-                    <spinner id="matrix_iteration_ranks" textSize="16" entries="{{language['matrix_iteration_ranks_list']}}"
-                    gravity="right|center" h="{{dp2px(12)}}"  />
-                </horizontal>
-                
-            </horizontal>
-            
-            <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+            <card w="*"  h="*" cardCornerRadius="1"
             cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
-            <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
-                <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-                <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
-                <text layout_weight="1" />
-                <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
-            </linear>
+            <vertical>
+                <horizontal id="phantom_pain_cage" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                    <text  gravity="center" textSize="16" text="{{language['phantom_pain_cage']}}" textColor="{{use.theme.text}}" />
+                    <text layout_weight="1" />
+                       <widget-switch-se7en id="_phantom_pain_cage"  checked="{{helper.phantom_pain_cage.启用}}" />
+                             
+                    <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{use.theme.text}}" />
+                </horizontal>
+            </vertical>
         </card>
-        <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
-            <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
-            cardElevation="0dp" foreground="?selectableItemBackground">
-            <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
-                <vertical padding="5 0" h="auto" w="0" layout_weight="1">
-                    <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
-                    <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
-                </vertical>
-                <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
+        
+        <widget-switch-se7en
+        id="disputes"
+        checked="{{helper.纷争战区.自动}}"
+        text="{{language['disputes']}}"
+        padding="6 6 6 6"
+        textSize="16" textColor="{{use.theme.text}}"
+        />
+        <widget-switch-se7en
+        id="lizhan_mapping"
+        checked="{{helper.历战映射.启用}}"
+        text="{{language['lizhan_mapping']}}"
+        padding="6 6 6 6"
+        textSize="16" textColor="{{use.theme.text}}"
+        />
+        <widget-switch-se7en
+        id="task_award"
+        checked="{{helper.任务奖励}}"
+        text="{{language['task_award']}}"
+        padding="6 6 6 6"
+        textSize="16" textColor="{{use.theme.text}}"
+        />
+        
+        <widget-switch-se7en
+        id="handbook"
+        checked="{{helper.手册经验}}"
+        text="{{language['handbook']}}"
+        padding="6 6 6 6"
+        textSize="16" textColor="{{use.theme.text}}"
+        />
+        
+        <widget-switch-se7en
+        id="matrix_recurrence"
+        checked="{{helper.matrix_recurrence}}"
+        text="{{language['matrix_recurrence']}}"
+        padding="6 6 6 6"
+        textSize="16" textColor="{{use.theme.text}}"
+        />
+        
+        
+        <horizontal id="matrix_iteration_ranks_id" marginLeft="8" gravity="center" visibility="{{helper.matrix_recurrence ? 'visible' : 'gone'}}">
+            <text  text="{{language['matrix_iteration_ranks']}}" textSize="16" textColor="{{use.theme.text}}" w="auto"  />
+            <horizontal w="*" gravity="right">
+                <spinner id="matrix_iteration_ranks" textSize="16" entries="{{language['matrix_iteration_ranks_list']}}"
+                gravity="right|center" h="{{dp2px(12)}}"  />
             </horizontal>
-            <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
-        </card>
+            
+        </horizontal>
+        
+        <card w="*" id="timed_tasks_frame" visibility="visible" margin="0 0 0 1" h="40" cardCornerRadius="1"
+        cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+        <linear clipChildren="false" elevation="0" gravity="center_vertical" margin="8 0 8 0" bg="#00000000">
+            <img id="timed_tasks_img" src="@drawable/ic_alarm_black_48dp" layout_gravity="top|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+            <text id="timed_tasks" margin="10 0 0 0" gravity="center" textSize="16" text="{{language['timed_tasks']}}" textColor="{{use.theme.text}}" />
+            <text layout_weight="1" />
+            <img id="timed_tasks_img2" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="25dp" h="*" tint="{{use.theme.text}}" />
+        </linear>
+    </card>
+    <list id="timed_tasks_list" visibility="gone" bg="#00000000" >
+        <card w="*" h="40" margin="5 0 5 0" cardCornerRadius="2dp"
+        cardElevation="0dp" foreground="?selectableItemBackground">
+        <horizontal gravity="center_horizontal" bg="{{use.theme.bg}}">
+            <vertical padding="5 0" h="auto" w="0" layout_weight="1">
+                <text text="{{this.app}}" textSize="16" maxLines="1" textColor="{{use.theme.text}}" />
+                <text text="{{this.shijian}}" textSize="14" maxLines="1" textColor="{{use.theme.text3}}" />
+            </vertical>
+            <img id="done" src="@drawable/ic_close_black_48dp" layout_gravity="right|center" tint="{{use.theme.text}}" w="30" h="*" margin="0 0 5 0" />
+        </horizontal>
+        <View bg="#dcdcdc" h="1" w="auto" layout_gravity="bottom" />
+    </card>
     </list>
     <button id="timed_tasks_add" text="{{language['timed_tasks_add']}}" margin="0 -5" visibility="gone" layout_weight="1" textSize="16" style="Widget.AppCompat.Button.Borderless.Colored" />
     
@@ -1183,7 +1210,10 @@ ui.daily_serum.on("click", function(view) {
     checked = view.checked;
     tool.writeJSON("每日血清", checked)
 });
-
+ui.IU24HES.on("click", function(view) {
+    checked = view.checked;
+    tool.writeJSON("IU24HES", checked)
+});
 ui.disputes.on("click", function(view) {
     checked = view.checked;
     if (checked) {
@@ -1208,11 +1238,58 @@ ui.aide_ac.on("click", function(view) {
     tool.writeJSON("助理交流", checked)
 });
 
-ui.brilliant_calculations.on("click", function(view) {
-    checked = view.checked;
-    tool.writeJSON("妙算神机", checked)
+ui._brilliant_calculations.on("click", function(view) {
+    let _id = "brilliant_calculations";
+    helper[_id]["启用"] = view.checked;
+    tool.writeJSON(_id, helper[_id]);
 });
 
+ui.brilliant_calculations.click(function(view) {
+    let imgview = view.getChildAt(2);
+    let fatherview = view.getParent();
+    let _id = "brilliant_calculations";
+    if (imgview.toString().indexOf("ImageView") == -1) {
+        imgview = view.getChildAt(3);
+    }
+    if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+
+        for (let k in helper[_id]) {
+
+            addview = ui.inflate(
+                '\ <widget-switch-se7en checked="' + helper[_id][k] + '" hint="' + k + '" text="' + language[_id +"_"+ k] + '"  textSize="16" textColor="{{use.theme.text}}" padding="6 6 6 6" />', fatherview)
+            fatherview.addView(addview, fatherview.getChildCount());
+            fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                let id_ = view.getHint();
+                helper[_id][id_] = view.checked;
+
+                tool.writeJSON(_id, helper[_id]);
+
+            });
+
+        }
+
+        fatherview.getParent().setCardElevation(1);
+        //        log(fatherview.getChildAt(1).getChildAt(0))
+    } else {
+        //删除视图监听、视图对象
+        for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
+            fatherview.getChildAt(i).removeAllListeners()
+            fatherview.removeView(fatherview.getChildAt(i));
+        }
+        fatherview.getParent().setCardElevation(0);
+        imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+    }
+
+
+});
+/*
+ui._dorm_series.on("click", function(view) {
+    let _id = "dorm_series";
+    helper[_id]["启用"] = view.checked;
+    tool.writeJSON(_id, helper[_id]);
+});
+*/
 
 ui.dorm_series.click(function(view) {
     // let index = parent.getParent().indexOfChild(0);
@@ -1301,9 +1378,14 @@ ui.norman_revival_war.click(function(view) {
 
 
 });
+ui._phantom_pain_cage.on("click", function(view) {
+    let _id = "phantom_pain_cage";
+    helper[_id]["启用"] = view.checked;
+    tool.writeJSON(_id, helper[_id]);
+});
 
 ui.phantom_pain_cage.click(function(view) {
-    let imgview = view.getChildAt(2);
+    let imgview = view.getChildAt(3);
     let fatherview = view.getParent();
     if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
         imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
@@ -1368,7 +1450,7 @@ ui.matrix_recurrence.on("click", function(view) {
 updater = false;
 ui.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
     onItemSelected: function(parent, view, resources_name, id) {
-       if (!updater) {
+        if (!updater) {
             updater = true;
             return
         }
@@ -1821,29 +1903,29 @@ function Update_UI(i) {
                     // let 资源类型 = language.resources_type.split("|");
                     let 资源类型 = language.resources_name.split("|");
                     let 资源id = 资源类型.indexOf(helper.战斗.资源名称);
-                    
+
                     ui.resources_type.setSelection(资源id != -1 ? 资源id : 0);
-                 /*   switch (helper.战斗.资源名称) {
-                        case "作战补给":
-                            ui.resources_type.setSelection(0);
-                            break
-                        case "后勤保养":
-                            ui.resources_type.setSelection(1);
-                            break;
-                        case "军备突破":
-                            ui.resources_type.setSelection(2);
-                            break;
-                        case "成员特训":
-                            ui.resources_type.setSelection(3);
-                            break;
-                        case "螺母大作战":
-                            ui.resources_type.setSelection(4);
-                            break;
-                        case "战技演习":
-                            ui.resources_type.setSelection(5);
-                            break;
-                    };
-                    */
+                    /*   switch (helper.战斗.资源名称) {
+                           case "作战补给":
+                               ui.resources_type.setSelection(0);
+                               break
+                           case "后勤保养":
+                               ui.resources_type.setSelection(1);
+                               break;
+                           case "军备突破":
+                               ui.resources_type.setSelection(2);
+                               break;
+                           case "成员特训":
+                               ui.resources_type.setSelection(3);
+                               break;
+                           case "螺母大作战":
+                               ui.resources_type.setSelection(4);
+                               break;
+                           case "战技演习":
+                               ui.resources_type.setSelection(5);
+                               break;
+                       };
+                       */
                 } else {
                     ui.depletion_way2.checked = true;
 

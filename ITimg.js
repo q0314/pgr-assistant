@@ -25,7 +25,7 @@ ITimg.results = false;
 ITimg.timer_lock = threads.atomic(0);
 
 ITimg.setting = {
-    "图片监测": true,
+    "图片监测": false,
     "full_resolution": false,
     "defaultOcr": "XiaoYueOCR",
     "截图方式": "辅助",
@@ -42,7 +42,7 @@ ITimg.setting = {
  */
 function Prepare(picture_default, ocr_default, outline_default, matchFeatures_default, setting) {
     let context;
-    (function () {
+    (function() {
         context = this;
     }());
     if (this === context) {
@@ -89,6 +89,7 @@ function Prepare(picture_default, ocr_default, outline_default, matchFeatures_de
         picture_failed_further: ocr_default.picture_failed_further,
         resolution: ocr_default.resolution || undefined,
         ocr_type: ocr_default.ocr_type || ITimg.setting.defaultOcr,
+        visualization: ocr_default.visualization,
         correction_path: ocr_default.correction_path || undefined,
 
     };
@@ -114,7 +115,6 @@ function Prepare(picture_default, ocr_default, outline_default, matchFeatures_de
         visualization: matchFeatures_default.visualization || true,
         saveSmallImg: matchFeatures_default.saveSmallImg,
         picture_failed_further: matchFeatures_default.picture_failed_further,
-        imageFeatures: matchFeatures_default.imageFeatures,
         small_image_catalog: matchFeatures_default.small_image_catalog || "./library/gallery/template/"
     }
 
@@ -125,7 +125,7 @@ function Prepare(picture_default, ocr_default, outline_default, matchFeatures_de
     files.create(package_path + "/logs/matchFeatures/.nomedia")
 
     try {
-        ITimg.gallery_info = JSON.parse(files.read(package_path + this.matchFeatures.small_image_catalog+"gallery_info.json"), (encoding = "utf-8"));
+        ITimg.gallery_info = JSON.parse(files.read(package_path + this.matchFeatures.small_image_catalog + "gallery_info.json"), (encoding = "utf-8"));
     } catch (e) {
         ITimg.gallery_info = {
             "分辨率": {
@@ -143,7 +143,7 @@ function Prepare(picture_default, ocr_default, outline_default, matchFeatures_de
 
     if (ITimg.setting.图片监测 && (app.autojs.versionCode > 8082200)) {
         ITimg.permission_detection = false;
-        setTimeout(function () {
+        setTimeout(function() {
             ITimg.permission_detection = true;
         }, 60000 * 15);
     }
@@ -165,12 +165,12 @@ function Prepare(picture_default, ocr_default, outline_default, matchFeatures_de
                 break;
         }
         if (ITimg.setting.异常超时) {
-            threads.start(function () {
+            threads.start(function() {
                 let is = (ITimg.setting.异常超时 === true) ? 5 : ITimg.setting.异常超时;
 
-                    console.info("异常界面超时暂停处理，分钟：" + is);
-                
-                fn = function () {
+                console.info("异常界面超时暂停处理，分钟：" + is);
+
+                fn = function() {
                     if (ITimg.timer_lock == is) {
 
                         toast("程序在" + (is / 2) + "分钟内未能判断当前界面，状态异常，将暂停并返回桌面")
@@ -219,7 +219,7 @@ function 申请截图() {
                 sleep(20)
                 console.verbose("确认线程启动中");
                 sleep(30)
-                threads.start(function () {
+                threads.start(function() {
                     if (device.brand != "HUAWEI") {
                         if (device.release != 11) {
                             //  if (files.read("./lib/prototype/Capture.txt") != "true") {
@@ -280,8 +280,8 @@ function 申请截图() {
                 break
 
             } else {
-                    toast("请求辅助截图权限成功");
-                
+                toast("请求辅助截图权限成功");
+
                 //请求截图权限成功后启动方舟
                 if (ITimg.results == 2) {
                     tool.launchPackage(ITimg.packageName);
@@ -485,7 +485,7 @@ function 图像匹配(picture, list) {
         }
         try {
             img.recycle()
-        } catch (e) { };
+        } catch (e) {};
     } else {
         img_small = images.read(small_image_catalog);
     }
@@ -530,18 +530,18 @@ function 图像匹配(picture, list) {
             toast("识图程序发生异常，返回false\n" + picture + err)
             console.error("识图程序发生异常，返回false\n" + picture + err);
         } else {
-            console.error("-要匹配的 '" + picture + ".png' 图片为空，返回false。错误信息：" + err.message+small_image_catalog)
+            console.error("-要匹配的 '" + picture + ".png' 图片为空，返回false。错误信息：" + err.message + small_image_catalog)
         }
         try {
             imgList.recycle()
             img_small.recycle()
-        } catch (e) { }
+        } catch (e) {}
 
         return false
     }
     try {
         !imgList.isRecycled() && imgList.recycle();
-    } catch (e) { }
+    } catch (e) {}
     if (ITimg.results) {
         if (list.action == 6) {
             return ITimg.results;
@@ -630,19 +630,22 @@ function matchFeatures(picture, list) {
         filter_w: list.filter_w || ITimg.default_list.matchFeatures.filter_w,
         filter_h: list.filter_h || ITimg.default_list.matchFeatures.filter_h,
         grayscale: list.grayscale,
-        imageFeatures: list.imageFeatures || ITimg.default_list.matchFeatures.imageFeatures,
-        visualization: list.visualization || ITimg.default_list.matchFeatures.visualization,
+        visualization: list.visualization,
         saveSmallImg: list.saveSmallImg,
         picture_failed_further: list.picture_failed_further,
         scale: list.scale || ITimg.default_list.matchFeatures.scale,
         log_policy: list.log_policy,
         small_image_catalog: list.small_image_catalog || ITimg.default_list.matchFeatures.small_image_catalog,
     }
-    if (list.saveSmallImg == undefined) {
+    if (list.saveSmallImg === undefined) {
         list.saveSmallImg = ITimg.default_list.matchFeatures.saveSmallImg;
     }
-    if (list.picture_failed_further == undefined) {
+    if (list.picture_failed_further === undefined) {
         list.picture_failed_further = ITimg.default_list.matchFeatures.picture_failed_further;
+    }
+
+    if (list.visualization === undefined) {
+        list.visualization = ITimg.default_list.matchFeatures.visualization;
     }
     let small_image_catalog = files.path(list.small_image_catalog + picture + ".png");
     if (list.saveSmallImg) {
@@ -661,10 +664,13 @@ function matchFeatures(picture, list) {
             if (list.threshold == 0.7) {
                 list.threshold = ITimg.default_list.picture.threshold;
             }
+            let grayscale = list.grayscale;
+
             parts = list.small_image_catalog;
             //可能导致部分设备闪退,不保证是灰度化图片后的原因
             list.picture = undefined;
             list.small_image_catalog = small_image_save_catalog;
+            list.grayscale = undefined;
             //   return 图像匹配(picture_name, list);
             let results = 图像匹配(picture_name, list);
             if (results) {
@@ -673,9 +679,11 @@ function matchFeatures(picture, list) {
                 console.verbose("常规图像匹配失败，继续特征匹配");
                 small_image_save_catalog += picture_name + ".png";
                 list.small_image_save_catalog = parts;
+                list.grayscale = grayscale;
                 parts = null;
                 results = null;
                 picture_name = null;
+                grayscale = null;
             } else {
                 return false;
             }
@@ -700,10 +708,7 @@ function matchFeatures(picture, list) {
     // 若要提高效率，可以在计算大图特征时调整scale参数，默认为0.5，
     // 越小越快，但可以放缩过度导致匹配错误。若在特征匹配时无法搜索到正确结果，可以调整这里的参数，比如\{scale: 1\}
     // 也可以在这里指定\{region: [...]\}参数只计算这个区域的特征提高效率
-    if(picture=="宿舍-家具-关闭"){
-        
-        log(list)
-    }
+
     let sceneFeatures = $images.detectAndComputeFeatures(img, {
         region: list.area,
         grayscale: list.grayscale,
@@ -734,15 +739,23 @@ function matchFeatures(picture, list) {
         list.matcher = "FLANNBASED";
     }
     // 将特征和匹配绘制出来，在调试时更容易看出匹配效果，但会增加耗时
-    let drawMatches = (list.visualization ? package_path + "/logs/matchFeatures/" + picture + "_特征匹配结果.jpg" : undefined);
-   if(picture=="宿舍-家具-关闭"){
-        log(drawMatches)
+    let drawMatches;
+    //大图指定区域部分是全黑时会崩溃
+    if (list.visualization) {
+        drawMatches = package_path + "/logs/matchFeatures/" + picture + "_特征匹配结果.jpg";
+        //  log(drawMatches)
+        try {
+            images.save(img, drawMatches);
+        } catch (e) {
+            console.error(e);
+        }
     }
     ITimg.results = $images.matchFeatures(sceneFeatures, objectFeatures, {
         drawMatches: drawMatches,
         threshold: list.threshold,
         matcher: list.matcher
     });
+
     // 回收特征对象
     objectFeatures.recycle();
     sceneFeatures.recycle()
@@ -854,6 +867,8 @@ function matchFeatures(picture, list) {
  * @param {boolean|string} [list.saveSmallImg = false] - 是否缓存小图,saveSmallImg可传入名称
  * @param {boolean} [list.picture_failed_further = false] - 缓存图像匹配时失败,继续OCR识别
  * @param {string} [list.ocr_type = "MlkitOCR"] - ocr扩展类型
+ * @param {boolean} 识别结果可视化，暂未支持
+
  * @param {boolean | object} [list.resolution = false] - 使用多分辨率兼容(调整大图片大小)识别文字,可使用{w:w,h:h}指定大小
  * @param {string} [list.correction_path = false] - ocr识别字符纠正规则json文件路径
  * @returns {boolean|object} - 返回值取决于list.action
@@ -876,6 +891,7 @@ function ocr文字识别(words, list) {
         gather: list.gather,
         threshold: list.threshold,
         saveSmallImg: list.saveSmallImg,
+        visualization: list.visualization,
         picture_failed_further: list.picture_failed_further,
         log_policy: list.log_policy,
         ocr_type: list.ocr_type || ITimg.default_list.ocr.ocr_type,
@@ -893,9 +909,13 @@ function ocr文字识别(words, list) {
     if (list.picture_failed_further === undefined) {
         list.picture_failed_further = ITimg.default_list.ocr.picture_failed_further
     }
+    if (list.visualization === undefined) {
+        list.visualization = ITimg.default_list.ocr.visualization;
+    }
     let small_image_save_catalog = files.path(ITimg.default_list.picture.small_image_catalog); // 使用 '/' 作为路径分隔符
 
-    if (list.saveSmallImg) {
+    if (list.saveSmallImg && !list.gather && list.action != 6) {
+
 
         let picture_name = (list.saveSmallImg === true ? words : list.saveSmallImg);
 
@@ -1099,7 +1119,7 @@ function ocr文字识别(words, list) {
                 click(query_.left + Math.floor((query_.right - query_.left) / 2), query_.top + Math.floor((query_.bottom - query_.top) / 2))
                 break;
 
-            //点击文字左上角
+                //点击文字左上角
             case 1:
                 click(query_.left, query_.top);
                 break
@@ -1327,7 +1347,7 @@ function binarized_contour(list) {
             );
             flattenedPoints = []
             // 计算坐标，绘制轮廓
-            vertices.map(function (vertex) {
+            vertices.map(function(vertex) {
                 vertex.x = vertex.x + list.area[0];
                 vertex.y = vertex.y + list.area[1];
                 flattenedPoints.push(vertex.x)
@@ -1393,7 +1413,7 @@ function binarized_contour(list) {
                 click(query_contour[0].left + Math.floor(query_contour[0].w / 2), query_contour.top + Math.floor(query_contour[0].h / 2));
                 break;
 
-            //点击文字左上角
+                //点击文字左上角
             case 1:
                 click(query_contour[0].left, query_contour[0].top);
                 break
@@ -1521,7 +1541,7 @@ function captureScreen_(way) {
                                 break;
                         }
                         ITimg.permission_detection = false;
-                        setTimeout(function () {
+                        setTimeout(function() {
                             ITimg.permission_detection = true;
                         }, 60000 * 15);
 
@@ -1541,7 +1561,7 @@ function captureScreen_(way) {
                         console.error("图片似乎已被回收，重新申请辅助截图权限");
                         try {
                             imgList.recycle()
-                        } catch (err) { }
+                        } catch (err) {}
                         $images.stopScreenCapture();
                         sleep(100);
                         try {
@@ -1627,7 +1647,7 @@ function 重置计时器(i) {
 }
 
 ITimg.ocr = ocr文字识别;
-ITimg.MlkitOCR = function (words, list) {
+ITimg.MlkitOCR = function(words, list) {
     if (!ITimg.MlkitOCR_module) {
         if (!initocr("MlkitOCR")) {
             return false;
@@ -1639,7 +1659,7 @@ ITimg.MlkitOCR = function (words, list) {
     list.ocr_type = "MlkitOCR";
     return ocr文字识别(words, list);
 }
-ITimg.XiaoYueOCR = function (words, list) {
+ITimg.XiaoYueOCR = function(words, list) {
     if (!ITimg.XiaoYueOCR_module) {
         if (!initocr("XiaoYueOCR")) {
             return false;
@@ -1686,29 +1706,29 @@ try {
         height = device.width,
             width = device.height;
     }
-    //  helper.截图方式 = null;
-    new ITimg.Prepare();
+ helper.截图方式 = null;
+    new ITimg.Prepare({},{},{},{},helper);
 
 
     // height = 2160;
     //  width = 1080;
 
     let name = {
-        picture_name: "12",
+        picture_name: "71",
         canvas_name: "节点"
     }
     let picture = images.read("/storage/emulated/0/DCIM/Screenshots/" + name.picture_name + ".jpg");
-    // let smallImgPath = files.path("./library/gallery_template/");
+     let smallImgPath = files.path("/storage/emulated/0/脚本/图色/");
 
-    log(ITimg.matchFeatures("主页-展开", {
-        area: 4,
+    log(ITimg.matchFeatures("血清_减", {
+        area: 1,
         action: 5,
-        threshold: 0.85,
+        threshold: 0.5,
         imageFeatures: true,
         visualization: true,
         saveSmallImg: true,
         picture: picture,
-        //  small_image_catalog: smallImgPath
+          small_image_catalog: smallImgPath
     }))
 
 

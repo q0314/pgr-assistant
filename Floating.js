@@ -531,21 +531,28 @@ function 主页设置() {
             text="{{language.main['aide_ac']}}"
             padding="6 6 6 6" textSize="16" textColor="{{theme.text}}"
             />
-            <Switch id="brilliant_calculations"
-            checked="{{helper.妙算神机}}"
-            text="{{language.main['brilliant_calculations']}}"
-            padding="6 6 6 6"  textSize="16" textColor="{{theme.text}}"
-            />
-            
             <card w="*"  h="*" cardCornerRadius="1"
             cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
             <vertical>
-                <horizontal id="dorm_series" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
-                    <text  gravity="center" textSize="16" text="{{language['dorm_series']}}" textColor="{{theme.text}}" />
+                <horizontal id="brilliant_calculations" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                    <text  gravity="center" textSize="16" text="{{language.main['brilliant_calculations']}}" textColor="{{theme.text}}" />
                     <text layout_weight="1" />
-                    <img id="claim_rewards_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{theme.text}}" />
+                    <Switch id="_brilliant_calculations"  checked="{{helper.brilliant_calculations.启用}}" />
+                    
+                    <img id="brilliant_calculations_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{theme.text}}" />
                 </horizontal>
             </vertical>
+        </card>
+        
+        <card w="*"  h="*" cardCornerRadius="1"
+        cardElevation="0dp" gravity="center_vertical" cardBackgroundColor="#00000000" >
+        <vertical>
+            <horizontal id="dorm_series" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
+                <text  gravity="center" textSize="16" text="{{language['dorm_series']}}" textColor="{{theme.text}}" />
+                <text layout_weight="1" />
+                <img id="claim_rewards_img" src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{theme.text}}" />
+            </horizontal>
+        </vertical>
         </card>
         
         <card w="*"  h="*" cardCornerRadius="1"
@@ -564,6 +571,8 @@ function 主页设置() {
             <horizontal id="phantom_pain_cage" clipChildren="false" elevation="0" gravity="center_vertical" margin="6 0" bg="#00000000" h="40">
                 <text  gravity="center" textSize="16" text="{{language.main['phantom_pain_cage']}}" textColor="{{theme.text}}" />
                 <text layout_weight="1" />
+                <Switch id="_phantom_pain_cage"  checked="{{helper.phantom_pain_cage.启用}}" />
+                   
                 <img src="@drawable/ic_keyboard_arrow_down_black_48dp" layout_gravity="right|center_vertical" w="{{px2dp(120)}}" h="*" padding="-3 -8" tint="{{theme.text}}" />
             </horizontal>
         </vertical>
@@ -597,14 +606,14 @@ function 主页设置() {
         padding="6 6 6 6"
         textSize="16" textColor="{{theme.text}}"
         />
-                    <horizontal id="matrix_iteration_ranks_id" marginLeft="8" gravity="center" visibility="{{helper.matrix_recurrence ? 'visible' : 'gone'}}">
-                <text  text="{{language.main['matrix_iteration_ranks']}}" textSize="16" textColor="{{theme.text}}" w="auto"  />
-                <horizontal w="*" gravity="right">
-                    <spinner id="matrix_iteration_ranks" textSize="16" entries="{{language.main['matrix_iteration_ranks_list']}}"
-                    gravity="right|center" h="{{dp2px(12)}}"  />
-                </horizontal>
-                
+        <horizontal id="matrix_iteration_ranks_id" marginLeft="8" gravity="center" visibility="{{helper.matrix_recurrence ? 'visible' : 'gone'}}">
+            <text  text="{{language.main['matrix_iteration_ranks']}}" textSize="16" textColor="{{theme.text}}" w="auto"  />
+            <horizontal w="*" gravity="right">
+                <spinner id="matrix_iteration_ranks" textSize="16" entries="{{language.main['matrix_iteration_ranks_list']}}"
+                gravity="right|center" h="{{dp2px(12)}}"  />
             </horizontal>
+            
+        </horizontal>
         </vertical>);
     var setup = dialogs.build({
         customView: setupView,
@@ -620,17 +629,17 @@ function 主页设置() {
     });
 */
     //    checked ? setupView.gmcs.attr("visibility", "visible") : setupView.gmcs.attr("visibility", "gone");
-   updater = false;
-setupView.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-    onItemSelected: function(parent, view, resources_name, id) {
-       if (!updater) {
-            updater = true;
-            return
+    updater = false;
+    setupView.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
+        onItemSelected: function(parent, view, resources_name, id) {
+            if (!updater) {
+                updater = true;
+                return
+            }
+            let text = parent.getSelectedItem()
+            tool.writeJSON("矩阵循生队伍", text);
         }
-        let text = parent.getSelectedItem()
-        tool.writeJSON("矩阵循生队伍", text);
-    }
-}));
+    }));
     setupView.disputes.on("click", function(view) {
         checked = view.checked;
 
@@ -650,10 +659,52 @@ setupView.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnIte
         tool.writeJSON("助理交流", checked)
     });
 
-    setupView.brilliant_calculations.on("click", function(view) {
-        checked = view.checked;
-        tool.writeJSON("妙算神机", checked)
+    setupView._brilliant_calculations.on("click", function(view) {
+        let _id = "brilliant_calculations";
+        helper[_id]["启用"] = view.checked;
+        tool.writeJSON(_id, helper[_id]);
     });
+
+    setupView.brilliant_calculations.click(function(view) {
+        let imgview = view.getChildAt(2);
+        let fatherview = view.getParent();
+        let _id = "brilliant_calculations";
+        if (imgview.toString().indexOf("ImageView") == -1) {
+            imgview = view.getChildAt(3);
+        }
+        if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
+            imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
+
+            for (let k in helper[_id]) {
+
+                addview = ui.inflate(
+                    '\ <Switch checked="' + helper[_id][k] + '" hint="' + k + '" text="' + language.main[_id + "_" + k] + '"  textSize="16" textColor="{{theme.text}}" padding="6 6 6 6" />', fatherview)
+                fatherview.addView(addview, fatherview.getChildCount());
+                fatherview.getChildAt(fatherview.getChildCount() - 1).click((view) => {
+                    let id_ = view.getHint();
+                    helper[_id][id_] = view.checked;
+
+                    tool.writeJSON(_id, helper[_id]);
+
+                });
+
+            }
+
+            fatherview.getParent().setCardElevation(1);
+            //        log(fatherview.getChildAt(1).getChildAt(0))
+        } else {
+            //删除视图监听、视图对象
+            for (let i = fatherview.getChildCount() - 1; i > 0; i--) {
+                fatherview.getChildAt(i).removeAllListeners()
+                fatherview.removeView(fatherview.getChildAt(i));
+            }
+            fatherview.getParent().setCardElevation(0);
+            imgview.attr("src", "@drawable/ic_keyboard_arrow_down_black_48dp");
+        }
+
+
+    });
+
 
     setupView.task_award.on("click", function(view) {
         checked = view.checked;
@@ -667,11 +718,14 @@ setupView.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnIte
     setupView.matrix_recurrence.on("click", function(view) {
         checked = view.checked;
         if (checked) {
-            use.Dialog_Tips(language.main.matrix_recurrence, language.main.matrix_recurrence_tips);
+            use.Dialog_Tips(language.main.warm_tips, language.main.matrix_recurrence_tips);
         }
+        setupView["matrix_iteration_ranks_id"].setVisibility(checked ? 0 : 8);
+
         helper.matrix_recurrence = checked;
         tool.writeJSON("matrix_recurrence", helper.matrix_recurrence);
     })
+
     setupView.dorm_series.click(function(view) {
         // let index = parent.getParent().indexOfChild(0);
         let imgview = view.getChildAt(2);
@@ -761,8 +815,13 @@ setupView.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnIte
 
     });
 
+setupView._phantom_pain_cage.on("click", function(view) {
+    let _id = "phantom_pain_cage";
+    helper[_id]["启用"] = view.checked;
+    tool.writeJSON(_id, helper[_id]);
+});
     setupView.phantom_pain_cage.click(function(view) {
-        let imgview = view.getChildAt(2);
+        let imgview = view.getChildAt(3);
         let fatherview = view.getParent();
         if (imgview.attr("src") != "@drawable/ic_keyboard_arrow_up_black_48dp") {
             imgview.attr("src", "@drawable/ic_keyboard_arrow_up_black_48dp");
@@ -802,11 +861,11 @@ setupView.matrix_iteration_ranks.setOnItemSelectedListener(new AdapterView.OnIte
 
 
     });
-               if (helper.matrix_recurrence) {
-                    let matrix_iteration_ranks_list = language.main.matrix_iteration_ranks_list.split("|");
-                    setupView.matrix_iteration_ranks.setSelection((matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) != -1) ? matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) : 0);
+    if (helper.matrix_recurrence) {
+        let matrix_iteration_ranks_list = language.main.matrix_iteration_ranks_list.split("|");
+        setupView.matrix_iteration_ranks.setSelection((matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) != -1) ? matrix_iteration_ranks_list.indexOf(helper.矩阵循生队伍) : 0);
 
-                }
+    }
     setup.show();
 
 }

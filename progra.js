@@ -3,7 +3,7 @@ runtime.unloadDex('./utlis/java/nlp-hanzi-similar-1.3.0.dex');
 runtime.loadDex('./utlis/java/nlp-hanzi-similar-1.3.0.dex');
 
 //指向Android/data/包名/file 路径
-var package_path = context.getExternalFilesDir(null).getAbsolutePath() + "/"
+var package_path = context.getExternalFilesDir(null).getAbsolutePath();
 
 var tool = require('./modules/app_tool.js');
 tool.dialog_tips = require("./modules/Dialog_Tips.js");
@@ -191,8 +191,7 @@ refreshTime.setHours(5, 0, 0, 0);
 
 let Day = refreshTime.getMonth() + 1; //月 
 let Dat = refreshTime.getDate(); //日
-
-if (new Date() >= refreshTime && helper.今日 != Day + "." + Dat) {
+if ((new Date() >= refreshTime && helper.今日 != Day + "." + Dat) || helper.今日 != Day + "." + Dat) {
     // 刷新日常任务时间记录
     console.log("日常任务时间记录已刷新");
 
@@ -262,6 +261,7 @@ function 主程序() {
         if (!helper.任务状态.每日登录) {
             领取任务奖励(true);
         }
+
         //消耗血清
         消耗血清();
     }
@@ -359,9 +359,8 @@ function 启动(package_) {
 
 function 检查获得奖励() {
     let OBTAINREWARDS = ITimg.ocr("集合文本", {
-        action: 5,
+        action: 6,
         area: 5,
-
     });
     let confirm = ITimg.ocr("获得奖励", {
         action: 1,
@@ -374,6 +373,18 @@ function 检查获得奖励() {
         log_policy: "简短",
         timing: 1000,
     }) || ITimg.ocr("OBTAINREWARDS", {
+        action: 1,
+        similar: 0.8,
+        gather: OBTAINREWARDS,
+        timing: 1000,
+        log_policy: "简短",
+    }) || ITimg.ocr("REWARD", {
+        action: 1,
+        similar: 0.8,
+        gather: OBTAINREWARDS,
+        timing: 1000,
+        log_policy: "简短",
+    }) || ITimg.ocr("奖励详情", {
         action: 1,
         similar: 0.8,
         gather: OBTAINREWARDS,
@@ -413,21 +424,24 @@ function 进入主页() {
     sleep(1000);
     if (tool.currentPackage() != helper.包名) {
         if (!启动()) {
-            启动()
+            启动();
+
         }
+        sleep(5000)
     }
     while (true) {
         sleep(1000);
         staging = (ITimg.ocr("主界面", {
             action: 5,
-            area: 1,
+            area: [0, 0, height / 4, width / 4],
         }) || ITimg.ocr("返回", {
-            area: 1,
+            area: [0, 0, height / 4, width / 4],
             refresh: false,
             action: 5,
-            similar: 0.72
+            similar: 0.72,
+            threshold: 0.95,
         }));
-        if (staging && staging.top < frcy(100) && staging.left < height / 3) {
+        if (staging && staging.top < frcy(100) && staging.right < height / 4) {
             click(staging.left, staging.bottom);
             sleep(1500);
         }
@@ -464,13 +478,12 @@ function 进入主页() {
                 visualization: true,
             })
             break
-        } else if (!ITimg.matchFeatures("返回", {
+        } else if (!ITimg.ocr("返回", {
                 action: 0,
                 timing: 1500,
-                area: 1,
-                threshold: 0.8,
+                area: [0, 0, height / 4, width / 4],
+                threshold: 0.85,
                 saveSmallImg: true,
-                visualization: true,
             })) {
             tool.Floating_emit("展示文本", "状态", "状态：等待进入战双主页");
             toastLog("等待加载登录");
@@ -489,14 +502,23 @@ function 进入主页() {
                 timing: 2000,
                 area: "下半屏"
             });
-            ITimg.ocr("点击空白处关闭", {
-                action: 0,
-                timing: 2000,
-                refresh: false,
-                area: "下半屏"
-            });
+            if (ITimg.ocr("点击空白处关闭", {
+                    action: 0,
+                    timing: 1000,
+                    refresh: false,
+                    area: "下半屏"
+                })) {
+                while (ITimg.ocr("点击空白处关闭", {
+                        action: 0,
+                        timing: 1000,
+                        nods: 500,
+                        area: "下半屏"
+                    })) {}
+            }
+
             click(height / 2, width - frcy(90));
-            log(356)
+
+            sleep(500);
             //关闭纷争战区弹窗
             ITimg.matchFeatures("宿舍-家具-关闭", {
                 action: 0,
@@ -759,35 +781,40 @@ function 采购() {
         toastLog("今日日常补给已领取");
         return
     }
-    if (!ITimg.ocr("采购", {
+    let _max = 8;
+    while (_max) {
+
+        ITimg.ocr("采购", {
             action: 1,
-            timing: 2000,
-            area: "右半屏",
-        }) && !ITimg.ocr("采购", {
-            action: 1,
-            timing: 2000,
-            area: "右半屏",
-            part: true,
-            refresh: false,
-            nods: 1000,
-        }) && !ITimg.ocr("采购", {
-            action: 1,
-            timing: 2000,
-            area: 34,
-            similar: 0.72,
-        })) {
+            timing: 1500,
+            area: 24,
+            picture_failed_further: true,
+        })
+
+        if (!ITimg.ocr("补给包", {
+                action: 0,
+                timing: 1200,
+                area: 1,
+                nods: 1000,
+            })) {
+            _max--;
+        } else {
+            break;
+        }
+    }
+    if (!_max) {
         toastLog("无法识别到采购");
-        return
+        return false
     }
     tool.Floating_emit("面板", "隐藏");
     if (ITimg.ocr("补给包", {
             action: 0,
-            timing: 1200,
+            timing: 1000,
             area: 1,
             nods: 1000,
         }) || ITimg.ocr("补给包", {
             action: 0,
-            timing: 1200,
+            timing: 1000,
             area: 1,
             part: true,
         })) {
@@ -885,26 +912,7 @@ function 采购() {
         tool.Floating_emit("面板", "展开");
         //点击返回
 
-        let staging = (ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            similar: 0.72,
-            threshold: 0.85,
-        }) || ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            part: true,
-            threshold: 0.85,
-        }));
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("返回", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.返回) {
-            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-            sleep(2000);
-        };
-
+        返回主页(true)
 
     }
 }
@@ -962,24 +970,10 @@ function 交流() {
     }
     while (true) {
         //点击返回
-        let staging = (ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            similar: 0.72,
-            threshold: 0.85,
-        }) || ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            part: true,
-            nods: 100,
-            threshold: 0.85,
-        }));
-        if (staging) {
-            click(staging.left, staging.bottom);
+        if (返回主页(true)) {
             helper.任务状态.助理交流 = true;
             tool.writeJSON("任务状态", helper.任务状态);
 
-            坐标配置("返回", staging.left, staging.bottom)
             sleep(2000);
             break
         } else {
@@ -1028,8 +1022,10 @@ function 交流() {
 }
 
 function 指挥局() {
-    if (!helper.妙算神机) {
-        return
+    let _id = "brilliant_calculations";
+
+    if (!helper[_id] || !helper[_id].启用) {
+        return false;
     }
     if (helper.任务状态.妙算神机) {
         toastLog("今日妙算神机已完成");
@@ -1105,6 +1101,8 @@ function 指挥局() {
         console.error(tips);
         return false;
     }
+    tool.Floating_emit("面板", "隐藏");
+    sleep(500);
     while (true) {
         if (ITimg.ocr("新版指挥局", {
                 timing: 1500,
@@ -1127,6 +1125,86 @@ function 指挥局() {
             })
         }
     }
+    if (helper[_id].领取贡献) {
+        tool.Floating_emit("展示文本", "状态", "状态：领取公会贡献");
+        let contribution = ITimg.ocr("本周贡献", {
+            action: 5,
+            area: 1,
+            refresh: false,
+            saveSmallImg: false,
+        })
+        if (contribution) {
+            let _area = [contribution.left - 20, contribution.bottom - (contribution.bottom - contribution.top) * 4, contribution.right - contribution.left + 40, (contribution.bottom - contribution.top) * 3];
+            let contribution_max = ITimg.ocr("获取贡献", {
+                action: 6,
+                area: _area,
+                saveSmallImg: false,
+            })
+            if (contribution_max) {
+                //   contribution_max.sort((a, b) => a.top - b.top);
+                for (let _max_ of contribution_max) {
+                    if (_max_.text.match(/(\d+)/)) {
+                        contribution_max = _max_.text.match(/(\d+)/)[0];
+                        break
+                    }
+                }
+                toastLog("公会贡献：" + contribution_max)
+
+                if (contribution_max >= 15000) {
+
+                    while (true) {
+                        click(contribution.left + (contribution.right - contribution.left) / 2, contribution.top);
+                        sleep(1000);
+                        if (ITimg.ocr("一键领取", {
+                                action: 0,
+                                timing: 1000,
+                                area: 2,
+                            })) {
+                            if (检查获得奖励()) {
+                                sleep(1000);
+                            }
+                        }
+                        let axis_12000 = ITimg.ocr("12000", {
+                            action: 5,
+                            area: 4,
+                        })
+                        if (axis_12000) {
+
+                            while (true) {
+                                let slide_left = [axis_12000.left, axis_12000.top, height / 2, axis_12000.top, 500];
+
+                                swipe.apply(swipe, slide_left);
+                                sleep(500);
+                                axis_12000 = ITimg.ocr("15000", {
+                                    action: 5,
+                                    area: 4,
+                                    nods: 1000,
+                                    saveSmallImg: "公会贡献_15000",
+                                })
+                                if (!axis_12000) {
+                                    continue;
+                                }
+                                click(axis_12000.left + (axis_12000.right - axis_12000.left) / 2, axis_12000.top - frcy(100));
+                                sleep(1000);
+                                if (检查获得奖励()) {
+                                    break;
+                                }
+                            }
+                            break
+                        }
+
+                    }
+                    返回主页(true);
+                    sleep(500);
+                }
+
+            }
+
+
+        }
+        tool.Floating_emit("展示文本", "状态", "状态：与妙算神机交互");
+    }
+    tool.Floating_emit("面板", "展开");
 
     if (ITimg.ocr("岁雪新宵", {
             timing: 1500,
@@ -1171,25 +1249,7 @@ function 指挥局() {
         })) {
         click(height / 2, width - frcy(80));
         sleep(1000);
-        let staging = (ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            similar: 0.72,
-            threshold: 0.85,
-        }) || ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            part: true,
-            threshold: 0.85,
-        }));
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("返回", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.返回) {
-            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-            sleep(2000);
-        }
+        返回主页(true);
         sleep(1000);
         helper.任务状态.妙算神机 = true;
         tool.writeJSON("任务状态", helper.任务状态);
@@ -1207,19 +1267,7 @@ function 指挥局() {
     } else {
         toastLog("无法匹配到算一签,请确认移动小人步骤是否可用");
     }
-    let staging = ITimg.ocr("返回", {
-        area: 1,
-        action: 5,
-        threshold: 0.85,
-    });
-    if (staging) {
-        click(staging.left, staging.bottom);
-        坐标配置("返回", staging.left, staging.bottom)
-        sleep(2000)
-    } else if (coordinate.coordinate.返回) {
-        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-        sleep(2000);
-    };
+    返回主页(true);
 }
 
 
@@ -1228,7 +1276,7 @@ function 宿舍() {
         return false;
     }
     tool.Floating_emit("面板", "id", "宿舍系列");
-    tool.Floating_emit("展示文本", "状态", "状态：准备执行宿舍系列任务")
+    tool.Floating_emit("展示文本", "状态", "状态：准备执行宿舍系列任务");
     let _max = 5;
     while (true) {
         if (!ITimg.ocr("任务", {
@@ -1274,64 +1322,30 @@ function 宿舍() {
                 click.apply(click, coordinate.homepage_open);
                 sleep(1000);
             }
-            if (!ITimg.ocr("宿舍", {
-                    action: 0,
-                    area: 24,
-                    timing: 3000,
-                    nods: 1500,
-                }) && !ITimg.ocr("宿舍", {
-                    action: 0,
-                    timing: 3000,
-                    area: 24,
-                })) {
-                _max--;
-            } else {
-                break
-            }
-        } else {
-            break
         }
+        if (ITimg.ocr("委托", {
+                timing: 1000,
+                saveSmallImg: "宿舍_委托",
+                area: [parseInt(height / 1.4), parseInt(width / 1.1), height - parseInt(height / 1.4), width - parseInt(width / 1.1)]
+            }) || ITimg.ocr("执勤", {
+                area: [parseInt(height / 1.4), parseInt(width / 1.1), height - parseInt(height / 1.4), width - parseInt(width / 1.1)],
+                timing: 1000,
+                nods: 2000,
+                refresh: false,
+                saveSmallImg: "宿舍_执勤",
+            })) {
+            break
+        } else {
+            _max--;
+        }
+
     }
     if (!_max) {
         tips = "无法确认已进入宿舍";
         toast(tips);
         console.error(tips);
+        tool.Floating_emit("展示文本", "状态", "状态：" + tips);
         return false;
-    }
-    let matching_i = 0;
-    while (true) {
-        if (ITimg.ocr("委托", {
-                timing: 1000,
-                area: 4,
-            }) || ITimg.ocr("执勤", {
-                timing: 1000,
-                nods: 2000,
-                refresh: false,
-            })) {
-            break
-        } else {
-            matching_i++;
-            if (matching_i > 15) {
-                toastLog("宿舍-委托多次匹配失败,请确认OCR识别正常");
-                tool.Floating_emit("展示文本", "状态", "状态:宿舍-委托多次匹配失败");
-                tool.Floating_emit("暂停", "结束程序");
-                break
-            }
-        }
-        //确保进入宿舍
-        if (ITimg.ocr("任务", {
-                area: 2,
-                action: 5,
-            }) && ITimg.ocr("战斗", {
-                action: 5,
-                refresh: false,
-            })) {
-            ITimg.ocr("宿舍", {
-                action: 0,
-                area: 24,
-                timing: 3000,
-            });
-        }
     }
     if (ITimg.ocr("完成事件", {
             area: 4,
@@ -1356,15 +1370,18 @@ function 宿舍() {
                 action: 1,
                 timing: 2000,
                 area: 2,
+                saveSmallImg: "宿舍_任务",
             }) || ITimg.ocr("任务", {
                 action: 1,
                 timing: 2000,
                 nods: 1500,
                 area: 24,
+                saveSmallImg: "宿舍_任务",
             }) || ITimg.ocr("任务", {
                 action: 1,
                 timing: 2000,
                 area: 12,
+                saveSmallImg: "宿舍_任务",
             })) {
             ITimg.ocr("每日", {
                 action: 1,
@@ -1386,55 +1403,21 @@ function 宿舍() {
                         refresh: true
                     })) {
                     //返回 ,关闭奖励显示
-                    let staging = ITimg.ocr("返回", {
-                        area: 1,
-                        action: 5,
-                        threshold: 0.85,
-                    });
-                    if (staging) {
-                        click(staging.left, staging.bottom);
-                        坐标配置("返回", staging.left, staging.bottom)
-                        sleep(1000)
-                    } else if (coordinate.coordinate.返回) {
-                        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                        sleep(1000);
-                    };
+                    返回主页(true);
 
                 }
             }
             //返回
-            let staging = ITimg.ocr("返回", {
-                area: 1,
-                action: 5,
-                threshold: 0.85,
-            });
-            if (staging) {
-                click(staging.left, staging.bottom);
-                坐标配置("返回", staging.left, staging.bottom)
-                sleep(1000)
-            } else if (coordinate.coordinate.返回) {
-                click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                sleep(1000);
-            };
+            返回主页(true);
+
 
         } else {
             toastLog("无法执行领取任务奖励");
         }
     }
     //返回主界面
-    let staging = ITimg.ocr("返回", {
-        area: 1,
-        threshold: 0.85,
-        action: 5,
-    });
-    if (staging) {
-        click(staging.left, staging.bottom);
-        坐标配置("返回", staging.left, staging.bottom)
-        sleep(1000)
-    } else if (coordinate.coordinate.返回) {
-        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-        sleep(1000);
-    };
+    返回主页(true);
+
 
 
 }
@@ -1452,11 +1435,12 @@ function 宿舍_委托() {
             timing: 2000,
             nods: 1500,
             area: 4,
+            saveSmallImg: "宿舍_委托",
         }) || ITimg.ocr("委托", {
             action: 0,
             timing: 2000,
             area: 34,
-
+            saveSmallImg: "宿舍_委托",
         })
 
         if (ITimg.ocr("归队", {
@@ -1594,25 +1578,7 @@ function 宿舍_委托() {
 
 */
     //返回
-    let staging = (ITimg.ocr("返回", {
-        area: 1,
-        action: 5,
-        similar: 0.72,
-        threshold: 0.85,
-    }) || ITimg.ocr("返回", {
-        area: 1,
-        action: 5,
-        part: true,
-        threshold: 0.85,
-    }));
-    if (staging) {
-        click(staging.left, staging.bottom);
-        坐标配置("返回", staging.left, staging.bottom)
-        sleep(1000)
-    } else if (coordinate.coordinate.返回) {
-        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-        sleep(1000);
-    }
+    返回主页(true);
 
 }
 
@@ -1627,34 +1593,27 @@ function 宿舍_执勤() {
                 area: [height / 2, parseInt(width / 1.2), height / 2, parseInt(width - width / 1.2)],
 
                 similar: 0.8,
+                saveSmallImg: "宿舍_委托",
             }) && !ITimg.ocr("执勤", {
                 refresh: false,
                 similar: 0.8,
+                saveSmallImg: "宿舍_执勤",
             })) {
             //返回
-            let staging = ITimg.ocr("返回", {
-                area: 1,
-                action: 5,
-                threshold: 0.85,
-            });
-            if (staging) {
-                click(staging.left, staging.bottom);
-                坐标配置("返回", staging.left, staging.bottom)
-                sleep(2000)
-            } else if (coordinate.coordinate.返回) {
-                click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                sleep(2000);
-            };
+            返回主页(true);
+
         }
         if (ITimg.ocr("执勤", {
                 action: 0,
                 timing: 1000,
                 nods: 1500,
                 area: 24,
+                saveSmallImg: "宿舍_执勤",
             }) || ITimg.ocr("执勤", {
                 action: 0,
                 timing: 1000,
                 area: 4,
+                saveSmallImg: "宿舍_执勤",
             })) {
             break
         }
@@ -1675,23 +1634,18 @@ function 宿舍_执勤() {
             helper.宿舍系列.执勤代工.执行状态 = true;
             tool.writeJSON("宿舍系列", helper.宿舍系列);
             //返回
-            let staging = ITimg.ocr("返回", {
-                area: 1,
-                action: 5,
-                threshold: 0.85,
-            });
-            if (staging) {
-                click(staging.left, staging.bottom);
-                坐标配置("返回", staging.left, staging.bottom)
-                sleep(2000)
-            } else if (coordinate.coordinate.返回) {
-                click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                sleep(2000);
-            }
+            返回主页(true);
+
             return
         }
-        click(height / 2, parseInt(width / 1.7));
-        sleep(1000);
+        if (!ITimg.ocr("代工", {
+                action: 5,
+                area: 1,
+                saveSmallImg: "宿舍_执勤_代工",
+            })) {
+            click(height / 2, parseInt(width / 1.7));
+            sleep(1000);
+        }
     }
     click(height / 2, width - frcy(80));
     sleep(500);
@@ -1716,78 +1670,79 @@ function 宿舍_执勤() {
             area: "下半屏",
         });
     }
-    sleep(1500);
+    if (duty.duty) {
+        sleep(1500);
 
 
-    function findNearestNumber(array, other, right) {
-        let nearestNumber = null;
+        function findNearestNumber(array, other, right) {
+            let nearestNumber = null;
 
-        for (let j = 0; j < array.length; j++) {
-            let otherElement = array[j];
-            if (otherElement.text.match(/(\d+)/)) {
+            for (let j = 0; j < array.length; j++) {
+                let otherElement = array[j];
+                if (otherElement.text.match(/(\d+)/)) {
 
-                let distance = Math.abs(other.right - otherElement.right) <= frcx(10) && Math.abs(other.bottom - otherElement.top) <= frcy(40);
+                    let distance = Math.abs(other.right - otherElement.right) <= frcx(10) && Math.abs(other.bottom - otherElement.top) <= frcy(40);
 
-                if (distance) {
-                    nearestNumber = otherElement.text.match(/(\d+)/)[1];
-                }
-            }
-        }
-        return nearestNumber;
-    }
-
-
-    for (let i = 0; i < 2; i++) {
-        staging = ITimg.ocr("识别集合文本", {
-            action: 6
-        });
-        for (let element of staging) {
-            if (element.text.endsWith('/100')) {
-                let match = element.text.match(/(\d+)/);
-                if (match) {
-                    let value = parseInt(match[1]);
-                    let nearestNumber = findNearestNumber(staging, element);
-                    if (nearestNumber && value >= 100 && nearestNumber > 60) {
-                        click(element.left, element.bottom);
-                        sleep(200);
-                        duty.chosen++;
+                    if (distance) {
+                        nearestNumber = otherElement.text.match(/(\d+)/)[1];
                     }
                 }
             }
-            //已选择8位小伙伴时退出遍历
-            if (duty.chosen >= 8) {
-                break
+            return nearestNumber;
+        }
+
+
+        for (let i = 0; i < 2; i++) {
+            staging = ITimg.ocr("识别集合文本", {
+                action: 6
+            });
+            for (let element of staging) {
+                if (element.text.endsWith('/100')) {
+                    let match = element.text.match(/(\d+)/);
+                    if (match) {
+                        let value = parseInt(match[1]);
+                        let nearestNumber = findNearestNumber(staging, element);
+                        if (nearestNumber && value >= 100 && nearestNumber > 60) {
+                            click(element.left, element.bottom);
+                            sleep(200);
+                            duty.chosen++;
+                        }
+                    }
+                }
+                //已选择8位小伙伴时退出遍历
+                if (duty.chosen >= 8) {
+                    break
+                }
+
             }
+            if (duty.chosen < 8) {
+                //上滑显示新的小伙伴
+                swipe(parseInt(height / 2), parseInt(width / 1.4), parseInt(height / 2), parseInt(width / 2.5), 550);
+                sleep(2000);
+            } else {
+                break;
+            }
+        }
 
-        }
-        if (duty.chosen < 8) {
-            //上滑显示新的小伙伴
-            swipe(parseInt(height / 2), parseInt(width / 1.4), parseInt(height / 2), parseInt(width / 2.5), 550);
-            sleep(2000);
-        } else {
-            break;
-        }
+        toastLog("选择完成");
+        tool.Floating_emit("面板", "展开");
+        //如果刚才没有识别成功则重新识别
+        duty.duty = duty.duty ? duty.duty : ITimg.ocr("开始执勤", {
+            action: 5,
+            area: "右下半屏"
+        });
+        sleep(1000)
+        //点击开始执勤
+        click(duty.duty.left, duty.duty.top);
+
+        sleep(3000);
+        //有bug,执勤过了,没一会又可以选择,但是显示工位已被使用
+        ITimg.ocr("取消", {
+            action: 1,
+            timing: 1000,
+            area: 4,
+        });
     }
-
-    toastLog("选择完成");
-    tool.Floating_emit("面板", "展开");
-    //如果刚才没有识别成功则重新识别
-    duty.duty = duty.duty ? duty.duty : ITimg.ocr("开始执勤", {
-        action: 5,
-        area: "右下半屏"
-    });
-    sleep(1000)
-    //点击开始执勤
-    click(duty.duty.left, duty.duty.top);
-
-    sleep(3000);
-    //有bug,执勤过了,没一会又可以选择,但是显示工位已被使用
-    ITimg.ocr("取消", {
-        action: 1,
-        timing: 1000,
-        area: 4,
-    });
-
     (ITimg.ocr("一键代工", {
         action: 1,
         timing: 1000,
@@ -1800,6 +1755,13 @@ function 宿舍_执勤() {
         area: "下半屏",
         part: true,
         refresh: false,
+    }) || ITimg.ocr("一键代", {
+        action: 1,
+        timing: 1000,
+        area: "下半屏",
+        part: true,
+        refresh: false,
+        saveSmallImg: "一键代工",
     }));
 
     if (ITimg.ocr("立即完成", {
@@ -1814,19 +1776,8 @@ function 宿舍_执勤() {
     sleep(1500);
 
     //返回
-    staging = ITimg.ocr("返回", {
-        area: 1,
-        action: 5,
-        threshold: 0.85,
-    });
-    if (staging) {
-        click(staging.left, staging.bottom);
-        坐标配置("返回", staging.left, staging.bottom)
-        sleep(2000)
-    } else if (coordinate.coordinate.返回) {
-        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-        sleep(2000);
-    }
+    返回主页(true);
+
 
 }
 
@@ -1853,31 +1804,17 @@ function 宿舍_抚摸() {
     sleep(1000);
     if (!ITimg.ocr("执勤", {
             action: 5,
-            area: 4
+            area: 4,
+            saveSmallImg: "宿舍_执勤",
         }) && !ITimg.ocr("执勤", {
             part: true,
+            saveSmallImg: "宿舍_执勤",
             refresh: false,
         })) {
         //返回
-        let staging = (ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            similar: 0.72,
-            threshold: 0.85,
-        }) || ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            part: true,
-            threshold: 0.85,
-        }));
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("返回", staging.left, staging.bottom)
-            sleep(2000)
-        } else if (coordinate.coordinate.返回) {
-            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-            sleep(2000);
-        };
+        while (!返回主页(true)) {
+
+        }
     }
     if (coordinate.宿舍.宿舍房间位置.length == 0) {
         coordinate.宿舍.宿舍房间位置 = []
@@ -2157,19 +2094,8 @@ function 宿舍_抚摸() {
 
             if (petting == 0) {
                 tool.Floating_emit("展示文本", "状态", "状态：没有可抚摸次数");
-                let staging = ITimg.ocr("返回", {
-                    area: 1,
-                    action: 5,
-                    threshold: 0.85,
-                });
-                if (staging) {
-                    click(staging.left, staging.bottom);
-                    坐标配置("返回", staging.left, staging.bottom)
-                    sleep(1000)
-                } else if (coordinate.coordinate.返回) {
-                    click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                    sleep(1000);
-                }
+                返回主页(true);
+
 
                 continue;
             }
@@ -2248,19 +2174,8 @@ function 宿舍_抚摸() {
             }
 
             tool.Floating_emit("展示文本", "状态", "状态：抚摸完成");
-            let staging = ITimg.ocr("返回", {
-                area: 1,
-                action: 5,
-                threshold: 0.85,
-            });
-            if (staging) {
-                click(staging.left, staging.bottom);
-                坐标配置("返回", staging.left, staging.bottom)
-                sleep(1500)
-            } else if (coordinate.coordinate.返回) {
-                click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                sleep(1500);
-            }
+            返回主页(true);
+
             continue;
         }
         //点击返回
@@ -2300,6 +2215,7 @@ function 宿舍_家具制造() {
                 action: 5,
                 refresh: false,
                 part: true,
+                saveSmallImg: "宿舍_商店",
             }) && !ITimg.ocr("仓库", {
                 action: 5,
                 refresh: false,
@@ -2404,11 +2320,13 @@ function 宿舍_家具制造() {
             timing: 3000,
             nods: 1000,
             area: "右下半屏",
+            saveSmallImg: "宿舍_家具_制造",
         }) && ITimg.ocr("制造", {
             action: 4,
             part: true,
             timing: 3000,
             area: "下半屏",
+            saveSmallImg: "宿舍_家具_制造",
         });
 
 
@@ -2453,7 +2371,7 @@ function 宿舍_家具制造() {
 
 
 function 消耗血清() {
-
+    console.info("---消耗血清---");
     helper = tool.readJSON("helper");
     tool.Floating_emit("面板", "id", "消耗血清");
     tool.Floating_emit("展示文本", "状态", "状态：准备作战中");
@@ -2465,6 +2383,116 @@ function 消耗血清() {
         })) {
         返回主页()
     };
+    if (helper.IU24HES) {
+        tool.Floating_emit("展示文本", "状态", "状态：检查使用将过期血清");
+        let expired_serum = (ITimg.ocr("小时", {
+            action: 5,
+            area: 2,
+            part: true,
+            saveSmallImg: "血清组剩余时间",
+        }) || ITimg.ocr("血清组剩余时间", {
+            action: 5,
+            area: 2,
+            part: true,
+            refresh: false,
+            saveSmallImg: "血清组剩余时间",
+        }))
+        if (expired_serum) {
+            tool.Floating_emit("面板", "隐藏");
+            expired_serum = [expired_serum.right, expired_serum.bottom + frcy(15)];
+            click.apply(click, expired_serum);
+            sleep(1000);
+            expired_serum = ITimg.matchFeatures("血清_减", {
+                action: 5,
+                area: 1,
+            });
+            if (expired_serum) {
+
+                expired_serum = [expired_serum.right - (expired_serum.w / 3), expired_serum.top + (expired_serum.h / 3)];
+                click.apply(click, expired_serum);
+                sleep(1000);
+
+            }
+            let surplus_hour_list = ITimg.ocr("集合", {
+                action: 6,
+                area: 5,
+            })
+
+            for (let surplus_hour of surplus_hour_list) {
+                if (surplus_hour.text.indexOf("小时") != -1 || surplus_hour.text.indexOf("时") != -1) {
+
+                    for (let i = 10; i > 0; i--) {
+                        click(surplus_hour.right, surplus_hour.bottom);
+                        sleep(50);
+
+                    }
+                    //识别到等待一秒
+                    ITimg.ocr("超出该血清最大数量", {
+                        action: 5,
+                        area: 5,
+                        timing: 1000,
+                    })
+                }
+            }
+            tool.Floating_emit("面板", "展开");
+            expired_serum = (ITimg.ocr("确定", {
+                action: 5,
+                area: 4,
+            }) || ITimg.ocr("确定", {
+                action: 5,
+                refresh: false,
+            }));
+            expired_serum = [expired_serum.right, expired_serum.top];
+            click.apply(click, expired_serum);
+            sleep(200);
+            click.apply(click, expired_serum);
+            sleep(200);
+            click.apply(click, expired_serum);
+            sleep(1000);
+
+            if (检查获得奖励()) {
+                helper.已注射血清++;
+                tool.Floating_emit("展示文本", "血清", "血清：可使用:" + helper.注射血清 + "&已使用:" + helper.已注射血清);
+                toastLog("使用即将过期血清");
+            }
+            frequency = 3;
+            while (frequency) {
+                sleep(200)
+                if (ITimg.matchFeatures("宿舍-家具-关闭", {
+                        action: 0,
+                        timing: 1000,
+                        area: 2,
+                        threshold: 0.8,
+                        nods: 1000,
+                        saveSmallImg: "注射血清-关闭",
+                    }) || ITimg.matchFeatures("宿舍-家具-关闭", {
+                        action: 0,
+                        timing: 1000,
+                        area: 2,
+                        threshold: 0.8,
+                        saveSmallImg: "注射血清-关闭",
+                        visualization: true,
+
+                    }) || ITimg.ocr("取消", {
+                        action: 1,
+                        area: 4,
+                        timing: 1000,
+                    })) {
+                    break
+                }
+                frequency--;
+                if (!frequency) {
+                    if (coordinate.coordinate["宿舍-家具-关闭"]) {
+                        click(coordinate.coordinate["宿舍-家具-关闭"].x, coordinate.coordinate["宿舍-家具-关闭"].y);
+
+                    }
+                }
+
+            }
+
+
+        }
+    }
     this.serum = 便笺(1000, true);
 
     if (this.serum) {
@@ -2476,7 +2504,7 @@ function 消耗血清() {
 
         }
     }
-    tool.Floating_emit("展示文本", "状态", "状态：准备作战中")
+    tool.Floating_emit("展示文本", "状态", "状态：准备作战中");
     if (!helper.战斗.活动) {
         if (!ITimg.ocr("战斗", {
                 action: 2,
@@ -2803,9 +2831,9 @@ function 消耗血清() {
                 }
             }
 
-            frequency = 5;
+            frequency = 3;
             while (frequency) {
-                sleep(500)
+                sleep(200)
                 if (ITimg.matchFeatures("宿舍-家具-关闭", {
                         action: 0,
                         timing: 2000,
@@ -2834,9 +2862,9 @@ function 消耗血清() {
 
             }
         } else {
-            frequency = 5;
+            frequency = 3;
             while (frequency) {
-                sleep(500)
+                sleep(200)
                 if (ITimg.matchFeatures("宿舍-家具-关闭", {
                         action: 0,
                         timing: 2000,
@@ -3054,13 +3082,42 @@ function 消耗血清() {
     返回主页()
 }
 
-function 返回主页() {
+function 返回主页(only_return) {
+    if (only_return) {
+        if (coordinate.coordinate.返回) {
+            click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
+            sleep(2000);
+            return true;
+        } else {
+            let staging = (ITimg.ocr("返回", {
+                area: [0, 0, height / 4, width / 4],
+                action: 5,
+                similar: 0.72,
+                threshold: 0.85,
+            }) || ITimg.ocr("返回", {
+                area: [0, 0, height / 4, width / 4],
+                action: 5,
+                part: true,
+                threshold: 0.85,
+            }));
+            if (staging) {
+                if (staging.right < height / 4 && staging.bottom < width / 4) {
+                    click(staging.left, staging.bottom);
+                    坐标配置("返回", staging.left, staging.bottom)
+                    sleep(2000);
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
     tool.Floating_emit("展示文本", "状态", "状态：尝试回到主页..")
 
-    console.warn("---返回主页---")
+    console.info("---返回主页---")
     //返回主页
     let staging = (ITimg.ocr("主页面", {
-        area: 1,
+        area: [0, 0, height / 4, width / 4],
         action: 5,
     }) || ITimg.ocr("主界面", {
         action: 5,
@@ -3467,7 +3524,7 @@ function 矩阵循生() {
             }
         }
         if (this.出击()) {
-            if(!this.give_up_max){
+            if (!this.give_up_max) {
                 return false
             }
             this.领取奖励();
@@ -3550,7 +3607,7 @@ function 矩阵循生() {
             return this.抉择();
         }
         if (this.出击()) {
-            if(!this.give_up_max){
+            if (!this.give_up_max) {
                 return false
             }
             this.领取奖励();
@@ -4450,6 +4507,7 @@ function 诺曼复兴战() {
                 area: 34,
                 action: 5,
                 part: true,
+                saveSmallImg: false,
             }) || ITimg.ocr("常规挑战", {
                 action: 5,
                 similar: 0.8,
@@ -4479,6 +4537,7 @@ function 诺曼复兴战() {
         action: 5,
         part: true,
         saveSmallImg: false,
+        nods: 1000,
     }) || ITimg.ocr("/18", {
         action: 5,
         part: true,
@@ -4506,6 +4565,9 @@ function 诺曼复兴战() {
         click(operator.left, operator.top);
         sleep(1500);
 
+    } else {
+        toastLog("无法确认诺曼复兴战进度");
+        return false;
     }
     while (true) {
         if (ITimg.ocr("商店", {
@@ -4531,16 +4593,19 @@ function 诺曼复兴战() {
                 action: 4,
                 timing: 1000,
                 similar: 0.85,
+                saveSmallImg: "进度0-3",
             }) || ITimg.ocr("进度:0/3", {
                 action: 4,
                 timing: 1000,
                 similar: 0.85,
                 refresh: false,
                 nods: 500,
+                saveSmallImg: "进度0-3",
             }) || ITimg.ocr("0/3", {
                 action: 4,
                 timing: 1000,
                 similar: 0.85,
+                saveSmallImg: "进度0-3",
             }));
 
             (ITimg.ocr("直达深巢", {
@@ -4632,6 +4697,7 @@ function 诺曼复兴战() {
 
 
 function 幻痛囚笼() {
+    console.info("---幻痛囚笼---");
     if (!helper.phantom_pain_cage || !helper.phantom_pain_cage.启用) {
         return
     }
@@ -4870,6 +4936,7 @@ function 幻痛囚笼() {
             refresh: false,
             //文件名不能带特殊符号
             saveSmallImg: "0-3",
+            threshold: 0.9,
         })) {
         toastLog("今日已无挑战次数");
         return false
@@ -5225,18 +5292,7 @@ function 幻痛囚笼() {
 
     }
 
-    staging = ITimg.ocr("返回", {
-        area: 1,
-        action: 5,
-    });
-    if (staging) {
-        click(staging.left, staging.bottom);
-        坐标配置("返回", staging.left, staging.bottom)
-        sleep(2000)
-    } else if (coordinate.coordinate.返回) {
-        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-        sleep(2000);
-    }
+    返回主页(true);
 
     if (!helper.phantom_pain_cage.领取奖励) {
         return false;
@@ -5642,18 +5698,7 @@ function 纷争战区() {
                     timing: 1000,
                     refresh: false
                 })
-                let staging = ITimg.ocr("返回", {
-                    area: 1,
-                    action: 5,
-                });
-                if (staging) {
-                    click(staging.left, staging.bottom);
-                    坐标配置("返回", staging.left, staging.bottom)
-                    sleep(2000)
-                } else if (coordinate.coordinate.返回) {
-                    click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-                    sleep(2000);
-                };
+                返回主页(true);
 
                 break;
             }
@@ -5730,7 +5775,7 @@ function 历战映射() {
         action: 5,
         saveSmallImg: false,
         part: true,
-    });
+    })
     let settlement_frequency = 10;
     if (operator) {
         // 使用正则表达式提取数字
@@ -5753,13 +5798,13 @@ function 历战映射() {
         let tips = "无法获取已获得算符，请检查/1500相关识别结果";
         toast(tips);
         console.warn(tips);
-        (ITimg.ocr("历战映射", {
-            action: 2,
+        operator = (ITimg.ocr("历战映射", {
+            action: 5,
             timing: 1000,
             area: 34,
             refresh: false,
         }) || ITimg.ocr("创生算符", {
-            action: 4,
+            action: 5,
             timing: 1000,
             refresh: false,
             part: true,
@@ -5986,25 +6031,7 @@ function 历战映射() {
         tool.pointerPositionDisplay(false);
     }
 
-    if (coordinate.coordinate.返回) {
-        click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
-        sleep(2000);
-    } else {
-        staging = (ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            similar: 0.72,
-        }) || ITimg.ocr("返回", {
-            area: 1,
-            action: 5,
-            part: true,
-        }));
-        if (staging) {
-            click(staging.left, staging.bottom);
-            坐标配置("返回", staging.left, staging.bottom)
-            sleep(2000)
-        }
-    }
+    返回主页(true);
     if (ITimg.ocr("奖励", {
             action: 1,
             area: 3,
@@ -6594,7 +6621,7 @@ function 领取手册经验() {
         area: 4,
     });
     if (!ITimg.ocr("评定任务", {
-            action: 1,
+            action: 4,
             timing: 500,
             area: 34,
         })) {
@@ -6605,7 +6632,7 @@ function 领取手册经验() {
         })
         click(height / 2, width - frcy(80));
         ITimg.ocr("评定任务", {
-            action: 1,
+            action: 4,
             timing: 500,
             area: 34,
         })
@@ -6625,7 +6652,7 @@ function 领取手册经验() {
     sleep(1000);
 
     if (ITimg.ocr("战略补给", {
-            action: 1,
+            action: 4,
             timing: 1200,
             area: "左上半屏",
         })) {

@@ -5,9 +5,9 @@
   ],
   "assets": [],
   "build": {
-    "build_id": "55FA553A-1231",
-    "build_number": 1231,
-    "build_time": 1721814561603,
+    "build_id": "2B14D3E7-1232",
+    "build_number": 1232,
+    "build_time": 1722405607777,
     "release": false
   },
   "encryptLevel": 0,
@@ -85,6 +85,6 @@
     "uuid": "30e8349e-b7be-4217-a506-6072dedc75df"
   },
   "useFeatures": [],
-  "versionCode": 39,
-  "versionName": "1.3.3"
+  "versionCode": 40,
+  "versionName": "1.3.4"
 }
