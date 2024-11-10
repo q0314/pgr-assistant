@@ -181,7 +181,8 @@ module.exports = function 诺曼复兴战() {
                 break
             }
         }
-        let _max = 3
+        let _max = 3;
+        let _number = 3;
         while (_max) {
             if (!ITimg.ocr("扫荡作战", {
                     action: 4,
@@ -189,6 +190,11 @@ module.exports = function 诺曼复兴战() {
                     timing: 1000,
                 })) {
                 _max--;
+            }else{
+                _number--;
+                if(!_number){
+                    break
+                }
             }
             let return_text = ITimg.ocr("返回", {
                 action: 5,
