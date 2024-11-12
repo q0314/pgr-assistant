@@ -128,7 +128,7 @@ var interface = tool.readJSON("interface", {
     "公告": false,
     "无障碍提醒": false,
     "运行次数": 0,
-    "server": "http://arkplan.top/arkplan/"
+    "server": "http://arkplan.top/pgr_assistant/"
 });
 
 var notes = tool.readJSON("notes", {
@@ -154,7 +154,7 @@ if (helper.注射血清 == undefined) {
 }
 
 if (!interface.server) {
-    tool.writeJSON("server", "http://arkplan.top/arkplan/", "interface");
+    tool.writeJSON("server", "http://arkplan.top/pgr_assistant/", "interface");
     interface = tool.readJSON("interface");
 }
 
