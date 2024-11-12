@@ -153,10 +153,8 @@ if (helper.注射血清 == undefined) {
     throw Error("初始化配置失败，已重置数据，请尝试重启应用")
 }
 
-if (!interface.server) {
     tool.writeJSON("server", "http://arkplan.top/pgr_assistant/", "interface");
     interface = tool.readJSON("interface");
-}
 
 if (!helper.历战映射 || !helper.宿舍系列.touch_role) {
     tool.writeJSON("历战映射", {

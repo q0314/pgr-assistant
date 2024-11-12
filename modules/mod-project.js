@@ -233,8 +233,8 @@ let exp = {
             let _cur_page = 1;
             let _per_page = _opt.per_page || 30; // 100
             let _min_ver = _opt.min_version_name || 'v0.0.0'; // 'v2.0.1'
-            let _max = 3;
-                        _.urlapi = 'https://api.github.com';
+            let _max = 4;
+                 _.urlapi = 'https://api.github.com';
             while (_max--) {
                 if (_max == 2) {
                     _.urlapi = 'https://api.kkgithub.com';
