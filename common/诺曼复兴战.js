@@ -134,55 +134,62 @@ module.exports = function 诺曼复兴战() {
             sleep(1000);
         }
     }
-    tool.Floating_emit("面板", "隐藏");
+    //开始前往关卡扫荡
+    //tool.Floating_emit("面板", "隐藏");
     sleep(800);
+    while (true) {
+        ITimg.ocr("奖励", {
+            action: 1,
+            area: 3,
+            timing: 1000,
+            nods: 1000,
+        })
+        if (ITimg.ocr("前往", {
+                action: 5,
+                area: 2,
+                part: true,
+            })) {
+            break
+        }
+    }
+    let goto_list = ITimg.ocr("集合", {
+        action: 6,
+        area: 2,
+    })
+    goto_list && goto_list.sort((a, b) => a.top - b.top);
     let _settlement_frequency = settlement_frequency;
     while (settlement_frequency) {
-        if (settlement_frequency == 1&&_settlement_frequency >= 3) {
-            swipe(height / 2, width / 2, height / 4, width / 2, 1000);
-            sleep(500);
-        }
-        while (true) {
-            (ITimg.ocr("进度：0/3", {
-                action: 4,
-                timing: 1000,
-                similar: 0.85,
-                saveSmallImg: "进度0-3",
-            }) || ITimg.ocr("进度:0/3", {
-                action: 4,
-                timing: 1000,
-                similar: 0.85,
-                refresh: false,
-                nods: 500,
-                saveSmallImg: "进度0-3",
-            }) || ITimg.ocr("0/3", {
-                action: 4,
-                timing: 1000,
-                similar: 0.85,
-                saveSmallImg: "进度0-3",
-            }));
 
-            (ITimg.ocr("直达深巢", {
-                action: 4,
-                area: 4,
-                timing: 1000,
-            }) || ITimg.ocr("直达深巢", {
-                action: 4,
-                area: 4,
-                timing: 1000,
+        let _max = 3;
+        let _number = 3;
+        while (true) {
+            (ITimg.ocr("前往", {
+                action: 1,
+                area: 2,
+                timing: 1500,
+                gather: goto_list,
+            }) || ITimg.ocr("前往", {
+                action: 1,
+                area: 2,
+                timing: 1500,
                 part: true,
-                refresh: false,
+                gather: goto_list,
             }))
+
             if (ITimg.ocr("扫荡作战", {
                     action: 5,
                     area: 4,
-                    nods: 1000,
                 })) {
+                break;
+            } else if (ITimg.ocr("战斗准备", {
+                    action: 5,
+                    area: 4,
+                    refresh: false,
+                })) {
+                _max = 0;
                 break
             }
         }
-        let _max = 3;
-        let _number = 3;
         while (_max) {
             if (!ITimg.ocr("扫荡作战", {
                     action: 4,
@@ -190,9 +197,9 @@ module.exports = function 诺曼复兴战() {
                     timing: 1000,
                 })) {
                 _max--;
-            }else{
+            } else {
                 _number--;
-                if(!_number){
+                if (!_number) {
                     break
                 }
             }
@@ -213,38 +220,44 @@ module.exports = function 诺曼复兴战() {
 
             }
         }
-        if(!_max){
+        if (!_max) {
             //双击返回键离开作战准备;
             返回主页(true);
             sleep(200);
             返回主页(true);
             sleep(150)
-        }else  {
+        } else {
 
             while (true) {
-                ITimg.ocr("返回", {
-                    action: 4,
-                    area: 1,
-                    timing: 1000,
-                    nods: 1000,
-                });
-                if (ITimg.ocr("商店", {
-                        action: 5,
-                        area: 3,
-                    }) && ITimg.ocr("奖励", {
-                        action: 5,
-                        area: 3,
-                        refresh: false,
-                        log_policy: "简短",
-                    })) {
+
+                let reward = ITimg.ocr("奖励", {
+                    action: 5,
+                    area: 3,
+                    timing: 101,
+                    refresh: false,
+                    //   log_policy: "简短",
+                })
+                if (reward) {
+                    click(reward.left, reward.top);
+                    sleep(500);
+                    click(reward.left, reward.top);
+                    sleep(1000);
                     settlement_frequency--;
                     break
                 }
             }
+            if (ITimg.ocr("一键领取", {
+                    action: 1,
+                    area: 2,
+                    timing: 1000,
+                })) {
+
+                检查获得奖励();
+            }
         }
     }
     tool.Floating_emit("面板", "展开");
-    if (helper.norman_revival_war.领取奖励) {
+    /*if (helper.norman_revival_war.领取奖励) {
         tool.Floating_emit("展示文本", "状态", "状态：领取诺曼复兴战奖励");
         while (true) {
             ITimg.ocr("奖励", {
@@ -265,4 +278,5 @@ module.exports = function 诺曼复兴战() {
             }
         }
     }
+    */
 }
