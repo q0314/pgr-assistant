@@ -1,0 +1,87 @@
+[v-cloak] {
+  display: none;
+}
+
+.root-container {
+  position: relative;
+  width: 100%;
+  /* min-height: 755px; */
+  overflow: scroll;
+  background: #ffffff;
+}
+
+.van-floating-bubble {
+	background: #ee0a24;
+}
+.fixed-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* 确保它在其他元素之上 */
+}
+.minimum-container {
+    min-height: 850px;
+}
+.seize-seat-upper-corner {
+    height: 40px;
+}
+
+.icon {
+  margin-left: 16px;
+  font-size: 20px;
+  color: #333;
+  pointer-events: auto; /* 确保点击事件能够被捕捉 */
+}
+.tip-block-wrap-text {
+  overflow-wrap: break-word; /* 自动换行 */
+  word-break: break-word; /* 保证单词换行 */
+}
+
+.custom-slide-button {
+  min-width: 26px;
+  font-size: 10px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 100px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.simple-span {
+  margin: 0;
+  color: rgba(69, 90, 100, 0.6);
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 16px;
+}
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.adaptive-field .van-field__label {
+  display: inline-block;
+  width: auto;
+  white-space: nowrap; /* 防止换行 */
+}
+
+.van-dropdown-item {
+  position: absolute; /* 确保绝对定位 */
+  top: 45px !important; /* 修改为你想要的值 */
+}
+.van-popover--dark{
+        overflow:inherit !important;
+}
+.rotate {
+  transform: rotate(180deg);
+}
+/* 禁用长按菜单 复制等 */
+* {
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
