@@ -632,7 +632,7 @@ let _area = [recruit_limit_f.left, recruit_limit_f.top - frcy(150), recruit_limi
                         let ranks = "队伍筛选-";
                         let attribute = [];
                         if (helper.矩阵循生队伍 == "随机") {
-                            attribute = [random[0, 1], random(0, 2)];
+                            attribute = [random(0, 1), random(0, 2)];
                         } else {
 
                             // 查找 在 ranks_attribute 中的位置
