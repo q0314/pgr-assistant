@@ -386,7 +386,6 @@ ui.layout(
                             <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto" textColor="{{use.theme.text}}" />
                             <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
                             layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
-                            <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto" textColor="{{use.theme.text}}" />
                         </radiogroup>
                         <horizontal id="depletion_manage" gravity="center" marginLeft="10" bg="{{use.theme.bg}}" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
                             <text id="mr1" text="{{language['input_tips1']}}" textSize="15" textColor="{{use.theme.text}}" />
@@ -1175,11 +1174,7 @@ ui.depletion_way1.on("check", function(checked) {
     helper.战斗.活动 = !checked;
     tool.writeJSON("战斗", helper.战斗);
 });
-ui.depletion_way2.on("check", function(checked) {
-    helper.战斗.活动 = checked;
-    tool.writeJSON("战斗", helper.战斗);
-    //if (checked) toastLog("暂时不支持此次活动材料");
-});
+
 
 ui.input_challenge.on("key", function(keyCode, event) {
     if (event.getAction() == 0 && keyCode == 66) {

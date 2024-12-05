@@ -5,7 +5,7 @@
         "depletion_serum": "自动消耗血清",
         "depletion_way1": "资源",
         "depletion_way2": "活动",
-        "resources_type": "意识材料|稀有意识|装备经验|装备突破|成员经验|螺母作战|技能点|辅助机资源",
+        "resources_type": "意识材料",
         "resources_name": "拟战场域|作战补给|后勤保养|军备突破|成员特训|螺母大作战|战技演习|辅助加装",
         "input_tips1": "挑战次数/使用血清上限:",
         "daily_serum": "领取每日血清",
