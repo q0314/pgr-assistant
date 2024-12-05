@@ -1,24 +1,32 @@
 {
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
   "assets": [],
   "build": {
-    "build_id": "1A4ACDE7-26",
-    "build_number": 26,
-    "build_time": 1671012019767,
-    "release": true
+    "build_id": "8266FB87-47",
+    "build_number": 47,
+    "build_time": 1698479841292,
+    "release": false
   },
   "encryptLevel": 0,
-  "useFeatures": [],
-  "icon": "res/icon.png",
+  "features": {
+    "activityIntentTasks": false,
+    "nodejs": "auto"
+  },
+  "icon": "res/ic_app_logo.png",
   "launchConfig": {
     "displaySplash": true,
     "hideLogs": false,
-    "splashIcon": "res/splashIcon.png",
+    "splashIcon": "res/ic_app_logo.png",
     "splashText": "图色助手Pro",
     "stableMode": false
   },
-  "main": "main.js",
+  "main": "图色助手UI.js",
   "name": "图色助手Pro",
   "optimization": {
+    "obfuscateComponents": true,
     "removeAccessibilityService": true,
     "removeOpenCv": false,
     "unusedResources": false
@@ -50,6 +58,7 @@
     "tags": []
   },
   "scripts": {},
-  "versionCode": 2,
-  "versionName": "2.1"
+  "useFeatures": [],
+  "versionCode": 3,
+  "versionName": "2.5"
 }

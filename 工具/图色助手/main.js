@@ -280,15 +280,19 @@ ui.canvas.setOnTouchListener(new android.view.View.OnTouchListener(function(view
         let W = view.getWidth();
         let H = view.getHeight();
         let PC = event.getPointerCount();
+   
         switch (event.getActionMasked()) {
             case event.ACTION_MOVE:
                 try {
+                   
+                 
                     if (touchControlPoint) {
                         for (let i = 0; i < PC; i++) {
 
                             let id = event.getPointerId(i);
                             let x = event.getX(i);
                             let y = event.getY(i);
+                         
                             let XYary = ASX.matrixPoints(ASX.invertMatrix, [x, y]);
                             setRectXY(imageRect, touchControlPoint, XYary[0], XYary[1]);
                         };
@@ -321,6 +325,7 @@ ui.canvas.setOnTouchListener(new android.view.View.OnTouchListener(function(view
                             let scale = ASX.getScaling();
                             let touchRadius = 50 / scale;
                             let XYary = ASX.matrixPoints(ASX.invertMatrix, [X, Y]);
+                            log("DK",XYary)
                             let resAry = isRectXY(imageRect, XYary[0], XYary[1], touchRadius);
                             //log(resAry);
                             if (resAry) {
@@ -347,6 +352,7 @@ ui.canvas.setOnTouchListener(new android.view.View.OnTouchListener(function(view
         throw "imgTouch: " + e;
     };
     if (touchControlPoint) {
+        console.error(touchControlPoint)
         return true;
     };
 
@@ -355,6 +361,8 @@ ui.canvas.setOnTouchListener(new android.view.View.OnTouchListener(function(view
 }));
 
 function setRectXY(rect, idAry, x, y) {
+ 
+   
     x = sinon(Math.floor(x - idAry[1]), 0, MainImg.getWidth());
     y = sinon(Math.floor(y - idAry[2]), 0, MainImg.getHeight());
     //log(x,y);
@@ -469,7 +477,9 @@ ui.canvas.on("draw", function(canvas) {
 
 
     } else {
-        canvas.drawText("请打开一个图片", 100, h / 2, paint2);
+        canvas.drawText("1.请在右上角打开一个图片", 50, h / 2.5, paint2);
+        canvas.drawText("2.-拖动绿色框圆角调整裁剪区域", 50, h / 2, paint2);
+        canvas.drawText("2.--双指按住放缩图片", 50, h / 1.7, paint2);
     };
 });
 
@@ -482,12 +492,16 @@ function canvas_post() {
     canvasRect.set(new android.graphics.RectF(50, 30, w-50, h-30));
   
     if (MainImg) {
+        //初始化
+        imageRect.set(new android.graphics.RectF(0, 0, MainImg.getWidth(), MainImg.getHeight()));
         
-       imageRect.set(new android.graphics.RectF(0, 0, MainImg.getWidth(), MainImg.getHeight()));
         canvasMatrix.setRectToRect(imageRect, canvasRect, android.graphics.Matrix.ScaleToFit.CENTER);
     };
     
     ASX.maxPointsListener();
+    //收缩绿框到图片的中间
+   imageRect&& imageRect.set(new android.graphics.RectF(MainImg.getWidth()/4, MainImg.getHeight()/4, parseInt(MainImg.getWidth()/1.4), parseInt(MainImg.getHeight()/1.4)));
+       
 };
 
 
@@ -643,17 +657,20 @@ function XYToMatrix(matrix, maxPoints) {
                             this.Touch.PointCurrent[i * 2] = x;
                             this.Touch.PointCurrent[i * 2 + 1] = y;
                         };
-
+                
                         //记录当前各手指坐标信息。
                         if (PC > this.maxPoints) { //手指数大于4个虽然记录坐标信息，但是不进行矩阵操作。
                             this.maxPointsListener(view, event);
                             break;
                         };
-
+                  console.trace(this.Touch.PointStart)
                         let Matrix = new android.graphics.Matrix();
                         Matrix.setPolyToPoly(this.Touch.PointStart, 0, this.Touch.PointCurrent, 0, PC > 4 ? 4 : PC);
+                        
                         this.matrix = new android.graphics.Matrix();
+                        console.info(this.Touch.Matrix)
                         this.matrix.setConcat(Matrix, this.Touch.Matrix);
+                        
                         //进行矩阵运算并刷新矩阵。
                         this.matrix.invert(this.invertMatrix);
                         //反矩阵
@@ -707,16 +724,18 @@ function XYToMatrix(matrix, maxPoints) {
                                 this.Touch.PointCurrent.splice(I * 2, 0, X, Y);
                                 //获取点的总数量。
                                 this.Touch.Matrix = this.matrix;
+                                
                                 for (let i = 0; i < PC; i++) {
                                     this.Touch.PointStart[i * 2] = this.Touch.PointCurrent[i * 2];
                                     this.Touch.PointStart[i * 2 + 1] = this.Touch.PointCurrent[i * 2 + 1];
                                 };
+                                
                                 //保存坐标的数组。
                                 if (PC > this.maxPoints) { //手指数大于4个化为原始矩阵虽然记录坐标信息，但是不进行矩阵操作。
                                     this.maxPointsListener(view, event);
                                     break;
                                 };
-
+                           
                                 let Matrix = new android.graphics.Matrix();
                                 Matrix.setPolyToPoly(this.Touch.PointStart, 0, this.Touch.PointCurrent, 0, PC > 4 ? 4 : PC);
                                 this.matrix = new android.graphics.Matrix();
