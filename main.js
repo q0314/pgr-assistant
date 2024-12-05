@@ -960,7 +960,9 @@ ui.drawerList.on("item_click", (item) => {
             return
         case "检查模板":
             case "模板图库":
-                  engines.execScriptFile('./activity/template_gallery.js');
+                  engines.execScriptFile('./activity/template_gallery.js',{
+                    path: files.path('./activity/')  
+                  });
           
                 break
         case "检查图库":
