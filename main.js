@@ -923,11 +923,11 @@ var items = [{
         text: "告使用者",
         drawable: "ic_pets_black_48dp",
     },
-    /*  {
-          text: "更换图库",
+  {
+          text: "模板图库",
           drawable: "ic_satellite_black_48dp",
       },
-      */
+      
     {
         text: "加群交流",
         drawable: "ic_games_black_48dp",
@@ -959,6 +959,11 @@ ui.drawerList.on("item_click", (item) => {
             toast("还没有相关内容")
             //notice();
             return
+        case "检查模板":
+            case "模板图库":
+                  engines.execScriptFile('./activity/template_gallery.js');
+          
+                break
         case "检查图库":
         case "更换图库":
             helper = tool.readJSON("helper");

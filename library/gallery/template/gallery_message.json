@@ -1,12 +1,1 @@
-{
-    "name": "官方 1220x2712",
-    "分辨率": {
-        "w": 1220,
-        "h": 2712
-    },
-    "服务器": "简中服",
-    "识别方式": {
-        "ocr": true,
-        "找图": true
-    }
-}
+{"name":"官方 1220x2712","分辨率":{"w":1220,"h":2712},"服务器":"简中服","识别方式":{"ocr":true,"找图":true},"img_info":{"返回":{"prototypeWH":{"w":"1220","h":"2712"},"remarks":""},"宿舍-家具-关闭":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"宿舍-家具-制造+":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"战斗-次数+":{"prototypeWH":{"w":"1220","h":"2712"},"remarks":""},"助理-告白-关闭":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"宿舍-房间-编辑":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"宿舍-房间-装扮宿舍":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"主页展开":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"主页-展开":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-空":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-暗":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-冰":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-物":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"超刻-试玩":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"阿尔法":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-雷":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-火":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"鸦羽-终阶":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"银冕-苍空炽月":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"银冕-终阶":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"鸦羽-鳞波沫舞":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-暗空":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-冰雷":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"队伍筛选-物火":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"招募能量7":{"prototypeWH":{"w":1220,"h":2712},"remarks":""},"血清_减":{"prototypeWH":{"w":1220,"h":2712},"remarks":""}}}
