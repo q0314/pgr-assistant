@@ -1254,6 +1254,8 @@ function 返回主页(only_return) {
                 })) {
                 click(height / 2, width - frcy(80));
                 sleep(1000);
+            }else {
+                进入主页();
             }
         }
     }

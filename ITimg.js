@@ -112,7 +112,7 @@ function Prepare(picture_default, ocr_default, outline_default, matchFeatures_de
         threshold: matchFeatures_default.threshold || 0.8,
         filter_w: matchFeatures_default.filter_w || 10,
         filter_h: matchFeatures_default.filter_h || 10,
-        scale: matchFeatures_default.scale || 0.5,
+        scale: matchFeatures_default.scale || 1,
         matcher: matchFeatures_default.matcher || "BRUTEFORCE_L1",
         visualization: matchFeatures_default.visualization || true,
         saveSmallImg: matchFeatures_default.saveSmallImg,
