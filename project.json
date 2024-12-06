@@ -5,9 +5,9 @@
   ],
   "assets": [],
   "build": {
-    "build_id": "2B14D3E7-1232",
-    "build_number": 1232,
-    "build_time": 1722405607777,
+    "build_id": "B6CDC34F-1236",
+    "build_number": 1236,
+    "build_time": 1733398941678,
     "release": false
   },
   "encryptLevel": 0,
@@ -85,6 +85,6 @@
     "uuid": "30e8349e-b7be-4217-a506-6072dedc75df"
   },
   "useFeatures": [],
-  "versionCode": 45,
+  "versionCode": 46,
   "versionName": "1.3.8"
 }

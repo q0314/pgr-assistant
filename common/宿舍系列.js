@@ -1002,12 +1002,14 @@ function 宿舍_家具制造() {
                 timing: 1000,
                 nods: 1500,
                 area: 2,
+                scale:1,
                 threshold: 0.8,
                 saveSmallImg: true,
             }) || ITimg.matchFeatures("宿舍-家具-关闭", {
                 action: 5,
                 timing: 1000,
                 area: 2,
+                scale:1,
                 threshold: 0.8,
                 saveSmallImg: true,
                 visualization: true,
@@ -1024,12 +1026,13 @@ function 宿舍_家具制造() {
         } else if (coordinate.coordinate["宿舍-家具-关闭"]) {
             click(coordinate.coordinate["宿舍-家具-关闭"].x, coordinate.coordinate["宿舍-家具-关闭"].y);
 
-        }
+        
         sleep(500);
         click(coordinate.coordinate["宿舍-家具-关闭"].x, coordinate.coordinate["宿舍-家具-关闭"].y);
         sleep(500)
         click(coordinate.coordinate["宿舍-家具-关闭"].x, coordinate.coordinate["宿舍-家具-关闭"].y);
         sleep(500);
+    }
         //返回
         if (coordinate.coordinate.返回) {
             click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
