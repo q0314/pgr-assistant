@@ -366,12 +366,6 @@ function 执行次数() {
             text="{{language.main['auto_use_serum']}}"
             padding="6 6 6 6"  textSize="16" textColor="{{theme.text}}"
             />
-            <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
-                <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto"  />
-                <spinner id="resources_type" textSize="16" entries="{{language.main['resources_type']}}"
-                layout_gravity="right|center" w="auto" h="20dp" visibility="gone" />
-                <radio id="depletion_way2" text="{{language['depletion_way2']}}" w="auto"  />
-            </radiogroup>
             <Switch id="ysrh" checked="{{helper.黑卡}}" text="仅使用药剂恢复血清" visibility="gone" padding="6 6 6 6" textSize="16sp" />
             
             <horizontal gravity="center" marginLeft="5">
@@ -392,19 +386,6 @@ function 执行次数() {
         rewriteView = null;
         rewriteDialogs = null;
     })
-    if (!helper.战斗.活动) {
-        rewriteView.depletion_way1.checked = true;
-        rewriteView.resources_type.setVisibility(0);
-        let 资源类型 = language.main.resources_name.split("|");
-        资源类型 = 资源类型.indexOf(helper.战斗.资源名称);
-        if (资源类型 != -1) {
-            rewriteView.resources_type.setSelection(资源类型);
-        }
-    } else {
-        rewriteView.depletion_way2.checked = true;
-
-    }
-
     rewriteView.depletion_serum.on("click", function(view) {
         checked = view.checked;
         rewriteView.depletion_way.setVisibility(checked ? 0 : 8);
@@ -419,28 +400,8 @@ function 执行次数() {
     })
 
 
-    rewriteView.depletion_way1.on("check", function(checked) {
-        rewriteView.resources_type.setVisibility(checked ? 0 : 8);
-        helper.战斗.活动 = !checked;
-        tool.writeJSON("战斗", helper.战斗);
-    });
-    rewriteView.depletion_way2.on("check", function(checked) {
-        if (checked) toastLog("暂时不支持此次活动材料");
-    });
 
     let updater;
-    rewriteView.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-        onItemSelected: function(parent, view, resources_name, id) {
-            if (!updater) {
-                updater = true;
-                return
-            }
-            resource_name = language.main.resources_name.split("|")[resource_name];
-
-            helper.战斗.资源名称 = resource_name;
-            tool.writeJSON("战斗", helper.战斗);
-        }
-    }));
 
 
     rewriteView.ysrh.on("check", (checked) => {

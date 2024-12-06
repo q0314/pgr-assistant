@@ -234,9 +234,9 @@ threads.start(function() {
             // engines.stopAll();
         }
     } catch (err) {
-        toast("无法连接服务器，请检查网络。错误类型:" + err);
-        console.error("无法连接服务器，请检查网络。错误类型:" + err);
-        engines.stopAll();
+        tips ="无法连接服务器，请检查网络是否连接并支持ipv6。错误类型:" + err;
+        toast(tips)
+        console.error(tips);
     };
 });
 
@@ -382,11 +382,6 @@ ui.layout(
                         padding="6 6 6 6"
                         textSize="16" textColor="{{use.theme.text}}"
                         />
-                        <radiogroup id="depletion_way" orientation="horizontal" h="auto" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
-                            <radio id="depletion_way1" text="{{language['depletion_way1']}}" w="auto" textColor="{{use.theme.text}}" />
-                            <spinner id="resources_type" textSize="16" entries="{{language['resources_type']}}"
-                            layout_gravity="right|center" w="auto" h="{{dp2px(10)}}" visibility="gone" />
-                        </radiogroup>
                         <horizontal id="depletion_manage" gravity="center" marginLeft="10" bg="{{use.theme.bg}}" visibility="{{helper.血清 ? 'visible' : 'gone'}}">
                             <text id="mr1" text="{{language['input_tips1']}}" textSize="15" textColor="{{use.theme.text}}" />
                             <input id="input_challenge" inputType="number" hint="{{helper.挑战次数}}次" layout_weight="1" w="auto" textColorHint="{{use.theme.text3}}" />
@@ -1167,15 +1162,9 @@ ui.emitter.on("resume", function() {
 
 ui.depletion_serum.on("click", function(view) {
     checked = view.checked;
-    ui.depletion_way.setVisibility(checked ? 0 : 8);
     ui.depletion_manage.setVisibility(checked ? 0 : 8)
     tool.writeJSON("血清", checked)
 })
-ui.depletion_way1.on("check", function(checked) {
-    ui.resources_type.setVisibility(checked ? 0 : 8);
-    helper.战斗.活动 = !checked;
-    tool.writeJSON("战斗", helper.战斗);
-});
 
 
 ui.input_challenge.on("key", function(keyCode, event) {
@@ -1193,18 +1182,6 @@ ui.input_serum.on("key", function(keyCode, event) {
 
 
 let updater;
-ui.resources_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener({
-    onItemSelected: function(parent, view, resources_name, id) {
-        if (!updater) {
-            updater = true;
-            return
-        }
-        resources_name = language.resources_name.split("|")[resources_name];
-
-        helper.战斗.资源名称 = resources_name;
-        tool.writeJSON("战斗", helper.战斗);
-    }
-}));
 
 ui.daily_serum.on("click", function(view) {
     checked = view.checked;
@@ -1896,40 +1873,6 @@ function Update_UI(i) {
                 ui.disputes.setRadius(25);
 
                 ui._bgA.attr("cardCornerRadius", "25dp");
-
-                if (!helper.战斗.活动) {
-                    ui.depletion_way1.checked = true;
-                    ui.resources_type.setVisibility(0);
-                    // let 资源类型 = language.resources_type.split("|");
-                    let 资源类型 = language.resources_name.split("|");
-                    let 资源id = 资源类型.indexOf(helper.战斗.资源名称);
-
-                    ui.resources_type.setSelection(资源id != -1 ? 资源id : 0);
-                    /*   switch (helper.战斗.资源名称) {
-                           case "作战补给":
-                               ui.resources_type.setSelection(0);
-                               break
-                           case "后勤保养":
-                               ui.resources_type.setSelection(1);
-                               break;
-                           case "军备突破":
-                               ui.resources_type.setSelection(2);
-                               break;
-                           case "成员特训":
-                               ui.resources_type.setSelection(3);
-                               break;
-                           case "螺母大作战":
-                               ui.resources_type.setSelection(4);
-                               break;
-                           case "战技演习":
-                               ui.resources_type.setSelection(5);
-                               break;
-                       };
-                       */
-                } else {
-                    ui.depletion_way2.checked = true;
-
-                }
 
                 if (helper.matrix_recurrence) {
                     let matrix_iteration_ranks_list = language.matrix_iteration_ranks_list.split("|");
