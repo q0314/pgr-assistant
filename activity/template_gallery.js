@@ -358,7 +358,6 @@ let bridgeHandler = {
         let imgList = [];
         gallery.isImgInfo = gallery.gallery_info && gallery.gallery_info.img_info;
         if (!gallery.isImgInfo) {
-            console.info(gallery.gallery_info)
             gallery.gallery_info.img_info = {}
         }
         for (let _img in pngFiles) {

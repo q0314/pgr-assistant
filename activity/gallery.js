@@ -18,7 +18,6 @@ let gallery = {
         if (files.exists(this.path + "template/gallery_message.json")) {
           
             this.gallery_info = JSON.parse(files.read(this.path + "template/gallery_message.json"), (encoding = "utf-8"));
-        console.warn(this.gallery_info)
             this.language = this.gallery_info.服务器;
             this.name = (this.gallery_info.名称 ? this.gallery_info.名称 : this.gallery_info.name)
         }else if (files.exists(this.path + "template/gallery_message.json")) {
