@@ -1037,6 +1037,8 @@ function 宿舍_家具制造() {
         if (coordinate.coordinate.返回) {
             click(coordinate.coordinate.返回.x, coordinate.coordinate.返回.y);
             sleep(1500);
+        }else{
+                返回主页(true);
         }
     }
 
